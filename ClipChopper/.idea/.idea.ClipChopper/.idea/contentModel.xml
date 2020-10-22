@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ContentModelStore">
+    <e p="C:\Users\Valery\AppData\Local\JetBrains\Rider2020.2\extResources" t="IncludeRecursive" />
+    <e p="C:\Users\Valery\AppData\Local\JetBrains\Rider2020.2\resharper-host\Local\Transient\Rider\v202\SolutionCaches\_ClipChopper.-342515958.00" t="ExcludeRecursive" />
+    <e p="C:\Users\Valery\RiderProjects\clip-chopper\ClipChopper" t="IncludeFlat">
+      <e p="Applications" t="Include">
+        <e p="ClipChopper.DesktopApp" t="IncludeRecursive">
+          <e p="app.manifest" t="Include" />
+          <e p="App.xaml" t="Include" />
+          <e p="App.xaml.cs" t="Include" />
+          <e p="bin" t="ExcludeRecursive" />
+          <e p="ClipChopper.DesktopApp.csproj" t="IncludeRecursive" />
+          <e p="DirectoryItem.cs" t="Include" />
+          <e p="ffmpeg" t="Include">
+            <e p="avcodec-58.dll" t="Include" />
+            <e p="avdevice-58.dll" t="Include" />
+            <e p="avfilter-7.dll" t="Include" />
+            <e p="avformat-58.dll" t="Include" />
+            <e p="avutil-56.dll" t="Include" />
+            <e p="ffmpeg.exe" t="Include" />
+            <e p="ffplay.exe" t="Include" />
+            <e p="ffprobe.exe" t="Include" />
+            <e p="postproc-55.dll" t="Include" />
+            <e p="swresample-3.dll" t="Include" />
+            <e p="swscale-5.dll" t="Include" />
+          </e>
+          <e p="FragmentSelection.cs" t="Include" />
+          <e p="icon.ico" t="Include" />
+          <e p="KeyframeProber.cs" t="Include" />
+          <e p="MainWindow.xaml" t="Include" />
+          <e p="MainWindow.xaml.cs" t="Include" />
+          <e p="obj" t="ExcludeRecursive">
+            <e p="x64" t="Include">
+              <e p="Release" t="Include">
+                <e p="netcoreapp3.1" t="Include">
+                  <e p="App.g.cs" t="Include" />
+                  <e p="ClipChopper.DesktopApp.AssemblyInfo.cs" t="Include" />
+                  <e p="ClipChopper.DesktopApp_Content.g.cs" t="Include" />
+                  <e p="GeneratedInternalTypeHelper.g.cs" t="Include" />
+                  <e p="MainWindow.g.cs" t="Include" />
+                </e>
+              </e>
+            </e>
+          </e>
+          <e p="Utilities.cs" t="Include" />
+        </e>
+      </e>
+      <e p="ClipChopper.sln" t="IncludeFlat" />
+      <e p="Libraries" t="Include" />
+      <e p="packages" t="ExcludeRecursive" />
+      <e p="Tests" t="Include" />
+    </e>
+  </component>
+</project>

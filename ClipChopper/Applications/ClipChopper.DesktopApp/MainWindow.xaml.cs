@@ -6,15 +6,16 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Diagnostics;
 using System.Collections.Generic;
+using Ookii.Dialogs.Wpf;
 
 namespace ClipChopper.DesktopApp
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public sealed partial class MainWindow : Window
+    public sealed partial class MainWindow
     {
-        private _selectedDirectory;
+        private string? _selectedDirectory;
         private string? _loadedMedia;
         private FragmentSelection? _fragment;
 
@@ -25,7 +26,7 @@ namespace ClipChopper.DesktopApp
             Media.MediaOpened += Media_MediaOpened;
         }
 
-        private void Media_MediaOpened(object sender, Unosquare.FFME.Common.MediaOpenedEventArgs e)
+        private void Media_MediaOpened(object? sender, Unosquare.FFME.Common.MediaOpenedEventArgs e)
         {
             Console.WriteLine(e.Info.Duration);
             Save.IsEnabled = true;
@@ -112,7 +113,10 @@ namespace ClipChopper.DesktopApp
                 .ToList();
 
             DirectoryList.ItemsSource = Enumerable.Range(0, files.Count).Select(i => new DirectoryItem(files[i])).ToList();
-            DirectoryList.SelectedIndex = files.IndexOf(_loadedMedia);
+            if (_loadedMedia != null)
+            {
+                DirectoryList.SelectedIndex = files.IndexOf(_loadedMedia);
+            }
         }
 
         private void Start_Click(object sender, RoutedEventArgs e)
@@ -135,14 +139,14 @@ namespace ClipChopper.DesktopApp
             if (DirectoryList.SelectedItem is null ||
                 ((DirectoryItem) DirectoryList.SelectedItem).Path == _loadedMedia)
             {
-                // Do nothing if selection disappeared or selected file is already loaded.
+                // Do nothing if selection disappeared or selected file was already loaded.
                 return;
             }
 
             var selectedFile = (DirectoryItem) DirectoryList.SelectedItem;
             if (!File.Exists(selectedFile.Path))
             {
-                MessageBox.Show($"Could not load non-existant file {selectedFile.Path}");
+                ShowMessage($"Could not load non-existent file {selectedFile.Path}");
                 return;
             }
 
@@ -169,40 +173,59 @@ namespace ClipChopper.DesktopApp
                 OverwritePrompt = true,
                 FileName = "Trimmed " + Path.GetFileName(_loadedMedia)
             };
+
+            if (!dialog.ShowDialog().GetValueOrDefault()) return;
             
-            if (dialog.ShowDialog().GetValueOrDefault())
+            Console.WriteLine(dialog.FileName);
+            var inputFile = _loadedMedia;
+            var outputFile = dialog.FileName;
+
+            var ffmpegPath = Path.Combine(Unosquare.FFME.Library.FFmpegDirectory, "ffmpeg.exe");
+            var startKeyframe = KeyframeProber.FindClosestKeyframeTime(inputFile, _fragment.Start);
+
+            string args = $"-y -ss {startKeyframe} -i \"{inputFile}\" -map_metadata 0 " +
+                          $"-to \"{_fragment.Stop - startKeyframe}\" -c:v copy -c:a copy " +
+                          $"-map 0 \"{outputFile}\"";
+
+            var startInfo = new ProcessStartInfo()
             {
-                Console.WriteLine(dialog.FileName);
-                var inputFile = _loadedMedia;
-                var outputFile = dialog.FileName;
+                RedirectStandardOutput = true,
+                RedirectStandardInput = true,
+                UseShellExecute = false,
+                CreateNoWindow = true,
+                FileName = ffmpegPath,
+                Arguments = args
+            };
 
-                var ffmpegPath = Path.Combine(Unosquare.FFME.Library.FFmpegDirectory, "ffmpeg.exe");
-                var startKeyframe = KeyframeProber.FindClosestKeyframeTime(inputFile, _fragment.Start);
-
-                string args = $"-ss {startKeyframe} -i \"{inputFile}\" -map_metadata 0 " +
-                    $"-to \"{_fragment.Stop - startKeyframe}\" -c:v copy -c:a copy " +
-                    $"-map 0 \"{outputFile}\"";
-
-                var startInfo = new ProcessStartInfo()
+            using (var ffmpeg = Process.Start(startInfo))
+            {
+                Debug.Assert(ffmpeg != null, nameof(ffmpeg) + " != null");
+                ffmpeg.OutputDataReceived += (s, e) =>
                 {
-                    RedirectStandardOutput = true,
-                    RedirectStandardInput = true,
-                    UseShellExecute = false,
-                    CreateNoWindow = true,
-                    FileName = ffmpegPath,
-                    Arguments = args
+                    Debug.WriteLine(e.Data);
                 };
-
-                using (var ffmpeg = Process.Start(startInfo))
-                {
-                    ffmpeg.OutputDataReceived += new DataReceivedEventHandler((s, e) =>
-                    {
-                        Debug.WriteLine(e.Data);
-                    });
-                    ffmpeg.WaitForExit();
-                }
-                MessageBox.Show("Done");
+                ffmpeg.WaitForExit();
             }
+            ShowMessage("Done");
+            RefreshDirectory_Click(sender, eventArgs);
+        }
+
+        private void ShowMessage(string message)
+        {
+            if (!TaskDialog.OSSupportsTaskDialogs)
+            {
+                MessageBox.Show(message);
+                return;
+            }
+
+            var dialog = new TaskDialog
+            {
+                WindowTitle = "Clip Chopper",
+                MainInstruction = message,
+                MainIcon = TaskDialogIcon.Information
+            };
+            dialog.Buttons.Add(new TaskDialogButton(ButtonType.Ok));
+            dialog.ShowDialog(this);
         }
     }
 }

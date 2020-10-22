@@ -26,16 +26,17 @@ namespace ClipChopper
 
             using (var probe = Process.Start(startInfo))
             {
-                probe.OutputDataReceived += new DataReceivedEventHandler((s, e) =>
+                Debug.Assert(probe != null, nameof(probe) + " != null");
+                probe.OutputDataReceived += (s, e) =>
                 {
                     if (e.Data is null) return;
 
                     var data = e.Data.Split(',');
-                    var splitted_time = data[2].Split('.');
+                    var splittedTime = data[2].Split('.');
                     
                     // TODO: move this logic to new function.
                     TimeSpan frame = TimeSpan.FromSeconds(
-                        int.Parse(splitted_time[0])) + TimeSpan.ParseExact(splitted_time[1],
+                        int.Parse(splittedTime[0])) + TimeSpan.ParseExact(splittedTime[1],
                         "ffffff", System.Globalization.CultureInfo.InvariantCulture
                     );
 
@@ -50,7 +51,7 @@ namespace ClipChopper
                             keyframe = frame;
                         }
                     }
-                });
+                };
                 probe.BeginOutputReadLine();
                 probe.WaitForExit();
             }

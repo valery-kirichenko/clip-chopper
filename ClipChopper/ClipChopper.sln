@@ -21,6 +21,7 @@ Global
 		{72CA55A6-B3C2-4779-818D-CC49758C2A15}.Debug|x64.Build.0 = Debug|x64
 		{72CA55A6-B3C2-4779-818D-CC49758C2A15}.Release|x64.ActiveCfg = Release|x64
 		{72CA55A6-B3C2-4779-818D-CC49758C2A15}.Release|x64.Build.0 = Release|x64
+		{72CA55A6-B3C2-4779-818D-CC49758C2A15}.Release|x64.Deploy.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
