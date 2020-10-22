@@ -7,9 +7,9 @@ namespace ClipChopper.DesktopApp
     // TODO: use Prism.WPF BindableBase.
     public sealed class FragmentSelection : INotifyPropertyChanged
     {
-        private TimeSpan start;
-        private TimeSpan stop;
-        private TimeSpan duration;
+        private TimeSpan _start;
+        private TimeSpan _stop;
+        private TimeSpan _duration;
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -27,14 +27,14 @@ namespace ClipChopper.DesktopApp
 
         public TimeSpan Start
         {
-            get => start;
+            get => _start;
 
             set
             {
-                if (value != start)
+                if (value != _start)
                 {
-                    start = value;
-                    NotifyPropertyChanged("Start");
+                    _start = value;
+                    NotifyPropertyChanged();
 
                     if (Stop <= Start)
                     {
@@ -46,14 +46,14 @@ namespace ClipChopper.DesktopApp
 
         public TimeSpan Stop
         {
-            get => stop;
+            get => _stop;
 
             set
             {
-                if (value != stop)
+                if (value != _stop)
                 {
-                    stop = value;
-                    NotifyPropertyChanged("Stop");
+                    _stop = value;
+                    NotifyPropertyChanged();
 
                     if (Start >= value)
                     {
@@ -63,12 +63,12 @@ namespace ClipChopper.DesktopApp
             }
         }
 
-        public TimeSpan Duration
+        private TimeSpan Duration
         {
-            get => duration;
+            get => _duration;
             set
             {
-                duration = value;
+                _duration = value;
                 if (Stop > value)
                 {
                     Stop = value;

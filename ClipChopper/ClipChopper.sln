@@ -4,6 +4,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 16.0.29709.97
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Applications", "Applications", "{30A9B94B-57FE-4C5D-B493-2E8F2D578AF8}"
+	ProjectSection(SolutionItems) = preProject
+		app.manifest = app.manifest
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Libraries", "Libraries", "{A4D3BDEB-BB70-46BC-BB8C-B58D71922315}"
 EndProject

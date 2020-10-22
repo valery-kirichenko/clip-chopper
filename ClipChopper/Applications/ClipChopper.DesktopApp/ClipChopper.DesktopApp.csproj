@@ -14,6 +14,7 @@
     <RootNamespace>ClipChopper.DesktopApp</RootNamespace>
     <ApplicationIcon>icon.ico</ApplicationIcon>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
 
     <ItemGroup>
