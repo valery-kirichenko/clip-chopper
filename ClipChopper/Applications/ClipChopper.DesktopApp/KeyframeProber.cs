@@ -10,7 +10,7 @@ namespace ClipChopper
             var ffprobePath = Unosquare.FFME.Library.FFmpegDirectory + @"\ffprobe.exe";
             var keyframe = TimeSpan.Zero;
 
-            string args = $"-threads {Environment.ProcessorCount.ToString()} -select_streams v " +
+            string args = $"-threads {Environment.ProcessorCount} -select_streams v -skip_frame nokey " +
                 $"-show_frames -print_format csv " +
                 $"-show_entries frame=key_frame,pkt_dts_time \"{filePath}\"";
 
