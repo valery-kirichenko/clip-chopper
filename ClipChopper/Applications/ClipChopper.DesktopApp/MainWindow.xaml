@@ -1,0 +1,205 @@
+﻿<Window x:Class="ClipChopper.DesktopApp.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:ffme="clr-namespace:Unosquare.FFME;assembly=ffme.win"
+        xmlns:local="clr-namespace:ClipChopper"
+        mc:Ignorable="d"
+        x:Name="CurrentWindow"
+        Title="Clip Chopper"
+        Height="870"
+        Width="1491"
+        WindowStartupLocation="CenterScreen">
+    <!--1491x870 to get 720p video preview-->
+    <Window.Resources>
+        <local:TimeSpanToSecondsConverter x:Key="TimeSpanToSecondsConverter" />
+        <local:TimeSpanFormatter x:Key="TimeSpanFormatter" />
+    </Window.Resources>
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="180" />
+            <ColumnDefinition Width="5" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+        <Grid Grid.Column="0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="48" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+            <Grid Grid.Row="0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition />
+                    <ColumnDefinition Width="48" />
+                </Grid.ColumnDefinitions>
+                <Button Grid.Column="0" Content="Select a Directory" Click="SelectDirectory_Click" Margin="5" />
+                <Button Grid.Column="1" Click="RefreshDirectory_Click" Margin="5">
+                    <Viewbox Width="16" Height="16" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
+                        <Rectangle Width="16" Height="16">
+                            <Rectangle.Fill>
+                                <DrawingBrush>
+                                    <DrawingBrush.Drawing>
+                                        <DrawingGroup>
+                                            <DrawingGroup.Children>
+                                                <GeometryDrawing Brush="#00FFFFFF" Geometry="F1M16,16L0,16 0,0 16,0z" />
+                                                <GeometryDrawing Brush="#FFF6F6F6" Geometry="F1M16,8C16,12.411 12.411,16 8,16 3.589,16 0,12.411 0,8 0,6.597 0.384,5.212 1.088,4L0,4 0,0 8,0 8,8 4,8C4,10.206 5.794,12 8,12 10.206,12 12,10.206 12,8 12,6.656 11.331,5.41 10.21,4.666L9.377,4.112 11.592,0.78 12.425,1.333C14.663,2.822,16,5.314,16,8" />
+                                                <GeometryDrawing Brush="#FF424242" Geometry="F1M15,8C15,11.859 11.859,15 8,15 4.14,15 1,11.859 1,8 1,6.076 1.801,4.292 3.121,3L1,3 1,1 7,1 7,7 5,7 5,4.002C3.766,4.931 3,6.401 3,8 3,10.757 5.243,13 8,13 10.757,13 13,10.757 13,8 13,6.321 12.164,4.763 10.764,3.833L11.871,2.167C13.83,3.469,15,5.649,15,8" />
+                                            </DrawingGroup.Children>
+                                        </DrawingGroup>
+                                    </DrawingBrush.Drawing>
+                                </DrawingBrush>
+                            </Rectangle.Fill>
+                        </Rectangle>
+                    </Viewbox>
+                </Button>
+            </Grid>
+            
+            <ListBox Grid.Row="1" x:Name="DirectoryList" ScrollViewer.HorizontalScrollBarVisibility="Disabled" SelectionChanged="DirectoryList_Selected">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding Name}" TextWrapping="Wrap" />
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+        </Grid>
+
+        <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Stretch" />
+        <Grid Grid.Column="2" Margin="5 5 5 0">
+            <Grid.RowDefinitions>
+                <RowDefinition />
+                <RowDefinition Height="29" />
+                <RowDefinition Height="29" />
+                <RowDefinition Height="48" />
+            </Grid.RowDefinitions>
+
+            <ffme:MediaElement Grid.Row="0"
+                               x:Name="Media"
+                               Background="Gray"
+                               LoadedBehavior="Manual"
+                               UnloadedBehavior="Manual" />
+
+            <Slider Grid.Row="1" VerticalAlignment="Center" Margin="0 5"
+                    x:Name="PositionSlider"
+                    IsSnapToTickEnabled="False"
+                    IsMoveToPointEnabled="True"
+                    SmallChange="{Binding PositionStep, ElementName=Media, Converter={StaticResource TimeSpanToSecondsConverter}}"
+                    LargeChange="{Binding PositionStep, ElementName=Media, Converter={StaticResource TimeSpanToSecondsConverter}}"
+                    IsSelectionRangeEnabled="True"
+                    Minimum="{Binding PlaybackStartTime, ElementName=Media, Converter={StaticResource TimeSpanToSecondsConverter}}"
+                    Maximum="{Binding PlaybackEndTime, ElementName=Media, Converter={StaticResource TimeSpanToSecondsConverter}}"
+                    Value="{Binding Position, ElementName=Media, Converter={StaticResource TimeSpanToSecondsConverter}}"/>
+            
+            <Grid Grid.Row="2" Margin="0 5">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0" Text="{Binding Position, ElementName=Media, Converter={StaticResource TimeSpanFormatter}, Mode=OneWay}" VerticalAlignment="Center" />
+                <TextBlock Grid.Column="1" Text="{Binding RemainingDuration, ElementName=Media, Converter={StaticResource TimeSpanFormatter}, Mode=OneWay}" VerticalAlignment="Center" HorizontalAlignment="Right" />
+                <!--<TextBlock x:Name="frame" VerticalAlignment="Center" />-->
+            </Grid>
+            
+            <StackPanel Orientation="Horizontal" Grid.Row="3">
+                <Button Margin="0 5 5 5" Click="Play_Click" ToolTip="Play/Pause" RenderTransformOrigin="0.5,0.5">
+                    <Button.RenderTransform>
+                        <ScaleTransform ScaleX="-1" />
+                    </Button.RenderTransform>
+                    <Viewbox xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
+                        <Rectangle Width="32" Height="32">
+                            <Rectangle.Fill>
+                                <DrawingBrush>
+                                    <DrawingBrush.Drawing>
+                                        <DrawingGroup>
+                                            <DrawingGroup.Children>
+                                                <GeometryDrawing Brush="#00FFFFFF" Geometry="F1M16,16L0,16 0,0 16,0z" />
+                                                <GeometryDrawing Brush="#FFF6F6F6" Geometry="F1M14,2.1313L6,7.4643 6,3.0003 3,3.0003 3,13.0003 6,13.0003 6,8.5353 14,13.8683z" />
+                                                <GeometryDrawing Brush="#FF414141" Geometry="F1M13,12L7,8 13,4z" />
+                                                <GeometryDrawing Brush="#FF414141" Geometry="F1M4,12L5.001,12 5.001,4 4,4z" />
+                                            </DrawingGroup.Children>
+                                        </DrawingGroup>
+                                    </DrawingBrush.Drawing>
+                                </DrawingBrush>
+                            </Rectangle.Fill>
+                        </Rectangle>
+                    </Viewbox>
+                </Button>
+                <Button Margin="5" Click="Pframe_Click" ToolTip="Previous frame">
+                    <Viewbox xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
+                        <Rectangle Width="16" Height="16">
+                            <Rectangle.Fill>
+                                <DrawingBrush>
+                                    <DrawingBrush.Drawing>
+                                        <DrawingGroup>
+                                            <DrawingGroup.Children>
+                                                <GeometryDrawing Brush="#00FFFFFF" Geometry="F1M16,16L0,16 0,0 16,0z" />
+                                                <GeometryDrawing Brush="#FFF6F6F6" Geometry="F1M15.0947,11L11.4517,11 11.3387,10.128C11.2367,9.338,10.8127,8.655,10.2087,8.205L6.4137,12 0.999699999999999,12 0.999699999999999,6.586 4.9997,2.586 4.9997,5.03C6.0327,4.367 7.2447,4 8.4997,4 11.8417,4 14.6957,6.596 14.9957,9.91z" />
+                                                <GeometryDrawing Brush="#FF414141" Geometry="F1M14,10L12.331,10C12.085,8.102 10.465,6.637 8.5,6.637 6.898,6.637 5.348,7.611 4.762,9L5,8.998 5,9 8,9 6,11 2,11 2,7 4,5 4,7.348C4.996,5.931 6.64,5 8.5,5 11.363,5 13.746,7.201 14,10" />
+                                            </DrawingGroup.Children>
+                                        </DrawingGroup>
+                                    </DrawingBrush.Drawing>
+                                </DrawingBrush>
+                            </Rectangle.Fill>
+                        </Rectangle>
+                    </Viewbox>
+                </Button>
+                <Button Margin="5" Click="Nframe_Click" ToolTip="Next frame">
+                    <Viewbox xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
+                        <Rectangle Width="16" Height="16">
+                            <Rectangle.Fill>
+                                <DrawingBrush>
+                                    <DrawingBrush.Drawing>
+                                        <DrawingGroup>
+                                            <DrawingGroup.Children>
+                                                <GeometryDrawing Brush="#00FFFFFF" Geometry="F1M16,16L0,16 0,0 16,0z" />
+                                                <GeometryDrawing Brush="#FFF6F6F6" Geometry="F1M15,6.5859L15,11.9999 9.586,11.9999 5.791,8.2049C5.187,8.6549,4.764,9.3379,4.661,10.1279L4.548,10.9999 0.904999999999999,10.9999 1.004,9.9099C1.305,6.5959 4.158,3.9999 7.5,3.9999 8.755,3.9999 9.967,4.3669 11,5.0299L11,2.5859z" />
+                                                <GeometryDrawing Brush="#FF414141" Geometry="F1M14,7L14,11 10,11 8,9 11,9 11,8.998 11.238,9C10.652,7.611 9.102,6.637 7.5,6.637 5.535,6.637 3.915,8.102 3.669,10L2,10C2.254,7.201 4.637,5 7.5,5 9.359,5 11.004,5.931 12,7.348L12,5z" />
+                                            </DrawingGroup.Children>
+                                        </DrawingGroup>
+                                    </DrawingBrush.Drawing>
+                                </DrawingBrush>
+                            </Rectangle.Fill>
+                        </Rectangle>
+                    </Viewbox>
+                </Button>
+                <Button Margin="5"
+                        Padding="10 0"
+                        x:Name="Start"
+                        Content="Start"
+                        Click="Start_Click" />
+
+                <Button Margin="5"
+                        Padding="10 0"
+                        x:Name="Stop"
+                        Content="Stop"
+                        Click="Stop_Click" />
+
+                <Button Margin="5 5 0 5"
+                        Padding="10 0"
+                        x:Name="Save"
+                        Content="Save..."
+                        Click="Save_Click"/>
+
+                <Slider VerticalAlignment="Center"
+                        ToolTip="Volume"
+                        Margin="5"
+                        Width="100"
+                        IsSnapToTickEnabled="False"
+                        IsMoveToPointEnabled="True"
+                        ValueChanged="Volume_Change"
+                        Minimum="0"
+                        Maximum="1"
+                        Value="1"/>
+
+                <ComboBox Margin="5"
+                          ToolTip="Audio Track"
+                          SelectedIndex="0"
+                          ItemsSource="{Binding Path=AudioTracks, Mode=OneWay, RelativeSource={RelativeSource AncestorType=Window}}"
+                          DisplayMemberPath="Name"
+                          x:Name="AudioTrackSlider"
+                          VerticalContentAlignment="Center"
+                          SelectionChanged="ComboBox_SelectionChanged"/>
+            </StackPanel>
+        </Grid>
+    </Grid>
+</Window>
