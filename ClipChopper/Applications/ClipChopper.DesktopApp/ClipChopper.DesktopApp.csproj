@@ -1,6 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop" ToolsVersion="Current">
   <PropertyGroup Label="Globals">
     <Platforms>x64</Platforms>
+    <PackageVersion>1.1.0</PackageVersion>
+    <Company>Kirichenko Valery</Company>
+    <Product>ClipChopper</Product>
+    <AssemblyVersion>1.1.0</AssemblyVersion>
+    <AssemblyName>ClipChopper</AssemblyName>
+    <PackageId>ClipChopper</PackageId>
+    <Authors>Kirichenko Valery</Authors>
   </PropertyGroup>
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
@@ -9,7 +16,7 @@
     <UseWPF>true</UseWPF>
     <Nullable>enable</Nullable>
     <WarningsAsErrors>CS8600,CS8602,CS8603,CS8618,CS8625</WarningsAsErrors>
-    <RootNamespace>ClipChopper.DesktopApp</RootNamespace>
+    <RootNamespace>ClipChopper</RootNamespace>
     <ApplicationIcon>icon.ico</ApplicationIcon>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <ApplicationManifest>app.manifest</ApplicationManifest>
