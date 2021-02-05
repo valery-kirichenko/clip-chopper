@@ -197,6 +197,7 @@
                           ItemsSource="{Binding Path=AudioTracks, Mode=OneWay, RelativeSource={RelativeSource AncestorType=Window}}"
                           DisplayMemberPath="Name"
                           x:Name="AudioTrackSlider"
+                          VerticalContentAlignment="Center"
                           SelectionChanged="ComboBox_SelectionChanged"/>
             </StackPanel>
         </Grid>
