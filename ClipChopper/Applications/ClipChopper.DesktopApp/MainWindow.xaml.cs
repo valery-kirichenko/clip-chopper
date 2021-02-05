@@ -6,7 +6,9 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Diagnostics;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using Ookii.Dialogs.Wpf;
+using System.Threading.Tasks;
 
 namespace ClipChopper.DesktopApp
 {
@@ -18,17 +20,37 @@ namespace ClipChopper.DesktopApp
         private string? _selectedDirectory;
         private string? _loadedMedia;
         private FragmentSelection? _fragment;
-
+        private int _selectedAudioStream;
+        public ObservableCollection<AudioTrack> AudioTracks { get; } = new ObservableCollection<AudioTrack>();
 
         public MainWindow()
         {
             InitializeComponent();
             Media.MediaOpened += Media_MediaOpened;
+            Media.MediaChanging += Media_MediaChanging;
         }
 
         private void Media_MediaOpened(object? sender, Unosquare.FFME.Common.MediaOpenedEventArgs e)
         {
-            Console.WriteLine(e.Info.Duration);
+            var tags = LoadTags();
+            AudioTracks.Clear();
+            var audioStreams = Media.MediaInfo.Streams
+                .Where(kvp => kvp.Value.CodecType == FFmpeg.AutoGen.AVMediaType.AVMEDIA_TYPE_AUDIO)
+                .Select(kvp => kvp.Value);
+            foreach (var stream in audioStreams)
+            {
+                AudioTracks.Add(new AudioTrack
+                {
+                    Name = $"Audio #{stream.StreamIndex} - " + tags
+                        .Where(tag => tag.Name.Equals($"Track{stream.StreamId}Name")).Select(tag => tag.Value)
+                        .DefaultIfEmpty("Untitled").First(),
+                    StreamIndex = stream.StreamIndex
+                });
+            }
+
+            AudioTrackSlider.SelectedIndex = 0;
+
+            Debug.WriteLine(e.Info.Duration);
             Save.IsEnabled = true;
             _fragment = new FragmentSelection(e.Info.Duration);
             PositionSlider.SelectionStart = _fragment.Start.TotalSeconds;
@@ -55,7 +77,6 @@ namespace ClipChopper.DesktopApp
 
         private async void Play_Click(object sender, RoutedEventArgs e)
         {
-
             if (Media.IsPlaying)
             {
                 await Media.Pause();
@@ -94,7 +115,8 @@ namespace ClipChopper.DesktopApp
 
                 // TODO: implement extensions filter, move this to new method.
                 IReadOnlyList<string> files = Directory.GetFiles(_selectedDirectory, "*.*")
-                    .Where(s => s.EndsWith(".mp4", StringComparison.OrdinalIgnoreCase) || s.EndsWith(".mkv", StringComparison.OrdinalIgnoreCase))
+                    .Where(s => s.EndsWith(".mp4", StringComparison.OrdinalIgnoreCase) ||
+                                s.EndsWith(".mkv", StringComparison.OrdinalIgnoreCase))
                     .ToList();
 
                 DirectoryList.ItemsSource = Enumerable.Range(0, files.Count)
@@ -109,10 +131,12 @@ namespace ClipChopper.DesktopApp
 
             // TODO: implement extensions filter, move this to new method.
             List<string> files = Directory.GetFiles(_selectedDirectory, "*.*")
-                .Where(s => s.EndsWith(".mp4", StringComparison.OrdinalIgnoreCase) || s.EndsWith(".mkv", StringComparison.OrdinalIgnoreCase))
+                .Where(s => s.EndsWith(".mp4", StringComparison.OrdinalIgnoreCase) ||
+                            s.EndsWith(".mkv", StringComparison.OrdinalIgnoreCase))
                 .ToList();
 
-            DirectoryList.ItemsSource = Enumerable.Range(0, files.Count).Select(i => new DirectoryItem(files[i])).ToList();
+            DirectoryList.ItemsSource =
+                Enumerable.Range(0, files.Count).Select(i => new DirectoryItem(files[i])).ToList();
             if (_loadedMedia != null)
             {
                 DirectoryList.SelectedIndex = files.IndexOf(_loadedMedia);
@@ -162,6 +186,7 @@ namespace ClipChopper.DesktopApp
             {
                 throw new InvalidOperationException("Loaded media value is not initialized.");
             }
+
             Debug.WriteLine(Path.GetExtension(_loadedMedia).Substring(1, 3));
 
             var dialog = new Ookii.Dialogs.Wpf.VistaSaveFileDialog()
@@ -175,7 +200,7 @@ namespace ClipChopper.DesktopApp
             };
 
             if (!dialog.ShowDialog().GetValueOrDefault()) return;
-            
+
             Console.WriteLine(dialog.FileName);
             var inputFile = _loadedMedia;
             var outputFile = dialog.FileName;
@@ -200,14 +225,17 @@ namespace ClipChopper.DesktopApp
             using (var ffmpeg = Process.Start(startInfo))
             {
                 Debug.Assert(ffmpeg != null, nameof(ffmpeg) + " != null");
-                ffmpeg.OutputDataReceived += (s, e) =>
-                {
-                    Debug.WriteLine(e.Data);
-                };
+                ffmpeg.OutputDataReceived += (s, e) => { Debug.WriteLine(e.Data); };
                 ffmpeg.WaitForExit();
             }
+
             ShowMessage("Done");
             RefreshDirectory_Click(sender, eventArgs);
+        }
+
+        private void Volume_Change(object sender, RoutedPropertyChangedEventArgs<double> eventArgs)
+        {
+            Media.Volume = (Math.Exp(eventArgs.NewValue) - 1) / (Math.E - 1);
         }
 
         private void ShowMessage(string message)
@@ -226,6 +254,38 @@ namespace ClipChopper.DesktopApp
             };
             dialog.Buttons.Add(new TaskDialogButton(ButtonType.Ok));
             dialog.ShowDialog(this);
+        }
+
+        private List<NExifTool.Tag> LoadTags()
+        {
+            var etOptions = new NExifTool.ExifToolOptions()
+            {
+                ExifToolPath = AppDomain.CurrentDomain.BaseDirectory + @"\exiftool.exe"
+            };
+            var et = new NExifTool.ExifTool(etOptions);
+            Debug.WriteLine(etOptions.ExifToolPath);
+            Debug.WriteLine(_loadedMedia);
+            var task = Task.Run(async () => await et.GetTagsAsync(_loadedMedia));
+            return task.Result.ToList();
+        }
+
+        private void Media_MediaChanging(object? sender, Unosquare.FFME.Common.MediaOpeningEventArgs e)
+        {
+
+            var audioStream = Media.MediaInfo.Streams
+                .Where(kvp => kvp.Value.CodecType == FFmpeg.AutoGen.AVMediaType.AVMEDIA_TYPE_AUDIO)
+                .Where(kvp => kvp.Value.StreamIndex == _selectedAudioStream)
+                .Select(kvp => kvp.Value);
+
+            e.Options.AudioStream = audioStream.First();
+
+        }
+
+        private void ComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (AudioTrackSlider.SelectedItem == null) return;
+            _selectedAudioStream = ((AudioTrack)AudioTrackSlider.SelectedItem).StreamIndex;
+            Media.ChangeMedia();
         }
     }
 }

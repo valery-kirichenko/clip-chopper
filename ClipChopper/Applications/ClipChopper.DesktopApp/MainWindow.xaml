@@ -13,8 +13,6 @@
         WindowStartupLocation="CenterScreen">
     <!--1491x870 to get 720p video preview-->
     <Window.Resources>
-        <Path x:Key="PlayIcon" Width="20.5832" Height="31.6667" Canvas.Left="30.0833" Canvas.Top="22.1667" Stretch="Fill" Fill="#FF000000" Data="F1 M 30.0833,22.1667L 50.6665,37.6043L 50.6665,38.7918L 30.0833,53.8333L 30.0833,22.1667 Z "/>
-        <Path x:Key="PauseIcon" Width="22.1667" Height="28.5" Canvas.Left="26.9167" Canvas.Top="23.75" Stretch="Fill" Fill="#FF000000" Data="F1 M 26.9167,23.75L 33.25,23.75L 33.25,52.25L 26.9167,52.25L 26.9167,23.75 Z M 42.75,23.75L 49.0833,23.75L 49.0833,52.25L 42.75,52.25L 42.75,23.75 Z "/>
         <local:TimeSpanToSecondsConverter x:Key="TimeSpanToSecondsConverter" />
         <local:TimeSpanFormatter x:Key="TimeSpanFormatter" />
     </Window.Resources>
@@ -103,7 +101,7 @@
             </Grid>
             
             <StackPanel Orientation="Horizontal" Grid.Row="3">
-                <Button Margin="0 5 5 5" Name="play" Click="Play_Click" ToolTip="Play/Pause" RenderTransformOrigin="0.5,0.5">
+                <Button Margin="0 5 5 5" Click="Play_Click" ToolTip="Play/Pause" RenderTransformOrigin="0.5,0.5">
                     <Button.RenderTransform>
                         <ScaleTransform ScaleX="-1" />
                     </Button.RenderTransform>
@@ -126,7 +124,7 @@
                         </Rectangle>
                     </Viewbox>
                 </Button>
-                <Button Margin="5" Name="pframe" Click="Pframe_Click" ToolTip="Previous frame">
+                <Button Margin="5" Click="Pframe_Click" ToolTip="Previous frame">
                     <Viewbox xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
                         <Rectangle Width="16" Height="16">
                             <Rectangle.Fill>
@@ -145,7 +143,7 @@
                         </Rectangle>
                     </Viewbox>
                 </Button>
-                <Button Margin="5" Name="nframe" Click="Nframe_Click" ToolTip="Next frame">
+                <Button Margin="5" Click="Nframe_Click" ToolTip="Next frame">
                     <Viewbox xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
                         <Rectangle Width="16" Height="16">
                             <Rectangle.Fill>
@@ -181,6 +179,25 @@
                         x:Name="Save"
                         Content="Save..."
                         Click="Save_Click"/>
+
+                <Slider VerticalAlignment="Center"
+                        ToolTip="Volume"
+                        Margin="5"
+                        Width="100"
+                        IsSnapToTickEnabled="False"
+                        IsMoveToPointEnabled="True"
+                        ValueChanged="Volume_Change"
+                        Minimum="0"
+                        Maximum="1"
+                        Value="1"/>
+
+                <ComboBox Margin="5"
+                          ToolTip="Audio Track"
+                          SelectedIndex="0"
+                          ItemsSource="{Binding Path=AudioTracks, Mode=OneWay, RelativeSource={RelativeSource AncestorType=Window}}"
+                          DisplayMemberPath="Name"
+                          x:Name="AudioTrackSlider"
+                          SelectionChanged="ComboBox_SelectionChanged"/>
             </StackPanel>
         </Grid>
     </Grid>

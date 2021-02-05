@@ -1,9 +1,7 @@
-﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
-
+﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop" ToolsVersion="Current">
   <PropertyGroup Label="Globals">
     <Platforms>x64</Platforms>
   </PropertyGroup>
-    
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
@@ -16,8 +14,10 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
-
-    <ItemGroup>
+  <ItemGroup>
+    <Content Include="exiftool.exe">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="ffmpeg\avcodec-58.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -52,10 +52,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
-
-    <ItemGroup>
-      <PackageReference Include="FFME.Windows" Version="4.2.330" />
-      <PackageReference Include="Ookii.Dialogs.Wpf.NETCore" Version="2.0.0" />
-    </ItemGroup>
-
+  <ItemGroup>
+    <PackageReference Include="FFME.Windows" Version="4.2.330" />
+    <PackageReference Include="NExifTool" Version="0.9.0" />
+    <PackageReference Include="Ookii.Dialogs.Wpf.NETCore" Version="2.0.0" />
+  </ItemGroup>
 </Project>
