@@ -21,7 +21,12 @@ namespace ClipChopper.DesktopApp
         private string? _loadedMedia;
         private FragmentSelection? _fragment;
         private int _selectedAudioStream;
-        public ObservableCollection<AudioTrack> AudioTracks { get; } = new ObservableCollection<AudioTrack>();
+        public ObservableCollection<AudioTrack> AudioTracks { get; } = new ObservableCollection<AudioTrack>() {
+            new AudioTrack
+            {
+                Name = "No audio",
+                StreamIndex = 0
+            } };
 
         public MainWindow()
         {
@@ -30,25 +35,17 @@ namespace ClipChopper.DesktopApp
             Media.MediaChanging += Media_MediaChanging;
         }
 
-        private void Media_MediaOpened(object? sender, Unosquare.FFME.Common.MediaOpenedEventArgs e)
+        async private void Media_MediaOpened(object? sender, Unosquare.FFME.Common.MediaOpenedEventArgs e)
         {
-            var tags = LoadTags();
             AudioTracks.Clear();
-            var audioStreams = Media.MediaInfo.Streams
-                .Where(kvp => kvp.Value.CodecType == FFmpeg.AutoGen.AVMediaType.AVMEDIA_TYPE_AUDIO)
-                .Select(kvp => kvp.Value);
-            foreach (var stream in audioStreams)
+            AudioTracks.Add(new AudioTrack
             {
-                AudioTracks.Add(new AudioTrack
-                {
-                    Name = $"Audio #{stream.StreamIndex} - " + tags
-                        .Where(tag => tag.Name.Equals($"Track{stream.StreamId}Name")).Select(tag => tag.Value)
-                        .DefaultIfEmpty("Untitled").First(),
-                    StreamIndex = stream.StreamIndex
-                });
-            }
-
+                Name = "Loading...",
+                StreamIndex = 0
+            });
             AudioTrackSlider.SelectedIndex = 0;
+            AudioTrackSlider.IsEnabled = false;
+            await Task.Run(() => LoadTags());
 
             Debug.WriteLine(e.Info.Duration);
             Save.IsEnabled = true;
@@ -256,17 +253,50 @@ namespace ClipChopper.DesktopApp
             dialog.ShowDialog(this);
         }
 
-        private List<NExifTool.Tag> LoadTags()
+        async private void LoadTags()
         {
             var etOptions = new NExifTool.ExifToolOptions()
             {
                 ExifToolPath = AppDomain.CurrentDomain.BaseDirectory + @"\exiftool.exe"
             };
             var et = new NExifTool.ExifTool(etOptions);
-            Debug.WriteLine(etOptions.ExifToolPath);
-            Debug.WriteLine(_loadedMedia);
-            var task = Task.Run(async () => await et.GetTagsAsync(_loadedMedia));
-            return task.Result.ToList();
+            List<NExifTool.Tag> tags = (await et.GetTagsAsync(_loadedMedia)).ToList();
+            Dispatcher.Invoke((Action)delegate
+            {
+                // If you switch between files very quickly, this makes it less likely to crash
+                if (!Media.IsLoaded || Media.MediaInfo == null)
+                {
+                    return;
+                }
+                var audioStreams = Media.MediaInfo.Streams
+                    .Where(kvp => kvp.Value.CodecType == FFmpeg.AutoGen.AVMediaType.AVMEDIA_TYPE_AUDIO)
+                    .Select(kvp => kvp.Value);
+
+                AudioTracks.Clear();
+                if (!audioStreams.Any())
+                {
+                    AudioTracks.Add(new AudioTrack
+                    {
+                        Name = "No audio",
+                        StreamIndex = 0
+                    });
+                    AudioTrackSlider.SelectedIndex = 0;
+                    return;
+                }
+                foreach (var stream in audioStreams)
+                {
+                    Debug.WriteLine(stream.StreamIndex);
+                    AudioTracks.Add(new AudioTrack
+                    {
+                        Name = $"Audio #{stream.StreamIndex} - " + tags
+                            .Where(tag => tag.Name.Equals($"Track{stream.StreamId}Name")).Select(tag => tag.Value)
+                            .DefaultIfEmpty("Untitled").First(),
+                        StreamIndex = stream.StreamIndex
+                    });
+                }
+                AudioTrackSlider.IsEnabled = true;
+                AudioTrackSlider.SelectedIndex = 0;
+            });
         }
 
         private void Media_MediaChanging(object? sender, Unosquare.FFME.Common.MediaOpeningEventArgs e)
@@ -276,8 +306,10 @@ namespace ClipChopper.DesktopApp
                 .Where(kvp => kvp.Value.CodecType == FFmpeg.AutoGen.AVMediaType.AVMEDIA_TYPE_AUDIO)
                 .Where(kvp => kvp.Value.StreamIndex == _selectedAudioStream)
                 .Select(kvp => kvp.Value);
-
-            e.Options.AudioStream = audioStream.First();
+            if (audioStream.Any())
+            {
+                e.Options.AudioStream = audioStream.First();
+            }
 
         }
 

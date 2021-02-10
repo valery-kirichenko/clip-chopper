@@ -195,10 +195,20 @@
                           ToolTip="Audio Track"
                           SelectedIndex="0"
                           ItemsSource="{Binding Path=AudioTracks, Mode=OneWay, RelativeSource={RelativeSource AncestorType=Window}}"
-                          DisplayMemberPath="Name"
                           x:Name="AudioTrackSlider"
                           VerticalContentAlignment="Center"
-                          SelectionChanged="ComboBox_SelectionChanged"/>
+                          SelectionChanged="ComboBox_SelectionChanged"
+                          IsEnabled="False"
+                          Width="150">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock 
+                                Text="{Binding Name}" 
+                                TextWrapping="Wrap"
+                                TextTrimming="CharacterEllipsis" />
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
             </StackPanel>
         </Grid>
     </Grid>
