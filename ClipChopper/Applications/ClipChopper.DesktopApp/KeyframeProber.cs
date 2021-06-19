@@ -12,7 +12,7 @@ namespace ClipChopper
 
             string args = $"-threads {Environment.ProcessorCount} -select_streams v -skip_frame nokey " +
                 $"-show_frames -print_format csv " +
-                $"-show_entries frame=key_frame,pkt_dts_time \"{filePath}\"";
+                $"-show_entries frame=key_frame,pkt_pts_time \"{filePath}\"";
 
             var startInfo = new ProcessStartInfo()
             {

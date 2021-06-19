@@ -21,7 +21,14 @@ namespace ClipChopper.DesktopApp
         private string? _loadedMedia;
         private FragmentSelection? _fragment;
         private int _selectedAudioStream;
-        public ObservableCollection<AudioTrack> AudioTracks { get; } = new ObservableCollection<AudioTrack>();
+        public ObservableCollection<AudioTrack> AudioTracks { get; } = new ObservableCollection<AudioTrack>(new List<AudioTrack>()
+        {
+            new AudioTrack
+            {
+                Name = "No Audio",
+                StreamIndex = 0
+            }
+        });
 
         public MainWindow()
         {
@@ -30,22 +37,36 @@ namespace ClipChopper.DesktopApp
             Media.MediaChanging += Media_MediaChanging;
         }
 
-        private void Media_MediaOpened(object? sender, Unosquare.FFME.Common.MediaOpenedEventArgs e)
+        private async void Media_MediaOpened(object? sender, Unosquare.FFME.Common.MediaOpenedEventArgs e)
         {
-            var tags = LoadTags();
+            var tags = await LoadTags();
             AudioTracks.Clear();
             var audioStreams = Media.MediaInfo.Streams
                 .Where(kvp => kvp.Value.CodecType == FFmpeg.AutoGen.AVMediaType.AVMEDIA_TYPE_AUDIO)
                 .Select(kvp => kvp.Value);
-            foreach (var stream in audioStreams)
+            
+            if (!audioStreams.Any())
             {
                 AudioTracks.Add(new AudioTrack
                 {
-                    Name = $"Audio #{stream.StreamIndex} - " + tags
-                        .Where(tag => tag.Name.Equals($"Track{stream.StreamId}Name")).Select(tag => tag.Value)
-                        .DefaultIfEmpty("Untitled").First(),
-                    StreamIndex = stream.StreamIndex
+                    Name = "No Audio",
+                    StreamIndex = 0
                 });
+                AudioTrackSlider.IsEnabled = false;
+            }
+            else
+            {
+                foreach (var stream in audioStreams)
+                {
+                    AudioTracks.Add(new AudioTrack
+                    {
+                        Name = $"Audio #{stream.StreamIndex} - " + tags
+                            .Where(tag => tag.Name.Equals($"Track{stream.StreamId}Name")).Select(tag => tag.Value)
+                            .DefaultIfEmpty("Untitled").First(),
+                        StreamIndex = stream.StreamIndex
+                    });
+                }
+                AudioTrackSlider.IsEnabled = true;
             }
 
             AudioTrackSlider.SelectedIndex = 0;
@@ -93,7 +114,10 @@ namespace ClipChopper.DesktopApp
 
         private void Pframe_Click(object sender, RoutedEventArgs e)
         {
-            Media.StepBackward();
+            if (Media.Position - Media.PositionStep > Media.PlaybackStartTime)
+            {
+                Media.StepBackward();
+            }
         }
 
         private void Nframe_Click(object sender, RoutedEventArgs e)
@@ -108,28 +132,23 @@ namespace ClipChopper.DesktopApp
 
         private void SelectDirectory_Click(object sender, RoutedEventArgs e)
         {
-            var dialog = new Ookii.Dialogs.Wpf.VistaFolderBrowserDialog();
+            var dialog = new VistaFolderBrowserDialog();
             if (dialog.ShowDialog().GetValueOrDefault())
             {
                 _selectedDirectory = dialog.SelectedPath;
-
-                // TODO: implement extensions filter, move this to new method.
-                IReadOnlyList<string> files = Directory.GetFiles(_selectedDirectory, "*.*")
-                    .Where(s => s.EndsWith(".mp4", StringComparison.OrdinalIgnoreCase) ||
-                                s.EndsWith(".mkv", StringComparison.OrdinalIgnoreCase))
-                    .ToList();
-
-                DirectoryList.ItemsSource = Enumerable.Range(0, files.Count)
-                    .Select(i => new DirectoryItem(files[i]))
-                    .ToList();
+                LoadDirectory();
             }
         }
 
         private void RefreshDirectory_Click(object sender, RoutedEventArgs e)
         {
-            if (_selectedDirectory is null) return;
+            LoadDirectory();
+        }
 
-            // TODO: implement extensions filter, move this to new method.
+        private void LoadDirectory()
+        {
+            if (_selectedDirectory is null) return;
+            // TODO: implement extensions filter
             List<string> files = Directory.GetFiles(_selectedDirectory, "*.*")
                 .Where(s => s.EndsWith(".mp4", StringComparison.OrdinalIgnoreCase) ||
                             s.EndsWith(".mkv", StringComparison.OrdinalIgnoreCase))
@@ -178,7 +197,7 @@ namespace ClipChopper.DesktopApp
             _loadedMedia = selectedFile.Path;
         }
 
-        private void Save_Click(object sender, RoutedEventArgs eventArgs)
+        private async void Save_Click(object sender, RoutedEventArgs eventArgs)
         {
             if (_fragment is null) return;
 
@@ -189,7 +208,7 @@ namespace ClipChopper.DesktopApp
 
             Debug.WriteLine(Path.GetExtension(_loadedMedia).Substring(1, 3));
 
-            var dialog = new Ookii.Dialogs.Wpf.VistaSaveFileDialog()
+            var dialog = new VistaSaveFileDialog()
             {
                 AddExtension = true,
                 Filter = "MP4 Files (*.mp4)|*.mp4|MKV Files (*.mkv)|*.mkv",
@@ -206,7 +225,8 @@ namespace ClipChopper.DesktopApp
             var outputFile = dialog.FileName;
 
             var ffmpegPath = Path.Combine(Unosquare.FFME.Library.FFmpegDirectory, "ffmpeg.exe");
-            var startKeyframe = KeyframeProber.FindClosestKeyframeTime(inputFile, _fragment.Start);
+            Status.Text = "Looking for keyframes...";
+            var startKeyframe = await Task.Run(() => KeyframeProber.FindClosestKeyframeTime(inputFile, _fragment.Start));
 
             string args = $"-y -ss {startKeyframe} -i \"{inputFile}\" -map_metadata 0 " +
                           $"-to \"{_fragment.Stop - startKeyframe}\" -c:v copy -c:a copy " +
@@ -222,15 +242,20 @@ namespace ClipChopper.DesktopApp
                 Arguments = args
             };
 
-            using (var ffmpeg = Process.Start(startInfo))
+            Status.Text = "Trimming...";
+            await Task.Run(() =>
             {
-                Debug.Assert(ffmpeg != null, nameof(ffmpeg) + " != null");
-                ffmpeg.OutputDataReceived += (s, e) => { Debug.WriteLine(e.Data); };
-                ffmpeg.WaitForExit();
-            }
-
-            ShowMessage("Done");
+                using (var ffmpeg = Process.Start(startInfo))
+                {
+                    Debug.Assert(ffmpeg != null, nameof(ffmpeg) + " != null");
+                    ffmpeg.OutputDataReceived += (s, e) => { Debug.WriteLine(e.Data); };
+                    ffmpeg.WaitForExit();
+                }
+            });
+            Status.Text = "Done";
             RefreshDirectory_Click(sender, eventArgs);
+            await Task.Delay(2000);
+            Status.Text = "";
         }
 
         private void Volume_Change(object sender, RoutedPropertyChangedEventArgs<double> eventArgs)
@@ -256,7 +281,7 @@ namespace ClipChopper.DesktopApp
             dialog.ShowDialog(this);
         }
 
-        private List<NExifTool.Tag> LoadTags()
+        private async Task<List<NExifTool.Tag>> LoadTags()
         {
             var etOptions = new NExifTool.ExifToolOptions()
             {
@@ -265,8 +290,8 @@ namespace ClipChopper.DesktopApp
             var et = new NExifTool.ExifTool(etOptions);
             Debug.WriteLine(etOptions.ExifToolPath);
             Debug.WriteLine(_loadedMedia);
-            var task = Task.Run(async () => await et.GetTagsAsync(_loadedMedia));
-            return task.Result.ToList();
+            var result = await et.GetTagsAsync(_loadedMedia);
+            return result.ToList();
         }
 
         private void Media_MediaChanging(object? sender, Unosquare.FFME.Common.MediaOpeningEventArgs e)
@@ -286,6 +311,38 @@ namespace ClipChopper.DesktopApp
             if (AudioTrackSlider.SelectedItem == null) return;
             _selectedAudioStream = ((AudioTrack)AudioTrackSlider.SelectedItem).StreamIndex;
             Media.ChangeMedia();
+        }
+
+        private void MainWindow_OnDrop(object sender, DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            {
+                string path = ((string[]) e.Data.GetData(DataFormats.FileDrop))[0];
+                if (Directory.Exists(path))
+                {
+                    _selectedDirectory = path;
+                } else if (File.Exists(path))
+                {
+                    _selectedDirectory = Path.GetDirectoryName(path);
+                    if (path.EndsWith(".mp4", StringComparison.OrdinalIgnoreCase) ||
+                        path.EndsWith(".mkv", StringComparison.OrdinalIgnoreCase))
+                    {
+                        Media.Open(new Uri(path));
+                        _loadedMedia = path;
+                    }
+                }
+                LoadDirectory();
+            }
+        }
+
+        private void SkipBack_Click(object sender, RoutedEventArgs e)
+        {
+            Media.Position = Media.Position.Subtract(TimeSpan.FromSeconds(5));
+        }
+
+        private void SkipForward_Click(object sender, RoutedEventArgs e)
+        {
+            Media.Position = Media.Position.Add(TimeSpan.FromSeconds(5));
         }
     }
 }

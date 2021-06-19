@@ -10,7 +10,9 @@
         Title="Clip Chopper"
         Height="870"
         Width="1491"
-        WindowStartupLocation="CenterScreen">
+        WindowStartupLocation="CenterScreen"
+        AllowDrop="True"
+        Drop="MainWindow_OnDrop">
     <!--1491x870 to get 720p video preview-->
     <Window.Resources>
         <local:TimeSpanToSecondsConverter x:Key="TimeSpanToSecondsConverter" />
@@ -124,7 +126,7 @@
                         </Rectangle>
                     </Viewbox>
                 </Button>
-                <Button Margin="5" Click="Pframe_Click" ToolTip="Previous frame">
+                <Button Margin="5" Click="SkipBack_Click" ToolTip="Skip Back">
                     <Viewbox xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
                         <Rectangle Width="16" Height="16">
                             <Rectangle.Fill>
@@ -143,7 +145,7 @@
                         </Rectangle>
                     </Viewbox>
                 </Button>
-                <Button Margin="5" Click="Nframe_Click" ToolTip="Next frame">
+                <Button Margin="5" Click="SkipForward_Click" ToolTip="Skip Forward">
                     <Viewbox xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
                         <Rectangle Width="16" Height="16">
                             <Rectangle.Fill>
@@ -154,6 +156,46 @@
                                                 <GeometryDrawing Brush="#00FFFFFF" Geometry="F1M16,16L0,16 0,0 16,0z" />
                                                 <GeometryDrawing Brush="#FFF6F6F6" Geometry="F1M15,6.5859L15,11.9999 9.586,11.9999 5.791,8.2049C5.187,8.6549,4.764,9.3379,4.661,10.1279L4.548,10.9999 0.904999999999999,10.9999 1.004,9.9099C1.305,6.5959 4.158,3.9999 7.5,3.9999 8.755,3.9999 9.967,4.3669 11,5.0299L11,2.5859z" />
                                                 <GeometryDrawing Brush="#FF414141" Geometry="F1M14,7L14,11 10,11 8,9 11,9 11,8.998 11.238,9C10.652,7.611 9.102,6.637 7.5,6.637 5.535,6.637 3.915,8.102 3.669,10L2,10C2.254,7.201 4.637,5 7.5,5 9.359,5 11.004,5.931 12,7.348L12,5z" />
+                                            </DrawingGroup.Children>
+                                        </DrawingGroup>
+                                    </DrawingBrush.Drawing>
+                                </DrawingBrush>
+                            </Rectangle.Fill>
+                        </Rectangle>
+                    </Viewbox>
+                </Button>
+                <Button Margin="5" Click="Pframe_Click" ToolTip="Previous Frame">
+                    <Viewbox xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
+                        <Rectangle Width="16" Height="16">
+                            <Rectangle.Fill>
+                                <DrawingBrush>
+                                    <DrawingBrush.Drawing>
+                                        <DrawingGroup>
+                                            <DrawingGroup.Children>
+                                                <GeometryDrawing Brush="#00FFFFFF" Geometry="F1M16,16L0,16 0,0 16,0z" />
+                                                <GeometryDrawing Brush="#FFF6F6F6" Geometry="F1M2.248,8.0723L11,13.8853 11,13.0003 14,13.0003 14,3.0003 11,3.0003 11,2.1343z" />
+                                                <GeometryDrawing Brush="#FF414141" Geometry="F1M10,12L3.794,8.063 10,4z" />
+                                                <GeometryDrawing Brush="#FF414141" Geometry="F1M12,12L13,12 13,4 12,4z" />
+                                            </DrawingGroup.Children>
+                                        </DrawingGroup>
+                                    </DrawingBrush.Drawing>
+                                </DrawingBrush>
+                            </Rectangle.Fill>
+                        </Rectangle>
+                    </Viewbox>
+                </Button>
+                <Button Margin="5" Click="Nframe_Click" ToolTip="Next Frame">
+                    <Viewbox xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
+                        <Rectangle Width="16" Height="16">
+                            <Rectangle.Fill>
+                                <DrawingBrush>
+                                    <DrawingBrush.Drawing>
+                                        <DrawingGroup>
+                                            <DrawingGroup.Children>
+                                                <GeometryDrawing Brush="#00FFFFFF" Geometry="F1M16,16L0,16 0,0 16,0z" />
+                                                <GeometryDrawing Brush="#FFF6F6F6" Geometry="F1M14.752,7.9492L6,2.1352 6,3.0002 3,3.0002 3,13.0002 6,13.0002 6,13.8872z" />
+                                                <GeometryDrawing Brush="#FF414141" Geometry="F1M7,4L12.958,7.958 7,12z" />
+                                                <GeometryDrawing Brush="#FF414141" Geometry="F1M4,12L5.001,12 5.001,4 4,4z" />
                                             </DrawingGroup.Children>
                                         </DrawingGroup>
                                     </DrawingBrush.Drawing>
@@ -198,7 +240,10 @@
                           DisplayMemberPath="Name"
                           x:Name="AudioTrackSlider"
                           VerticalContentAlignment="Center"
-                          SelectionChanged="ComboBox_SelectionChanged"/>
+                          SelectionChanged="ComboBox_SelectionChanged"
+                          IsEnabled="False"/>
+
+                <TextBlock x:Name="Status" Margin="5" VerticalAlignment="Center"/>
             </StackPanel>
         </Grid>
     </Grid>
