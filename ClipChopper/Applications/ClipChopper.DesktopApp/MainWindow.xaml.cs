@@ -226,7 +226,11 @@ namespace ClipChopper.DesktopApp
 
             var ffmpegPath = Path.Combine(Unosquare.FFME.Library.FFmpegDirectory, "ffmpeg.exe");
             Status.Text = "Looking for keyframes...";
-            var startKeyframe = await Task.Run(() => KeyframeProber.FindClosestKeyframeTime(inputFile, _fragment.Start));
+            var progress = new Progress<int>((value) =>
+            {
+                Status.Text = $"Looking for keyframes... {value}%";
+            });
+            var startKeyframe = await Task.Run(() => KeyframeProber.FindClosestKeyframeTime(inputFile, _fragment.Start, progress));
 
             string args = $"-y -ss {startKeyframe} -i \"{inputFile}\" -map_metadata 0 " +
                           $"-to \"{_fragment.Stop - startKeyframe}\" -c:v copy -c:a copy " +

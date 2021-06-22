@@ -1,17 +1,18 @@
-﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop" ToolsVersion="Current">
+<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop" ToolsVersion="Current">
   <PropertyGroup Label="Globals">
     <Platforms>x64</Platforms>
     <PackageVersion>1.2.0</PackageVersion>
     <Company>Kirichenko Valery</Company>
     <Product>ClipChopper</Product>
-    <AssemblyVersion>1.2.0</AssemblyVersion>
+    <AssemblyVersion>1.2.1</AssemblyVersion>
+    <Version>1.2.1</Version>
     <AssemblyName>ClipChopper</AssemblyName>
     <PackageId>ClipChopper</PackageId>
     <Authors>Kirichenko Valery</Authors>
   </PropertyGroup>
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>net5.0-windows</TargetFramework>
     <LangVersion>8.0</LangVersion>
     <UseWPF>true</UseWPF>
     <Nullable>enable</Nullable>
@@ -20,6 +21,11 @@
     <ApplicationIcon>icon.ico</ApplicationIcon>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <ApplicationManifest>app.manifest</ApplicationManifest>
+    <PublishSingleFile>true</PublishSingleFile>
+    <SelfContained>true</SelfContained>
+    <IncludeAllContentForSelfExtract>true</IncludeAllContentForSelfExtract>
+    <PublishReadyToRun>true</PublishReadyToRun>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
   </PropertyGroup>
   <ItemGroup>
     <Content Include="exiftool.exe">

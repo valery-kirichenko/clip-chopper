@@ -5,7 +5,7 @@ namespace ClipChopper
 {
     internal static class KeyframeProber
     {
-        public static TimeSpan FindClosestKeyframeTime(string filePath, TimeSpan time)
+        public static TimeSpan FindClosestKeyframeTime(string filePath, TimeSpan time, IProgress<int> progress)
         {
             var ffprobePath = Unosquare.FFME.Library.FFmpegDirectory + @"\ffprobe.exe";
             var keyframe = TimeSpan.Zero;
@@ -49,6 +49,7 @@ namespace ClipChopper
                         else
                         {
                             keyframe = frame;
+                            progress.Report((int)(frame.TotalMilliseconds / time.TotalMilliseconds * 100));
                         }
                     }
                 };
