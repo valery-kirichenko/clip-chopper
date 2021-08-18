@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using Ookii.Dialogs.Wpf;
 using System.Threading.Tasks;
+using System.Windows.Shell;
 
 namespace ClipChopper.DesktopApp
 {
@@ -226,9 +227,12 @@ namespace ClipChopper.DesktopApp
 
             var ffmpegPath = Path.Combine(Unosquare.FFME.Library.FFmpegDirectory, "ffmpeg.exe");
             Status.Text = "Looking for keyframes...";
+            TaskbarProgress.ProgressState = TaskbarItemProgressState.Normal;
             var progress = new Progress<int>((value) =>
             {
                 Status.Text = $"Looking for keyframes... {value}%";
+                TaskbarProgress.ProgressValue = value / 100.0d;
+                Console.WriteLine(TaskbarProgress.ProgressValue);
             });
             var startKeyframe = await Task.Run(() => KeyframeProber.FindClosestKeyframeTime(inputFile, _fragment.Start, progress));
 
@@ -247,16 +251,16 @@ namespace ClipChopper.DesktopApp
             };
 
             Status.Text = "Trimming...";
+            TaskbarProgress.ProgressState = TaskbarItemProgressState.Indeterminate;
             await Task.Run(() =>
             {
-                using (var ffmpeg = Process.Start(startInfo))
-                {
-                    Debug.Assert(ffmpeg != null, nameof(ffmpeg) + " != null");
-                    ffmpeg.OutputDataReceived += (s, e) => { Debug.WriteLine(e.Data); };
-                    ffmpeg.WaitForExit();
-                }
+                using var ffmpeg = Process.Start(startInfo);
+                Debug.Assert(ffmpeg != null, nameof(ffmpeg) + " != null");
+                ffmpeg.OutputDataReceived += (s, e) => { Debug.WriteLine(e.Data); };
+                ffmpeg.WaitForExit();
             });
             Status.Text = "Done";
+            TaskbarProgress.ProgressState = TaskbarItemProgressState.None;
             RefreshDirectory_Click(sender, eventArgs);
             await Task.Delay(2000);
             Status.Text = "";

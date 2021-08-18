@@ -18,6 +18,7 @@
         <local:TimeSpanToSecondsConverter x:Key="TimeSpanToSecondsConverter" />
         <local:TimeSpanFormatter x:Key="TimeSpanFormatter" />
     </Window.Resources>
+    <Window.TaskbarItemInfo><TaskbarItemInfo x:Name="TaskbarProgress"></TaskbarItemInfo></Window.TaskbarItemInfo>
 
     <Grid>
         <Grid.ColumnDefinitions>

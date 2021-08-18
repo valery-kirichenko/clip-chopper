@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk.WindowsDesktop" ToolsVersion="Current">
   <PropertyGroup Label="Globals">
     <Platforms>x64</Platforms>
-    <PackageVersion>1.2.0</PackageVersion>
+    <PackageVersion>1.2.1</PackageVersion>
     <Company>Kirichenko Valery</Company>
     <Product>ClipChopper</Product>
     <AssemblyVersion>1.2.1</AssemblyVersion>
