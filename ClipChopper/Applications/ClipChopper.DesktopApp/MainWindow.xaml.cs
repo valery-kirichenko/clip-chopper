@@ -249,6 +249,19 @@ namespace ClipChopper.DesktopApp
 
         private async void Save_Click(object? sender, RoutedEventArgs eventArgs)
         {
+            try
+            {
+                await Save_Click_Inernal(sender, eventArgs);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex);
+                TaskDialogHelper.ShowErrorTaskDialog(this, ex);
+            }
+        }
+
+        private async Task Save_Click_Inernal(object? sender, RoutedEventArgs eventArgs)
+        {
             if (_fragment is null) return;
 
             if (_loadedMedia is null)
@@ -312,7 +325,7 @@ namespace ClipChopper.DesktopApp
             TaskbarProgress.ProgressState = TaskbarItemProgressState.None;
             RefreshDirectory_Click(sender, eventArgs);
             await Task.Delay(2000);
-            Status.Text = "";
+            Status.Text = string.Empty;
         }
 
         private void Volume_Change(object? sender, RoutedPropertyChangedEventArgs<double> eventArgs)
