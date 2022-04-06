@@ -1,18 +1,16 @@
-<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop" ToolsVersion="Current">
-  <PropertyGroup Label="Globals">
-    <Platforms>x64</Platforms>
-    <PackageVersion>1.2.1</PackageVersion>
-    <Company>Kirichenko Valery</Company>
+<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="Current">
+
+  <PropertyGroup>
+    <Company>Valery Kirichenko</Company>
     <Product>ClipChopper</Product>
-    <AssemblyVersion>1.2.1</AssemblyVersion>
-    <Version>1.2.1</Version>
     <AssemblyName>ClipChopper</AssemblyName>
     <PackageId>ClipChopper</PackageId>
-    <Authors>Kirichenko Valery</Authors>
-  </PropertyGroup>
-  <PropertyGroup>
+    <Authors>Valery Kirichenko</Authors>
+
+    <Platforms>x64</Platforms>
+    <Configurations>Debug;Release</Configurations>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net5.0-windows</TargetFramework>
+    <TargetFramework>net6.0-windows</TargetFramework>
     <LangVersion>8.0</LangVersion>
     <UseWPF>true</UseWPF>
     <Nullable>enable</Nullable>
@@ -20,55 +18,58 @@
     <RootNamespace>ClipChopper</RootNamespace>
     <ApplicationIcon>icon.ico</ApplicationIcon>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-    <ApplicationManifest>app.manifest</ApplicationManifest>
-    <PublishSingleFile>true</PublishSingleFile>
-    <SelfContained>true</SelfContained>
-    <IncludeAllContentForSelfExtract>true</IncludeAllContentForSelfExtract>
     <PublishReadyToRun>true</PublishReadyToRun>
+    <!-- Workaround to fix issue with debug mode in VS. -->
+    <PublishSingleFile Condition="'$(Configuration)' == 'Release'">true</PublishSingleFile>
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+
+    <AssemblyVersion>1.2.1</AssemblyVersion>
+    <Version>1.2.1</Version>
   </PropertyGroup>
+
   <ItemGroup>
     <Content Include="exiftool.exe">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="ffmpeg\avcodec-58.dll">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="ffmpeg\avdevice-58.dll">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="ffmpeg\avfilter-7.dll">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="ffmpeg\avformat-58.dll">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="ffmpeg\avutil-56.dll">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="ffmpeg\ffmpeg.exe">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="ffmpeg\ffplay.exe">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="ffmpeg\ffprobe.exe">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="ffmpeg\postproc-55.dll">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="ffmpeg\swresample-3.dll">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="ffmpeg\swscale-5.dll">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
+
   <ItemGroup>
     <PackageReference Include="FFME.Windows" Version="4.4.350" />
-    <PackageReference Include="FFmpeg.AutoGen" Version="4.4.0" />
-    <PackageReference Include="NExifTool" Version="0.9.0" />
-    <PackageReference Include="Ookii.Dialogs.Wpf" Version="3.1.0" />
+    <PackageReference Include="NExifTool" Version="0.11.0" />
+    <PackageReference Include="Ookii.Dialogs.Wpf" Version="5.0.1" />
   </ItemGroup>
+
 </Project>
