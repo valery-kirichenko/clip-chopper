@@ -1,17 +1,22 @@
 ﻿using System;
-using System.ComponentModel;
-using System.IO;
-using System.Linq;
-using System.Windows;
-using System.Windows.Controls;
-using System.Diagnostics;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using Ookii.Dialogs.Wpf;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Shell;
 using ClipChopper.Domain;
 using ClipChopper.Domain.Errors;
-using System.Windows.Shell;
+using FFmpeg.AutoGen;
+using Newtonsoft.Json;
+using NExifTool;
+using Ookii.Dialogs.Wpf;
+using Unosquare.FFME;
+using Unosquare.FFME.Common;
 
 namespace ClipChopper.DesktopApp
 {
@@ -24,7 +29,7 @@ namespace ClipChopper.DesktopApp
         private string? _loadedMedia;
         private FragmentSelection? _fragment;
         private int _selectedAudioStream;
-        public ObservableCollection<AudioTrack> AudioTracks { get; } = new ObservableCollection<AudioTrack>(new List<AudioTrack>()
+        public ObservableCollection<AudioTrack> AudioTracks { get; } = new ObservableCollection<AudioTrack>(new List<AudioTrack>
         {
             new AudioTrack
             {
@@ -40,7 +45,7 @@ namespace ClipChopper.DesktopApp
             Media.MediaChanging += Media_MediaChanging;
         }
         
-        private async void Media_MediaOpened(object? sender, Unosquare.FFME.Common.MediaOpenedEventArgs e)
+        private async void Media_MediaOpened(object? sender, MediaOpenedEventArgs e)
         {
             try
             {
@@ -53,7 +58,7 @@ namespace ClipChopper.DesktopApp
             }
         }
 
-        private async Task Media_MediaOpened_Internal(object? sender, Unosquare.FFME.Common.MediaOpenedEventArgs e)
+        private async Task Media_MediaOpened_Internal(object? sender, MediaOpenedEventArgs e)
         {
             var loadTags = LoadTags();
             loadTags.FireAndForgetSafeAsync(new DisplayTaskDialogErrorHandler(this));
@@ -66,7 +71,7 @@ namespace ClipChopper.DesktopApp
                 return;
             }
             var audioStreams = Media.MediaInfo.Streams
-                .Where(kvp => kvp.Value.CodecType == FFmpeg.AutoGen.AVMediaType.AVMEDIA_TYPE_AUDIO)
+                .Where(kvp => kvp.Value.CodecType == AVMediaType.AVMEDIA_TYPE_AUDIO)
                 .Select(kvp => kvp.Value);
             
             if (!audioStreams.Any())
@@ -271,7 +276,7 @@ namespace ClipChopper.DesktopApp
 
             Debug.WriteLine(Path.GetExtension(_loadedMedia).Substring(1, 3));
 
-            var dialog = new VistaSaveFileDialog()
+            var dialog = new VistaSaveFileDialog
             {
                 AddExtension = true,
                 Filter = "MP4 Files (*.mp4)|*.mp4|MKV Files (*.mkv)|*.mkv",
@@ -287,10 +292,10 @@ namespace ClipChopper.DesktopApp
             var inputFile = _loadedMedia;
             var outputFile = dialog.FileName;
 
-            var ffmpegPath = Path.Combine(Unosquare.FFME.Library.FFmpegDirectory, "ffmpeg.exe");
+            var ffmpegPath = Path.Combine(Library.FFmpegDirectory, "ffmpeg.exe");
             Status.Text = "Looking for keyframes...";
             TaskbarProgress.ProgressState = TaskbarItemProgressState.Normal;
-            var progress = new Progress<int>((value) =>
+            var progress = new Progress<int>(value =>
             {
                 Status.Text = $"Looking for keyframes... {value}%";
                 TaskbarProgress.ProgressValue = value / 100.0d;
@@ -302,7 +307,7 @@ namespace ClipChopper.DesktopApp
                           $"-to \"{_fragment.Stop - startKeyframe}\" -c:v copy -c:a copy " +
                           $"-map 0 \"{outputFile}\"";
 
-            var startInfo = new ProcessStartInfo()
+            var startInfo = new ProcessStartInfo
             {
                 RedirectStandardOutput = true,
                 RedirectStandardInput = true,
@@ -338,24 +343,32 @@ namespace ClipChopper.DesktopApp
             TaskDialogHelper.ShowInfoTaskDialog(this, message);
         }
         
-        private async Task<List<NExifTool.Tag>> LoadTags()
+        private async Task<List<Tag>> LoadTags()
         {
-            var etOptions = new NExifTool.ExifToolOptions()
+            var etOptions = new ExifToolOptions
             {
                 ExifToolPath = AppDomain.CurrentDomain.BaseDirectory + @"\exiftool.exe"
             };
-            var et = new NExifTool.ExifTool(etOptions);
+            var et = new ExifTool(etOptions);
             Debug.WriteLine(etOptions.ExifToolPath);
             Debug.WriteLine(_loadedMedia);
-            var result = await et.GetTagsAsync(_loadedMedia);
-            return result.ToList();
+            try
+            {
+                var result = await et.GetTagsAsync(_loadedMedia);
+                return result.ToList();
+            }
+            catch (JsonReaderException ex)
+            {
+                Debug.WriteLine(ex);
+                return new List<Tag>();
+            }
         }
 
-        private void Media_MediaChanging(object? sender, Unosquare.FFME.Common.MediaOpeningEventArgs e)
+        private void Media_MediaChanging(object? sender, MediaOpeningEventArgs e)
         {
 
             var audioStream = Media.MediaInfo.Streams
-                .Where(kvp => kvp.Value.CodecType == FFmpeg.AutoGen.AVMediaType.AVMEDIA_TYPE_AUDIO)
+                .Where(kvp => kvp.Value.CodecType == AVMediaType.AVMEDIA_TYPE_AUDIO)
                 .Where(kvp => kvp.Value.StreamIndex == _selectedAudioStream)
                 .Select(kvp => kvp.Value);
 
