@@ -9,8 +9,10 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Shell;
+using Acolyte.Common;
 using ClipChopper.Domain;
 using ClipChopper.Domain.Errors;
+using ClipChopper.Logging;
 using FFmpeg.AutoGen;
 using Newtonsoft.Json;
 using NExifTool;
@@ -25,6 +27,12 @@ namespace ClipChopper.DesktopApp
     /// </summary>
     public sealed partial class MainWindow
     {
+        /// <summary>
+        /// Logger instance for current class.
+        /// </summary>
+        private static readonly ILogger _logger =
+            LoggerFactory.CreateLoggerFor<MainWindow>();
+
         private string? _selectedDirectory;
         private string? _loadedMedia;
         private FragmentSelection? _fragment;
@@ -53,7 +61,7 @@ namespace ClipChopper.DesktopApp
             }
             catch (Exception ex)
             {
-                Debug.WriteLine(ex);
+                _logger.Error(ex, "Failed to open media.");
                 TaskDialogHelper.ShowErrorTaskDialog(this, ex);
             }
         }
@@ -100,7 +108,7 @@ namespace ClipChopper.DesktopApp
 
             AudioTrackSlider.SelectedIndex = 0;
 
-            Debug.WriteLine(e.Info.Duration);
+            _logger.Info($"Media info has been opened. Duration: [{e.Info.Duration}].");
             Save.IsEnabled = true;
             _fragment = new FragmentSelection(e.Info.Duration);
             PositionSlider.SelectionStart = _fragment.Start.TotalSeconds;
@@ -133,7 +141,7 @@ namespace ClipChopper.DesktopApp
             }
             catch (Exception ex)
             {
-                Debug.WriteLine(ex);
+                _logger.Error(ex, "Failed to play media.");
                 TaskDialogHelper.ShowErrorTaskDialog(this, ex);
             }
         }
@@ -222,7 +230,7 @@ namespace ClipChopper.DesktopApp
             if (_fragment is null) return;
 
             _fragment.Start = Media.Position;
-            Debug.WriteLine(Media.Position);
+            _logger.Info($"Start position of the clip has been selected. Position: [{Media.Position}].");
         }
 
         private void Stop_Click(object? sender, RoutedEventArgs e)
@@ -245,6 +253,7 @@ namespace ClipChopper.DesktopApp
             if (!File.Exists(selectedFile.Path))
             {
                 ShowMessage($"Could not load non-existent file {selectedFile.Path}");
+                LoadDirectory();
                 return;
             }
 
@@ -260,7 +269,7 @@ namespace ClipChopper.DesktopApp
             }
             catch (Exception ex)
             {
-                Debug.WriteLine(ex);
+                _logger.Error(ex, "Failed to save media.");
                 TaskDialogHelper.ShowErrorTaskDialog(this, ex);
             }
         }
@@ -274,7 +283,7 @@ namespace ClipChopper.DesktopApp
                 throw new InvalidOperationException("Loaded media value is not initialized.");
             }
 
-            Debug.WriteLine(Path.GetExtension(_loadedMedia).Substring(1, 3));
+            _logger.Info("Saving clip.");
 
             var dialog = new VistaSaveFileDialog
             {
@@ -323,7 +332,7 @@ namespace ClipChopper.DesktopApp
             {
                 using var ffmpeg = Process.Start(startInfo);
                 Debug.Assert(ffmpeg != null, nameof(ffmpeg) + " != null");
-                ffmpeg.OutputDataReceived += (s, e) => { Debug.WriteLine(e.Data); };
+                ffmpeg.OutputDataReceived += (s, e) => _logger.Info(e.Data.ToStringNullSafe());
                 ffmpeg.WaitForExit();
             });
             Status.Text = "Done";
@@ -350,8 +359,10 @@ namespace ClipChopper.DesktopApp
                 ExifToolPath = AppDomain.CurrentDomain.BaseDirectory + @"\exiftool.exe"
             };
             var et = new ExifTool(etOptions);
-            Debug.WriteLine(etOptions.ExifToolPath);
-            Debug.WriteLine(_loadedMedia);
+
+            _logger.Info($"Loading tags with ExifTool. Path: [{etOptions.ExifToolPath}].");
+            _logger.Info(_loadedMedia.ToStringNullSafe());
+
             try
             {
                 var result = await et.GetTagsAsync(_loadedMedia);
@@ -359,7 +370,7 @@ namespace ClipChopper.DesktopApp
             }
             catch (JsonReaderException ex)
             {
-                Debug.WriteLine(ex);
+                _logger.Error(ex, "Failed to read tags.");
                 return new List<Tag>();
             }
         }

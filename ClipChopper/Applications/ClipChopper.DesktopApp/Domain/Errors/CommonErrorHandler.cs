@@ -1,10 +1,17 @@
 ﻿using System;
-using System.Diagnostics;
+using ClipChopper.Logging;
 
 namespace ClipChopper.Domain.Errors
 {
     internal sealed class CommonErrorHandler : IErrorHandler
     {
+        /// <summary>
+        /// Logger instance for current class.
+        /// </summary>
+        private static readonly ILogger _logger =
+            LoggerFactory.CreateLoggerFor<CommonErrorHandler>();
+
+
         public CommonErrorHandler()
         {
         }
@@ -13,7 +20,7 @@ namespace ClipChopper.Domain.Errors
 
         public void HandleError(Exception ex)
         {
-            Debug.WriteLine($"Exception occurred during task execution.{Environment.NewLine}{ex}");
+            _logger.Error(ex, $"Exception occurred during task execution.");
         }
 
         #endregion

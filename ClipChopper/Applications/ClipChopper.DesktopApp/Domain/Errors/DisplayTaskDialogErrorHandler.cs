@@ -1,11 +1,17 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Windows;
+using ClipChopper.Logging;
 
 namespace ClipChopper.Domain.Errors
 {
     internal sealed class DisplayTaskDialogErrorHandler : IErrorHandler
     {
+        /// <summary>
+        /// Logger instance for current class.
+        /// </summary>
+        private static readonly ILogger _logger =
+            LoggerFactory.CreateLoggerFor<DisplayTaskDialogErrorHandler>();
+
         private readonly Window _window;
 
 
@@ -19,7 +25,7 @@ namespace ClipChopper.Domain.Errors
 
         public void HandleError(Exception ex)
         {
-            Debug.WriteLine($"Exception occurred during task execution.{Environment.NewLine}{ex}");
+            _logger.Error(ex, $"Exception occurred during task execution.");
             TaskDialogHelper.ShowErrorTaskDialog(_window, ex);
         }
 
