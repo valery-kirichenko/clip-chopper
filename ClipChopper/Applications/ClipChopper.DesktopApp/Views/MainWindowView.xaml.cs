@@ -5,6 +5,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -82,7 +83,9 @@ namespace ClipChopper.DesktopApp.Views
             }
             var audioStreams = Media.MediaInfo.Streams
                 .Where(kvp => kvp.Value.CodecType == AVMediaType.AVMEDIA_TYPE_AUDIO)
-                .Select(kvp => kvp.Value);
+                .Select(kvp => kvp.Value)
+                .ToArray();
+            var videoStreamsCount = Media.MediaInfo.Streams.Count(kvp => kvp.Value.CodecType == AVMediaType.AVMEDIA_TYPE_VIDEO);
             
             if (!audioStreams.Any())
             {
@@ -91,14 +94,12 @@ namespace ClipChopper.DesktopApp.Views
             }
             else
             {
+                var filteredTags = tags
+                    .Where(tag => Regex.IsMatch(tag.Name, "^Track\\d*Name$"))
+                    .ToArray();
                 foreach (var stream in audioStreams)
                 {
-                    // TODO: research why searching logic for track name is not working.
-                    string audioTrackName = tags
-                        .Where(tag => tag.Name.Equals($"Track{stream.StreamId}Name", StringComparison.OrdinalIgnoreCase))
-                        .Select(tag => tag.Value)
-                        .DefaultIfEmpty("Untitled")
-                        .First();
+                    string audioTrackName = filteredTags[stream.StreamIndex - videoStreamsCount].Value;
 
                     AudioTracks.Add(new AudioTrack
                     {
