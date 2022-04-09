@@ -20,23 +20,23 @@ using Ookii.Dialogs.Wpf;
 using Unosquare.FFME;
 using Unosquare.FFME.Common;
 
-namespace ClipChopper.DesktopApp
+namespace ClipChopper.DesktopApp.Views
 {
     /// <summary>
-    /// Interaction logic for MainWindow.xaml
+    /// Interaction logic for MainWindowView.xaml
     /// </summary>
-    public sealed partial class MainWindow
+    public sealed partial class MainWindowView
     {
         /// <summary>
         /// Logger instance for current class.
         /// </summary>
-        private static readonly ILogger _logger =
-            LoggerFactory.CreateLoggerFor<MainWindow>();
+        private static readonly ILogger _logger = LoggerFactory.CreateLoggerFor<MainWindowView>();
 
         private string? _selectedDirectory;
         private string? _loadedMedia;
         private FragmentSelection? _fragment;
         private int _selectedAudioStream;
+
         public ObservableCollection<AudioTrack> AudioTracks { get; } = new(new List<AudioTrack>
         {
             new AudioTrack
@@ -46,7 +46,8 @@ namespace ClipChopper.DesktopApp
             }
         });
 
-        public MainWindow()
+
+        public MainWindowView()
         {
             InitializeComponent();
             Media.MediaOpened += Media_MediaOpened;
@@ -98,8 +99,10 @@ namespace ClipChopper.DesktopApp
                     AudioTracks.Add(new AudioTrack
                     {
                         Name = $"Audio #{stream.StreamIndex} - " + tags
-                            .Where(tag => tag.Name.Equals($"Track{stream.StreamId}Name")).Select(tag => tag.Value)
-                            .DefaultIfEmpty("Untitled").First(),
+                            .Where(tag => tag.Name.Equals($"Track{stream.StreamId}Name"))
+                            .Select(tag => tag.Value)
+                            .DefaultIfEmpty("Untitled")
+                            .First(),
                         StreamIndex = stream.StreamIndex
                     });
                 }
@@ -202,8 +205,7 @@ namespace ClipChopper.DesktopApp
             if (!Directory.Exists(_selectedDirectory))
             {
                 _selectedDirectory = null;
-                string message = "Directory no longer exists.";
-                TaskDialogHelper.ShowInfoTaskDialog(this, message);
+                ShowMessage("Directory no longer exists.");
                 return;
             }
 
@@ -217,8 +219,6 @@ namespace ClipChopper.DesktopApp
                 .Select(i => new DirectoryItem(files[i]))
                 .ToList();
 
-            DirectoryList.ItemsSource =
-                Enumerable.Range(0, files.Length).Select(i => new DirectoryItem(files[i])).ToList();
             if (_loadedMedia != null)
             {
                 DirectoryList.SelectedIndex = Array.IndexOf(files, _loadedMedia);
@@ -356,7 +356,7 @@ namespace ClipChopper.DesktopApp
         {
             var etOptions = new ExifToolOptions
             {
-                ExifToolPath = AppDomain.CurrentDomain.BaseDirectory + @"\exiftool.exe"
+                ExifToolPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "exiftool.exe")
             };
             var et = new ExifTool(etOptions);
 
@@ -402,8 +402,10 @@ namespace ClipChopper.DesktopApp
                 if (Directory.Exists(path))
                 {
                     _selectedDirectory = path;
-                } else if (File.Exists(path))
+                }
+                else if (File.Exists(path))
                 {
+                    // TODO: duplicated code -> to refactor.
                     _selectedDirectory = Path.GetDirectoryName(path);
                     if (path.EndsWith(".mp4", StringComparison.OrdinalIgnoreCase) ||
                         path.EndsWith(".mkv", StringComparison.OrdinalIgnoreCase))
