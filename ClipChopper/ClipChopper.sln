@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.29709.97
+# Visual Studio Version 17
+VisualStudioVersion = 17.1.32328.378
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Applications", "Applications", "{30A9B94B-57FE-4C5D-B493-2E8F2D578AF8}"
 EndProject
@@ -10,6 +10,18 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{C2130176-D2F0-44C6-9D32-219B4B626F05}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ClipChopper.DesktopApp", "Applications\ClipChopper.DesktopApp\ClipChopper.DesktopApp.csproj", "{72CA55A6-B3C2-4779-818D-CC49758C2A15}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{30D71C54-EDCC-4DB5-8609-87B1FCD6A517}"
+	ProjectSection(SolutionItems) = preProject
+		Directory.Build.props = Directory.Build.props
+		NuGet.Config = NuGet.Config
+	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ClipChopper.Core", "Libraries\ClipChopper.Core\ClipChopper.Core.csproj", "{89AE0DD0-1B71-4DF1-856C-EC3A12BDDFEE}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ClipChopper.Logging", "Libraries\ClipChopper.Logging\ClipChopper.Logging.csproj", "{15230E04-1457-4A66-A1CC-E74F01DA9EB0}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ClipChopper.Common", "Libraries\ClipChopper.Common\ClipChopper.Common.csproj", "{12A8C3E5-96AE-4374-A721-7276AAF31D4D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -22,12 +34,27 @@ Global
 		{72CA55A6-B3C2-4779-818D-CC49758C2A15}.Release|x64.ActiveCfg = Release|x64
 		{72CA55A6-B3C2-4779-818D-CC49758C2A15}.Release|x64.Build.0 = Release|x64
 		{72CA55A6-B3C2-4779-818D-CC49758C2A15}.Release|x64.Deploy.0 = Release|x64
+		{89AE0DD0-1B71-4DF1-856C-EC3A12BDDFEE}.Debug|x64.ActiveCfg = Debug|x64
+		{89AE0DD0-1B71-4DF1-856C-EC3A12BDDFEE}.Debug|x64.Build.0 = Debug|x64
+		{89AE0DD0-1B71-4DF1-856C-EC3A12BDDFEE}.Release|x64.ActiveCfg = Release|x64
+		{89AE0DD0-1B71-4DF1-856C-EC3A12BDDFEE}.Release|x64.Build.0 = Release|x64
+		{15230E04-1457-4A66-A1CC-E74F01DA9EB0}.Debug|x64.ActiveCfg = Debug|x64
+		{15230E04-1457-4A66-A1CC-E74F01DA9EB0}.Debug|x64.Build.0 = Debug|x64
+		{15230E04-1457-4A66-A1CC-E74F01DA9EB0}.Release|x64.ActiveCfg = Release|x64
+		{15230E04-1457-4A66-A1CC-E74F01DA9EB0}.Release|x64.Build.0 = Release|x64
+		{12A8C3E5-96AE-4374-A721-7276AAF31D4D}.Debug|x64.ActiveCfg = Debug|x64
+		{12A8C3E5-96AE-4374-A721-7276AAF31D4D}.Debug|x64.Build.0 = Debug|x64
+		{12A8C3E5-96AE-4374-A721-7276AAF31D4D}.Release|x64.ActiveCfg = Release|x64
+		{12A8C3E5-96AE-4374-A721-7276AAF31D4D}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{72CA55A6-B3C2-4779-818D-CC49758C2A15} = {30A9B94B-57FE-4C5D-B493-2E8F2D578AF8}
+		{89AE0DD0-1B71-4DF1-856C-EC3A12BDDFEE} = {A4D3BDEB-BB70-46BC-BB8C-B58D71922315}
+		{15230E04-1457-4A66-A1CC-E74F01DA9EB0} = {A4D3BDEB-BB70-46BC-BB8C-B58D71922315}
+		{12A8C3E5-96AE-4374-A721-7276AAF31D4D} = {A4D3BDEB-BB70-46BC-BB8C-B58D71922315}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {D5421CE1-B974-4F27-83D9-6EACD36B29A4}

@@ -1,0 +1,43 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <Platforms>$(AppPlatforms)</Platforms>
+    <Configurations>$(AppConfigurations)</Configurations>
+    <OutputType>Library</OutputType>
+    <TargetFramework>$(LibraryTargetFramework)</TargetFramework>
+    <LangVersion>$(CSharpLangVersion)</LangVersion>
+    <Nullable>enable</Nullable>
+    <Deterministic>true</Deterministic>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <MinVerTagPrefix>v</MinVerTagPrefix>
+    <RootNamespace>ClipChopper.Core</RootNamespace>
+    <IncludeSymbols>false</IncludeSymbols>
+    <IsPackable>false</IsPackable>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+
+    <PublishReadyToRun>true</PublishReadyToRun>
+    <!-- Workaround to fix issue with debug mode in VS. -->
+    <PublishSingleFile Condition="'$(Configuration)' == 'Release'">true</PublishSingleFile>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <Authors>Valery Kirichenko; Vasily Vasilyev</Authors>
+    <Product>ClipChopper</Product>
+    <Company>ClipChopper</Company>
+    <NeutralLanguage>en-US</NeutralLanguage>
+    <RepositoryUrl>https://github.com/valery-kirichenko/clip-chopper</RepositoryUrl>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="$(SolutionDir)Libraries\ClipChopper.Common\ClipChopper.Common.csproj" />
+    <ProjectReference Include="$(SolutionDir)Libraries\ClipChopper.Logging\ClipChopper.Logging.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MinVer" Version="$(MinVerPackageVersion)" PrivateAssets="all" />
+  </ItemGroup>
+
+</Project>

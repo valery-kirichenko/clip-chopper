@@ -1,30 +1,36 @@
-<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="Current">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <Company>Valery Kirichenko</Company>
-    <Product>ClipChopper</Product>
-    <AssemblyName>ClipChopper</AssemblyName>
-    <PackageId>ClipChopper</PackageId>
-    <Authors>Valery Kirichenko</Authors>
-
-    <Platforms>x64</Platforms>
-    <Configurations>Debug;Release</Configurations>
+    <Platforms>$(AppPlatforms)</Platforms>
+    <Configurations>$(AppConfigurations)</Configurations>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net6.0-windows</TargetFramework>
-    <LangVersion>8.0</LangVersion>
+    <TargetFramework>$(WindowsAppTargetFramework)</TargetFramework>
+    <LangVersion>$(CSharpLangVersion)</LangVersion>
     <UseWPF>true</UseWPF>
     <Nullable>enable</Nullable>
-    <WarningsAsErrors>CS8600,CS8602,CS8603,CS8618,CS8625</WarningsAsErrors>
-    <RootNamespace>ClipChopper</RootNamespace>
+    <Deterministic>true</Deterministic>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <MinVerTagPrefix>v</MinVerTagPrefix>
+    <RootNamespace>ClipChopper.DesktopApp</RootNamespace>
+    <IncludeSymbols>false</IncludeSymbols>
+    <IsPackable>false</IsPackable>
     <ApplicationIcon>icon.ico</ApplicationIcon>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+
     <PublishReadyToRun>true</PublishReadyToRun>
     <!-- Workaround to fix issue with debug mode in VS. -->
     <PublishSingleFile Condition="'$(Configuration)' == 'Release'">true</PublishSingleFile>
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+  </PropertyGroup>
 
-    <AssemblyVersion>1.2.1</AssemblyVersion>
-    <Version>1.2.1</Version>
+  <PropertyGroup>
+    <Authors>Valery Kirichenko; Vasily Vasilyev</Authors>
+    <Product>ClipChopper</Product>
+    <Company>ClipChopper</Company>
+    <NeutralLanguage>en-US</NeutralLanguage>
+    <RepositoryUrl>https://github.com/valery-kirichenko/clip-chopper</RepositoryUrl>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <RepositoryType>git</RepositoryType>
   </PropertyGroup>
 
   <ItemGroup>
@@ -67,9 +73,16 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="FFME.Windows" Version="4.4.350" />
-    <PackageReference Include="NExifTool" Version="0.11.0" />
-    <PackageReference Include="Ookii.Dialogs.Wpf" Version="5.0.1" />
+    <ProjectReference Include="$(SolutionDir)Libraries\ClipChopper.Common\ClipChopper.Common.csproj" />
+    <ProjectReference Include="$(SolutionDir)Libraries\ClipChopper.Core\ClipChopper.Core.csproj" />
+    <ProjectReference Include="$(SolutionDir)Libraries\ClipChopper.Logging\ClipChopper.Logging.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FFME.Windows" Version="$(FFMEWindowsPackageVersion)" />
+    <PackageReference Include="MinVer" Version="$(MinVerPackageVersion)" PrivateAssets="all" />
+    <PackageReference Include="NExifTool" Version="$(NExifToolPackageVersion)" />
+    <PackageReference Include="Ookii.Dialogs.Wpf" Version="$(OokiiDialogsWpfPackageVersion)" />
   </ItemGroup>
 
 </Project>

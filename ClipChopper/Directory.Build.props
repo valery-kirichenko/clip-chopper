@@ -1,0 +1,26 @@
+<Project>
+
+  <!-- Project properties -->
+  <PropertyGroup>
+    <AppPlatforms>x64</AppPlatforms>
+    <AppConfigurations>Debug;Release</AppConfigurations>
+    <AppTargetFramework>net6.0</AppTargetFramework>
+    <WindowsAppTargetFramework>net6.0-windows</WindowsAppTargetFramework>
+    <LibraryTargetFramework>net6.0</LibraryTargetFramework>
+    <TestTargetFramework>net6.0</TestTargetFramework>
+    <CSharpLangVersion>10.0</CSharpLangVersion>
+  </PropertyGroup>
+
+  <!-- NuGet packages -->
+  <PropertyGroup>
+    <AcolyteNETPackageVersion>2.2.0</AcolyteNETPackageVersion>
+    <FFMEWindowsPackageVersion>4.4.350</FFMEWindowsPackageVersion>
+    <NExifToolPackageVersion>0.11.0</NExifToolPackageVersion>
+    <MinVerPackageVersion>3.1.0</MinVerPackageVersion>
+    <NLogPackageVersion>4.7.15</NLogPackageVersion>
+    <NLogConfigPackageVersion>4.7.15</NLogConfigPackageVersion>
+    <NLogSchemaPackageVersion>4.7.15</NLogSchemaPackageVersion>
+    <OokiiDialogsWpfPackageVersion>5.0.1</OokiiDialogsWpfPackageVersion>
+  </PropertyGroup>
+
+</Project>

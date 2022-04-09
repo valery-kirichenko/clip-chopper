@@ -29,7 +29,7 @@ namespace ClipChopper.DesktopApp
         private string? _loadedMedia;
         private FragmentSelection? _fragment;
         private int _selectedAudioStream;
-        public ObservableCollection<AudioTrack> AudioTracks { get; } = new ObservableCollection<AudioTrack>(new List<AudioTrack>
+        public ObservableCollection<AudioTrack> AudioTracks { get; } = new(new List<AudioTrack>
         {
             new AudioTrack
             {
