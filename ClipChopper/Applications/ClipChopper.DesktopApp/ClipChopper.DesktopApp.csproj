@@ -34,9 +34,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Include="exiftool.exe">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
     <Content Include="ffmpeg\avcodec-58.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -74,6 +71,7 @@
 
   <ItemGroup>
     <ProjectReference Include="$(SolutionDir)Libraries\ClipChopper.Common\ClipChopper.Common.csproj" />
+    <ProjectReference Include="$(SolutionDir)Libraries\ClipChopper.Configuration\ClipChopper.Configuration.csproj" />
     <ProjectReference Include="$(SolutionDir)Libraries\ClipChopper.Core\ClipChopper.Core.csproj" />
     <ProjectReference Include="$(SolutionDir)Libraries\ClipChopper.Logging\ClipChopper.Logging.csproj" />
   </ItemGroup>
@@ -81,7 +79,6 @@
   <ItemGroup>
     <PackageReference Include="FFME.Windows" Version="$(FFMEWindowsPackageVersion)" />
     <PackageReference Include="MinVer" Version="$(MinVerPackageVersion)" PrivateAssets="all" />
-    <PackageReference Include="NExifTool" Version="$(NExifToolPackageVersion)" />
     <PackageReference Include="Ookii.Dialogs.Wpf" Version="$(OokiiDialogsWpfPackageVersion)" />
   </ItemGroup>
 

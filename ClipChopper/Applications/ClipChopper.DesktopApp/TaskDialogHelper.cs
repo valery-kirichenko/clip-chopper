@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Windows;
+using Acolyte.Assertions;
 using Ookii.Dialogs.Wpf;
 
 namespace ClipChopper
@@ -29,14 +30,8 @@ namespace ClipChopper
         public static void ShowTaskDialog(Window window, string? message,
             TaskDialogIcon taskDialogIcon, params TaskDialogButton[] buttons)
         {
-            if (window is null)
-            {
-                throw new ArgumentNullException(nameof(window));
-            }
-            if (buttons is null)
-            {
-                throw new ArgumentNullException(nameof(buttons));
-            }
+            window.ThrowIfNull(nameof(window));
+            buttons.ThrowIfNull(nameof(buttons));
 
             if (!TaskDialog.OSSupportsTaskDialogs)
             {

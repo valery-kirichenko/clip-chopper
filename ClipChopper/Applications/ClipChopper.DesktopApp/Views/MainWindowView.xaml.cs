@@ -10,12 +10,13 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Shell;
 using Acolyte.Common;
+using ClipChopper.Core.Wrappers.Tags;
 using ClipChopper.Domain;
 using ClipChopper.Domain.Errors;
 using ClipChopper.Logging;
+using ClipChopper.Models.IO;
+using ClipChopper.Models.Wrappers.Tags;
 using FFmpeg.AutoGen;
-using Newtonsoft.Json;
-using NExifTool;
 using Ookii.Dialogs.Wpf;
 using Unosquare.FFME;
 using Unosquare.FFME.Common;
@@ -32,6 +33,8 @@ namespace ClipChopper.DesktopApp.Views
         /// </summary>
         private static readonly ILogger _logger = LoggerFactory.CreateLoggerFor<MainWindowView>();
 
+        private readonly IExifTagLoader _tagLoader;
+
         private string? _selectedDirectory;
         private string? _loadedMedia;
         private FragmentSelection? _fragment;
@@ -39,16 +42,14 @@ namespace ClipChopper.DesktopApp.Views
 
         public ObservableCollection<AudioTrack> AudioTracks { get; } = new(new List<AudioTrack>
         {
-            new AudioTrack
-            {
-                Name = "No Audio",
-                StreamIndex = 0
-            }
+            AudioTrack.NoAudio
         });
 
 
         public MainWindowView()
         {
+            _tagLoader = new NExifToolTagLoader();
+
             InitializeComponent();
             Media.MediaOpened += Media_MediaOpened;
             Media.MediaChanging += Media_MediaChanging;
@@ -85,24 +86,23 @@ namespace ClipChopper.DesktopApp.Views
             
             if (!audioStreams.Any())
             {
-                AudioTracks.Add(new AudioTrack
-                {
-                    Name = "No Audio",
-                    StreamIndex = 0
-                });
+                AudioTracks.Add(AudioTrack.NoAudio);
                 AudioTrackSlider.IsEnabled = false;
             }
             else
             {
                 foreach (var stream in audioStreams)
                 {
+                    // TODO: research why searching logic for track name is not working.
+                    string audioTrackName = tags
+                        .Where(tag => tag.Name.Equals($"Track{stream.StreamId}Name", StringComparison.OrdinalIgnoreCase))
+                        .Select(tag => tag.Value)
+                        .DefaultIfEmpty("Untitled")
+                        .First();
+
                     AudioTracks.Add(new AudioTrack
                     {
-                        Name = $"Audio #{stream.StreamIndex} - " + tags
-                            .Where(tag => tag.Name.Equals($"Track{stream.StreamId}Name"))
-                            .Select(tag => tag.Value)
-                            .DefaultIfEmpty("Untitled")
-                            .First(),
+                        Name = $"Audio #{stream.StreamIndex} - " + audioTrackName,
                         StreamIndex = stream.StreamIndex
                     });
                 }
@@ -283,8 +283,6 @@ namespace ClipChopper.DesktopApp.Views
                 throw new InvalidOperationException("Loaded media value is not initialized.");
             }
 
-            _logger.Info("Saving clip.");
-
             var dialog = new VistaSaveFileDialog
             {
                 AddExtension = true,
@@ -297,7 +295,7 @@ namespace ClipChopper.DesktopApp.Views
 
             if (!dialog.ShowDialog().GetValueOrDefault()) return;
 
-            Console.WriteLine(dialog.FileName);
+            _logger.Info($"Saving clip to [{dialog.FileName}].");
             var inputFile = _loadedMedia;
             var outputFile = dialog.FileName;
 
@@ -308,9 +306,11 @@ namespace ClipChopper.DesktopApp.Views
             {
                 Status.Text = $"Looking for keyframes... {value}%";
                 TaskbarProgress.ProgressValue = value / 100.0d;
-                Console.WriteLine(TaskbarProgress.ProgressValue);
+                _logger.Info($"Saving progress: {TaskbarProgress.ProgressValue}");
             });
-            var startKeyframe = await Task.Run(() => KeyframeProber.FindClosestKeyframeTime(inputFile, _fragment.Start, progress));
+            var startKeyframe = await Task.Run(
+                () => KeyframeProber.FindClosestKeyframeTimeAsync(inputFile, _fragment.Start, progress)
+            );
 
             string args = $"-y -ss {startKeyframe} -i \"{inputFile}\" -map_metadata 0 " +
                           $"-to \"{_fragment.Stop - startKeyframe}\" -c:v copy -c:a copy " +
@@ -352,27 +352,14 @@ namespace ClipChopper.DesktopApp.Views
             TaskDialogHelper.ShowInfoTaskDialog(this, message);
         }
         
-        private async Task<List<Tag>> LoadTags()
+        private async Task<IReadOnlyList<ExifTag>> LoadTags()
         {
-            var etOptions = new ExifToolOptions
+            if (string.IsNullOrEmpty(_loadedMedia))
             {
-                ExifToolPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "exiftool.exe")
-            };
-            var et = new ExifTool(etOptions);
-
-            _logger.Info($"Loading tags with ExifTool. Path: [{etOptions.ExifToolPath}].");
-            _logger.Info(_loadedMedia.ToStringNullSafe());
-
-            try
-            {
-                var result = await et.GetTagsAsync(_loadedMedia);
-                return result.ToList();
+                return Array.Empty<ExifTag>();
             }
-            catch (JsonReaderException ex)
-            {
-                _logger.Error(ex, "Failed to read tags.");
-                return new List<Tag>();
-            }
+
+            return await _tagLoader.LoadTagsAsync(new FilePath(_loadedMedia));
         }
 
         private void Media_MediaChanging(object? sender, MediaOpeningEventArgs e)

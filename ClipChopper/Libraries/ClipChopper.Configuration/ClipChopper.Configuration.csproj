@@ -10,7 +10,7 @@
     <Deterministic>true</Deterministic>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <MinVerTagPrefix>v</MinVerTagPrefix>
-    <RootNamespace>ClipChopper.Core</RootNamespace>
+    <RootNamespace>ClipChopper.Configuration</RootNamespace>
     <IncludeSymbols>false</IncludeSymbols>
     <IsPackable>false</IsPackable>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
@@ -26,22 +26,18 @@
     <RepositoryType>git</RepositoryType>
   </PropertyGroup>
 
+  
   <ItemGroup>
     <ProjectReference Include="$(SolutionDir)Libraries\ClipChopper.Common\ClipChopper.Common.csproj" />
-    <ProjectReference Include="$(SolutionDir)Libraries\ClipChopper.Configuration\ClipChopper.Configuration.csproj" />
     <ProjectReference Include="$(SolutionDir)Libraries\ClipChopper.Logging\ClipChopper.Logging.csproj" />
     <ProjectReference Include="$(SolutionDir)Libraries\ClipChopper.Models\ClipChopper.Models.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="exiftool.exe">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
-
-  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="$(MicrosoftExtensionsConfigurationPackageVersion)" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="$(MicrosoftExtensionsConfigurationBinderPackageVersion)" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="$(MicrosoftExtensionsConfigurationJsonPackageVersion)" />
     <PackageReference Include="MinVer" Version="$(MinVerPackageVersion)" PrivateAssets="all" />
-    <PackageReference Include="NExifTool" Version="$(NExifToolPackageVersion)" />
   </ItemGroup>
 
 </Project>

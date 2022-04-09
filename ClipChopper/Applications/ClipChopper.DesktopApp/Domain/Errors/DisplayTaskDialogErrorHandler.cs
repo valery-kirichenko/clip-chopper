@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Windows;
+using Acolyte.Assertions;
 using ClipChopper.Logging;
 
 namespace ClipChopper.Domain.Errors
@@ -18,7 +19,7 @@ namespace ClipChopper.Domain.Errors
         public DisplayTaskDialogErrorHandler(
             Window window)
         {
-            _window = window ?? throw new ArgumentNullException(nameof(window));
+            _window = window.ThrowIfNull(nameof(window));
         }
 
         #region IErrorHandler Implementation

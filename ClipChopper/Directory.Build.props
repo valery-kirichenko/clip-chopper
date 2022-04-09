@@ -16,7 +16,11 @@
     <AcolyteNETPackageVersion>2.2.0</AcolyteNETPackageVersion>
     <FFMEWindowsPackageVersion>4.4.350</FFMEWindowsPackageVersion>
     <NExifToolPackageVersion>0.11.0</NExifToolPackageVersion>
+    <MicrosoftExtensionsConfigurationPackageVersion>6.0.1</MicrosoftExtensionsConfigurationPackageVersion>
+    <MicrosoftExtensionsConfigurationBinderPackageVersion>6.0.0</MicrosoftExtensionsConfigurationBinderPackageVersion>
+    <MicrosoftExtensionsConfigurationJsonPackageVersion>6.0.0</MicrosoftExtensionsConfigurationJsonPackageVersion>
     <MinVerPackageVersion>3.1.0</MinVerPackageVersion>
+    <NewtonsoftJsonPackageVersion>13.0.1</NewtonsoftJsonPackageVersion>
     <NLogPackageVersion>4.7.15</NLogPackageVersion>
     <NLogConfigPackageVersion>4.7.15</NLogConfigPackageVersion>
     <NLogSchemaPackageVersion>4.7.15</NLogSchemaPackageVersion>
