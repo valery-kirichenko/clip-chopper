@@ -103,7 +103,7 @@ namespace ClipChopper.DesktopApp.Views
 
                     AudioTracks.Add(new AudioTrack
                     {
-                        Name = $"Audio #{stream.StreamIndex} - " + audioTrackName,
+                        Name = $"Audio #{stream.StreamIndex} - {audioTrackName}",
                         StreamIndex = stream.StreamIndex
                     });
                 }
