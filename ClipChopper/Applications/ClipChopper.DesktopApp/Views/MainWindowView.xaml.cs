@@ -266,7 +266,7 @@ namespace ClipChopper.DesktopApp.Views
         {
             try
             {
-                await Save_Click_Inernal(sender, eventArgs);
+                await Save_Click_Internal(sender, eventArgs);
             }
             catch (Exception ex)
             {
@@ -275,7 +275,7 @@ namespace ClipChopper.DesktopApp.Views
             }
         }
 
-        private async Task Save_Click_Inernal(object? sender, RoutedEventArgs eventArgs)
+        private async Task Save_Click_Internal(object? sender, RoutedEventArgs eventArgs)
         {
             if (_fragment is null) return;
 
