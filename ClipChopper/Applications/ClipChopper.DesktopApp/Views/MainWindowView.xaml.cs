@@ -99,7 +99,8 @@ namespace ClipChopper.DesktopApp.Views
                     .ToArray();
                 foreach (var stream in audioStreams)
                 {
-                    string audioTrackName = filteredTags[stream.StreamIndex - videoStreamsCount].Value;
+                    var tagIndex = stream.StreamIndex - videoStreamsCount;
+                    string audioTrackName = tagIndex < filteredTags.Length ? filteredTags[tagIndex].Value : "Unknown";
 
                     AudioTracks.Add(new AudioTrack
                     {
