@@ -316,7 +316,7 @@ namespace ClipChopper.DesktopApp.Views
 
             string args = $"-y -ss {startKeyframe} -i \"{inputFile}\" -map_metadata 0 " +
                           $"-to \"{_fragment.Stop - startKeyframe}\" -c:v copy -c:a copy " +
-                          $"-map 0 \"{outputFile}\"";
+                          $"-map 0 -map -0:d \"{outputFile}\"";
 
             var startInfo = new ProcessStartInfo
             {
