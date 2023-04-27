@@ -15,10 +15,44 @@
         Drop="MainWindow_OnDrop">
     <!--1491x870 to get 720p video preview-->
     <Window.Resources>
-        <local:TimeSpanToSecondsConverter x:Key="TimeSpanToSecondsConverter" />
-        <local:TimeSpanFormatter x:Key="TimeSpanFormatter" />
+        <ResourceDictionary>
+            <RoutedUICommand x:Key="Cntrl1" Text="Pause" />
+            <RoutedUICommand x:Key="Cntrl2" Text="SkipBack" />
+            <RoutedUICommand x:Key="Cntrl3" Text="SkipForward" />
+            <RoutedUICommand x:Key="Cntrl4" Text="Pframe" />
+            <RoutedUICommand x:Key="Cntrl5" Text="Nframe" />
+            <RoutedUICommand x:Key="Cntrl6" Text="Start" />
+            <RoutedUICommand x:Key="Cntrl7" Text="Stop" />
+            <RoutedUICommand x:Key="Cntrl8" Text="Save" />
+            
+            <local:TimeSpanToSecondsConverter x:Key="TimeSpanToSecondsConverter" />
+            <local:TimeSpanFormatter x:Key="TimeSpanFormatter" />
+
+        </ResourceDictionary>
     </Window.Resources>
     <Window.TaskbarItemInfo><TaskbarItemInfo x:Name="TaskbarProgress"></TaskbarItemInfo></Window.TaskbarItemInfo>
+    
+    <Window.InputBindings>
+        <KeyBinding Key="k" Command="{StaticResource Cntrl1}" />
+        <KeyBinding Key="Left" Command="{StaticResource Cntrl2}" />
+        <KeyBinding Key="Right" Command="{StaticResource Cntrl3}" />
+        <KeyBinding Key="Left" Modifiers="Ctrl" Command="{StaticResource Cntrl4}" />
+        <KeyBinding Key="Right" Modifiers="Ctrl" Command="{StaticResource Cntrl5}" />
+        <KeyBinding Key="OemOpenBrackets" Modifiers="Ctrl" Command="{StaticResource Cntrl6}" />
+        <KeyBinding Key="OemCloseBrackets" Modifiers="Ctrl" Command="{StaticResource Cntrl7}" />
+        <KeyBinding Key="S" Modifiers="Ctrl" Command="{StaticResource Cntrl8}" />
+    </Window.InputBindings>
+    
+    <Window.CommandBindings>
+        <CommandBinding Command="{StaticResource Cntrl1}" Executed="Play_Click" />
+        <CommandBinding Command="{StaticResource Cntrl2}" Executed="SkipBack_Click" />
+        <CommandBinding Command="{StaticResource Cntrl3}" Executed="SkipForward_Click" />
+        <CommandBinding Command="{StaticResource Cntrl4}" Executed="Pframe_Click" />
+        <CommandBinding Command="{StaticResource Cntrl5}" Executed="Nframe_Click" />
+        <CommandBinding Command="{StaticResource Cntrl6}" Executed="Start_Click" />
+        <CommandBinding Command="{StaticResource Cntrl7}" Executed="Stop_Click" />
+        <CommandBinding Command="{StaticResource Cntrl8}" Executed="Save_Click" />
+    </Window.CommandBindings>
 
     <Grid>
         <Grid.ColumnDefinitions>
