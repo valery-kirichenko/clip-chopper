@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "ClipChopper.WinUIApp (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "ClipChopper.WinUIApp (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}

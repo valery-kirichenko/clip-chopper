@@ -140,6 +140,7 @@ namespace ClipChopper.DesktopApp.Views
 
         private async void Play_Click(object? sender, RoutedEventArgs e)
         {
+            e.Handled = true;
             try
             {
                 await Play_Click_Internal(sender, e);
@@ -169,6 +170,7 @@ namespace ClipChopper.DesktopApp.Views
 
         private void Pframe_Click(object? sender, RoutedEventArgs e)
         {
+            e.Handled = true;
             if (Media.Position - Media.PositionStep > Media.PlaybackStartTime)
             {
                 Media.StepBackward();
@@ -177,6 +179,7 @@ namespace ClipChopper.DesktopApp.Views
 
         private void Nframe_Click(object? sender, RoutedEventArgs e)
         {
+            e.Handled = true;
             // Don't make a step if current frame is the last one
             // fixes an issue when StepForward actually moves to a previous key frame
             if (Media.Position + Media.PositionStep < Media.PlaybackEndTime)
@@ -348,7 +351,7 @@ namespace ClipChopper.DesktopApp.Views
         {
             Media.Volume = (Math.Exp(eventArgs.NewValue) - 1) / (Math.E - 1);
         }
-
+        
         private void ShowMessage(string message)
         {
             TaskDialogHelper.ShowInfoTaskDialog(this, message);
@@ -409,11 +412,13 @@ namespace ClipChopper.DesktopApp.Views
 
         private void SkipBack_Click(object sender, RoutedEventArgs e)
         {
+            e.Handled = true;
             Media.Position = Media.Position.Subtract(TimeSpan.FromSeconds(5));
         }
 
         private void SkipForward_Click(object sender, RoutedEventArgs e)
         {
+            e.Handled = true;
             Media.Position = Media.Position.Add(TimeSpan.FromSeconds(5));
         }
     }

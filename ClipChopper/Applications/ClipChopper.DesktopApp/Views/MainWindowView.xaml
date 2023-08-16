@@ -57,7 +57,7 @@
                     </Viewbox>
                 </Button>
             </Grid>
-            
+
             <ListBox Grid.Row="1" x:Name="DirectoryList" ScrollViewer.HorizontalScrollBarVisibility="Disabled" SelectionChanged="DirectoryList_Selected">
                 <ListBox.ItemTemplate>
                     <DataTemplate>
@@ -92,17 +92,19 @@
                     Minimum="{Binding PlaybackStartTime, ElementName=Media, Converter={StaticResource TimeSpanToSecondsConverter}}"
                     Maximum="{Binding PlaybackEndTime, ElementName=Media, Converter={StaticResource TimeSpanToSecondsConverter}}"
                     Value="{Binding Position, ElementName=Media, Converter={StaticResource TimeSpanToSecondsConverter}}"/>
-            
+
             <Grid Grid.Row="2" Margin="0 5">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition />
-                    <ColumnDefinition />
+                    <ColumnDefinition Width="175*" />
+                    <ColumnDefinition Width="12*"/>
+                    <ColumnDefinition Width="461*"/>
+                    <ColumnDefinition Width="648*" />
                 </Grid.ColumnDefinitions>
-                <TextBlock Grid.Column="0" Text="{Binding Position, ElementName=Media, Converter={StaticResource TimeSpanFormatter}, Mode=OneWay}" VerticalAlignment="Center" />
-                <TextBlock Grid.Column="1" Text="{Binding RemainingDuration, ElementName=Media, Converter={StaticResource TimeSpanFormatter}, Mode=OneWay}" VerticalAlignment="Center" HorizontalAlignment="Right" />
+                <TextBlock Grid.Column="0" Text="{Binding Position, ElementName=Media, Converter={StaticResource TimeSpanFormatter}, Mode=OneWay}" VerticalAlignment="Center" Grid.ColumnSpan="3" />
+                <TextBlock Grid.Column="3" Text="{Binding RemainingDuration, ElementName=Media, Converter={StaticResource TimeSpanFormatter}, Mode=OneWay}" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="648,0,0,0" />
                 <!--<TextBlock x:Name="frame" VerticalAlignment="Center" />-->
             </Grid>
-            
+
             <StackPanel Orientation="Horizontal" Grid.Row="3">
                 <Button Margin="0 5 5 5" Click="Play_Click" ToolTip="Play/Pause" RenderTransformOrigin="0.5,0.5">
                     <Button.RenderTransform>

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="ClipChopper.WinUIApp.AdvancedSaveContent"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:ClipChopper.WinUIApp"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+    
+    <NavigationView x:Name="NavigationViewControl" PaneDisplayMode="Top" ItemInvoked="NavigationView_ItemInvoked" IsSettingsVisible="False" IsBackButtonVisible="Collapsed">
+        <NavigationView.MenuItems>
+            <NavigationViewItem Content="Video" IsSelected="True" Tag="AdvancedSaveVideoPage" />
+            <NavigationViewItem Content="Audio" Tag="AdvancedSaveAudioPage" />
+        </NavigationView.MenuItems>
+        <NavigationView.Resources>
+            <SolidColorBrush x:Key="NavigationViewContentBackground" Color="Transparent" />
+        </NavigationView.Resources>
+        <Frame x:Name="ContentFrame"/>
+    </NavigationView>
+</Page>
