@@ -22,6 +22,8 @@
     <GenerateTemporaryStoreCertificate>True</GenerateTemporaryStoreCertificate>
 	<WindowsPackageType>None</WindowsPackageType>
 	<Nullable>enable</Nullable>
+	<ApplicationIcon>Assets\icon.ico</ApplicationIcon>
+	<AssemblyName>ClipChopper</AssemblyName>
   </PropertyGroup>
   <ItemGroup>
     <None Remove="AdvancedSaveAudioPage.xaml" />
@@ -37,14 +39,48 @@
     <Content Include="Assets\Square44x44Logo.targetsize-24_altform-unplated.png" />
     <Content Include="Assets\StoreLogo.png" />
     <Content Include="Assets\Wide310x150Logo.scale-200.png" />
+	<Content Include="Assets\icon.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
+	<Content Include="FFmpeg\avcodec-59.dll">
+	  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	</Content>
+	<Content Include="FFmpeg\avdevice-59.dll">
+	  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	</Content>
+	<Content Include="FFmpeg\avfilter-8.dll">
+	  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	</Content>
+	<Content Include="FFmpeg\avformat-59.dll">
+	  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	</Content>
+	<Content Include="FFmpeg\avutil-57.dll">
+	  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	</Content>
+	<Content Include="FFmpeg\postproc-56.dll">
+	  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	</Content>
+	<Content Include="FFmpeg\swresample-4.dll">
+	  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	</Content>
+	<Content Include="FFmpeg\swscale-6.dll">
+	  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	</Content>
+	<Content Include="FFmpeg\ffmpeg.exe">
+	  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	</Content>
+	<Content Include="FFmpeg\ffprobe.exe">
+	  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	</Content>
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.WinUI.UI.Controls.Input" Version="7.1.2" />
     <PackageReference Include="CommunityToolkit.WinUI.UI.Controls.Layout" Version="7.1.2" />
     <PackageReference Include="FFMpegCore" Version="5.1.0" />
-    <PackageReference Include="FlyleafLib" Version="3.7.17" />
-    <PackageReference Include="FlyleafLib.Controls.WinUI" Version="1.0.8" />
+    <PackageReference Include="FlyleafLib" Version="3.7.21" />
+    <PackageReference Include="FlyleafLib.Controls.WinUI" Version="1.0.10" />
     <PackageReference Include="MediaInfo.Wrapper.Core" Version="21.9.3" />
     <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.4.230811000-preview2" />
     <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.22621.756" />

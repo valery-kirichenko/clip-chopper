@@ -20,7 +20,7 @@
         </Grid.RowDefinitions>
         
         <Grid Grid.Row="0" x:Name="AppTitleBar" IsHitTestVisible="True">
-            <Image Source="Assets/StoreLogo.png"
+            <Image Source="Assets/icon.ico"
                    HorizontalAlignment="Left" 
                    Width="16" Height="16" 
                    Margin="8,0"/>
@@ -64,7 +64,7 @@
                         </AppBarButton.Icon>
                     </AppBarButton>
                     <AppBarButton Icon="Refresh" ToolTipService.ToolTip="Refresh" Label="Refresh" LabelPosition="Collapsed" Click="RefreshButton_Click"/>
-                    <AppBarButton Icon="Sort" ToolTipService.ToolTip="Sort" Label="Sort" LabelPosition="Collapsed">
+                    <AppBarButton Icon="Sort" ToolTipService.ToolTip="Sort" Label="Sort" LabelPosition="Collapsed" IsEnabled="False">
                         <AppBarButton.Flyout>
                             <MenuFlyout Placement="Bottom">
                                 <MenuFlyoutItem Text="By name" Click="SortItem_Click" Tag="name"/>
@@ -202,7 +202,7 @@
                                     <TextBlock Text="Save..."/>
                                 </StackPanel>
                             </Button>
-                            <Button IsTabStop="False" IsEnabled="{Binding Player.CanPlay, Mode=OneWay}" CornerRadius="0,4,4,0" Margin="-4,0,0,0" VerticalAlignment="Stretch">
+                            <Button IsTabStop="False" IsEnabled="False" CornerRadius="0,4,4,0" Margin="-4,0,0,0" VerticalAlignment="Stretch">
                                 <FontIcon Glyph="&#xE70D;" FontSize="11" />
                                 <Button.Flyout>
                                     <MenuFlyout Placement="BottomEdgeAlignedRight">

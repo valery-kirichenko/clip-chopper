@@ -22,6 +22,7 @@ using Microsoft.Extensions.Logging.Abstractions;
 using System.Collections.ObjectModel;
 using FFMpegCore;
 using Windows.ApplicationModel.DataTransfer;
+using System.IO;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -37,6 +38,11 @@ namespace ClipChopper.WinUIApp
         private const int WAINACTIVE = 0x00;
         private const int WAACTIVE = 0x01;
         private const int WMACTIVATE = 0x0006;
+        private const int ICON_SMALL = 0;
+        private const int ICON_BIG = 1;
+        private const int ICON_SMALL2 = 2;
+        private const int WM_GETICON = 0x007F;
+        private const int WM_SETICON = 0x0080;
         UISettings settings = new();
         SymbolIcon iconPlay = new SymbolIcon(Symbol.Play);
         SymbolIcon iconPause = new SymbolIcon(Symbol.Pause);
@@ -47,7 +53,12 @@ namespace ClipChopper.WinUIApp
 
         public MainWindow()
         {
-            GlobalFFOptions.Configure(new FFOptions { BinaryFolder = @"C:\Flyleaf\FFmpeg" });
+            IntPtr hWnd = WinRT.Interop.WindowNative.GetWindowHandle(this);
+            string sExe = System.Diagnostics.Process.GetCurrentProcess().MainModule.FileName;
+            System.Drawing.Icon ico = System.Drawing.Icon.ExtractAssociatedIcon(sExe);
+            SendMessage(hWnd, WM_SETICON, ICON_BIG, ico.Handle);
+
+            GlobalFFOptions.Configure(new FFOptions { BinaryFolder = Path.Combine(AppContext.BaseDirectory, "FFmpeg") });
             // Initializes Engine (Specifies FFmpeg libraries path which is required)
             Engine.Start(new EngineConfig()
             {
@@ -60,7 +71,7 @@ namespace ClipChopper.WinUIApp
                 UIRefresh = true, // For Activity Mode usage
                 UICurTimePerSecond = false,
                 UIRefreshInterval = 8,
-                FFmpegPath = @"C:\Flyleaf\FFmpeg",
+                FFmpegPath = Path.Combine(AppContext.BaseDirectory, "FFmpeg"),
                 FFmpegDevices = false,
             });
             Config config = new Config();
@@ -112,6 +123,10 @@ namespace ClipChopper.WinUIApp
 
         private void Player_OpenCompleted(object? sender, OpenCompletedArgs e)
         {
+            DispatcherQueue.TryEnqueue(() =>
+            {
+                FragmentRange.Width = 0;
+            });
             if (!Player.CanPlay)
             {
                 return;
@@ -299,7 +314,7 @@ namespace ClipChopper.WinUIApp
             var hWnd = WinRT.Interop.WindowNative.GetWindowHandle(this);
             WinRT.Interop.InitializeWithWindow.Initialize(savePicker, hWnd);
             savePicker.SuggestedStartLocation = PickerLocationId.VideosLibrary;
-            savePicker.SuggestedFileName = (DirectoryList.SelectedItem as StorageFile).DisplayName;
+            savePicker.SuggestedFileName = "Chopped " + (DirectoryList.SelectedItem as StorageFile).DisplayName;
             savePicker.FileTypeChoices.Add("MP4 video", new List<string>() { ".mp4" });
             savePicker.FileTypeChoices.Add("MKV video", new List<string>() { ".mkv" });
             StorageFile file = await savePicker.PickSaveFileAsync();
