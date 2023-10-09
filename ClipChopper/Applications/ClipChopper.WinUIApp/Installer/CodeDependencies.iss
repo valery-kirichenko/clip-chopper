@@ -19,6 +19,7 @@ var
   Dependency_List: array of TDependency_Entry;
   Dependency_NeedRestart, Dependency_ForceX86: Boolean;
   Dependency_DownloadPage: TDownloadWizardPage;
+  Dependency_InstallPage: TOutputProgressWizardPage;
 
 procedure Dependency_Add(const Filename, Parameters, Title, URL, Checksum: String; const ForceSuccess, RestartAfter: Boolean);
 var
@@ -50,6 +51,7 @@ end;
 procedure Dependency_Internal1;
 begin
   Dependency_DownloadPage := CreateDownloadPage(SetupMessage(msgWizardPreparing), SetupMessage(msgPreparingDesc), nil);
+  Dependency_InstallPage := CreateOutputProgressPage(SetupMessage(msgWizardInstalling), SetupMessage(msgInstallingLabel));
 end;
 
 <event('PrepareToInstall')>
@@ -94,11 +96,12 @@ begin
         end;
       end;
     end;
-
+    Dependency_DownloadPage.Hide;
+    Dependency_InstallPage.Show;
     if Result = '' then begin
       for DependencyIndex := 0 to DependencyCount - 1 do begin
-        Dependency_DownloadPage.SetText(Dependency_List[DependencyIndex].Title, '');
-        Dependency_DownloadPage.SetProgress(DependencyIndex + 1, DependencyCount + 1);
+        Dependency_InstallPage.SetText('Installing ' + Dependency_List[DependencyIndex].Title, '');
+        Dependency_InstallPage.SetProgress(DependencyIndex + 1, DependencyCount + 1);
 
         while True do begin
           ResultCode := 0;
@@ -148,7 +151,7 @@ begin
       end;
     end;
 
-    Dependency_DownloadPage.Hide;
+    Dependency_InstallPage.Hide;
   end;
 end;
 
