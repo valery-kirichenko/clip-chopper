@@ -162,28 +162,43 @@
 
                         <StackPanel Orientation="Horizontal" Spacing="4">
 
-                            <Button x:Name="PlayButton" ToolTipService.ToolTip="Play/Pause (Space)" IsTabStop="False" Command="{Binding Player.Commands.TogglePlayPause}" IsEnabled="{Binding Player.CanPlay, Mode=OneWay}">
+                            <Button x:Name="PlayButton" ToolTipService.ToolTip="Play/Pause (Space, K)" IsTabStop="False" Command="{Binding Player.Commands.TogglePlayPause}" IsEnabled="{Binding Player.CanPlay, Mode=OneWay}">
                                 <Button.KeyboardAccelerators>
                                     <KeyboardAccelerator Key="Space"/>
+                                    <KeyboardAccelerator Key="K"/>
                                 </Button.KeyboardAccelerators>
                                 <SymbolIcon Symbol="Play" />
                             </Button>
-                            <Button x:Name="SeekBackwardButton" IsTabStop="False" Command="{Binding Player.Commands.SeekBackward}" IsEnabled="{Binding Player.CanPlay, Mode=OneWay}" Margin="4 0 0 0" RenderTransformOrigin="0.5,0.5">
+                            <Button x:Name="SeekBackwardButton" ToolTipService.ToolTip="Seek Backward (Left, J)" IsTabStop="False" Command="{Binding Player.Commands.SeekBackward}" IsEnabled="{Binding Player.CanPlay, Mode=OneWay}" Margin="4 0 0 0" RenderTransformOrigin="0.5,0.5">
                                 <Button.RenderTransform>
                                     <ScaleTransform ScaleX="-1"/>
                                 </Button.RenderTransform>
+                                <Button.KeyboardAccelerators>
+                                    <KeyboardAccelerator Key="Left"/>
+                                    <KeyboardAccelerator Key="J"/>
+                                </Button.KeyboardAccelerators>
                                 <FontIcon Glyph="&#xE847;" />
                             </Button>
-                            <Button x:Name="SeekFrameBackwardButton" IsTabStop="False" Click="SeekFrameBackwardButton_Click"  IsEnabled="{Binding Player.CanPlay, Mode=OneWay}" RenderTransformOrigin="0.5,0.5">
+                            <Button x:Name="SeekFrameBackwardButton" ToolTipService.ToolTip="Step Backward (Ctrl+Left, Comma)" IsTabStop="False" Click="SeekFrameBackwardButton_Click"  IsEnabled="{Binding Player.CanPlay, Mode=OneWay}" RenderTransformOrigin="0.5,0.5">
                                 <Button.RenderTransform>
                                     <ScaleTransform ScaleX="-1"/>
                                 </Button.RenderTransform>
+                                <Button.KeyboardAccelerators>
+                                    <KeyboardAccelerator Key="Left" Modifiers="Control"/>
+                                </Button.KeyboardAccelerators>
                                 <FontIcon Glyph="&#xE846;" />
                             </Button>
-                            <Button x:Name="SeekFrameForwardButton" IsTabStop="False" Command="{Binding Player.Commands.ShowFrameNext}" IsEnabled="{Binding Player.CanPlay, Mode=OneWay}">
+                            <Button x:Name="SeekFrameForwardButton" ToolTipService.ToolTip="Step Forward (Ctrl+Right, Period)" IsTabStop="False" Command="{Binding Player.Commands.ShowFrameNext}" IsEnabled="{Binding Player.CanPlay, Mode=OneWay}">
+                                <Button.KeyboardAccelerators>
+                                    <KeyboardAccelerator Key="Right" Modifiers="Control"/>
+                                </Button.KeyboardAccelerators>
                                 <FontIcon Glyph="&#xE846;" />
                             </Button>
-                            <Button x:Name="SeekForwardButton" IsTabStop="False" Command="{Binding Player.Commands.SeekForward}" IsEnabled="{Binding Player.CanPlay, Mode=OneWay}">
+                            <Button x:Name="SeekForwardButton" ToolTipService.ToolTip="Seek Forward (Right, L)" IsTabStop="False" Command="{Binding Player.Commands.SeekForward}" IsEnabled="{Binding Player.CanPlay, Mode=OneWay}">
+                                <Button.KeyboardAccelerators>
+                                    <KeyboardAccelerator Key="Right"/>
+                                    <KeyboardAccelerator Key="L"/>
+                                </Button.KeyboardAccelerators>
                                 <FontIcon Glyph="&#xE847;" />
                             </Button>
                             <Button x:Name="StartFragmentButton" Click="StartFragmentButton_Click" IsTabStop="False" IsEnabled="{Binding Player.CanPlay, Mode=OneWay}" Margin="4,0,0,0">
@@ -192,11 +207,17 @@
                             <Button x:Name="EndFragmentButton" Click="EndFragmentButton_Click" IsTabStop="False" IsEnabled="{Binding Player.CanPlay, Mode=OneWay}">
                                 <FontIcon Glyph="&#xE81A;" />
                             </Button>
-                            <Button x:Name="TakeSnapshotButton" Click="TakeSnapshotButton_Click" ToolTipService.ToolTip="Save Current Frame" IsTabStop="False" IsEnabled="{Binding Player.CanPlay, Mode=OneWay}" Margin="4,0,0,0">
+                            <Button x:Name="TakeSnapshotButton" Click="TakeSnapshotButton_Click" ToolTipService.ToolTip="Save Current Frame (Ctrl+Alt+S)" IsTabStop="False" IsEnabled="{Binding Player.CanPlay, Mode=OneWay}" Margin="4,0,0,0">
+                                <Button.KeyboardAccelerators>
+                                    <KeyboardAccelerator Key="S" Modifiers="Control,Menu"/>
+                                </Button.KeyboardAccelerators>
                                 <SymbolIcon Symbol="Camera"/>
                             </Button>
 
-                            <Button x:Name="SaveButton" Click="SaveButton_Click" IsTabStop="False" IsEnabled="{Binding Player.CanPlay, Mode=OneWay}" CornerRadius="4,0,0,4">
+                            <Button x:Name="SaveButton" ToolTipService.ToolTip="Save Trimmed Video (Ctrl+S)" Click="SaveButton_Click" IsTabStop="False" IsEnabled="{Binding Player.CanPlay, Mode=OneWay}" CornerRadius="4,0,0,4">
+                                <Button.KeyboardAccelerators>
+                                    <KeyboardAccelerator Key="S" Modifiers="Control"/>
+                                </Button.KeyboardAccelerators>
                                 <StackPanel Orientation="Horizontal" Spacing="8">
                                     <FontIcon Glyph="&#xE792;" />
                                     <TextBlock Text="Save..."/>

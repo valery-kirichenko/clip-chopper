@@ -23,6 +23,9 @@ using System.Collections.ObjectModel;
 using FFMpegCore;
 using Windows.ApplicationModel.DataTransfer;
 using System.IO;
+using Microsoft.Win32;
+using Microsoft.UI.Xaml.Input;
+using Windows.System;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -48,13 +51,28 @@ namespace ClipChopper.WinUIApp
         SymbolIcon iconPause = new SymbolIcon(Symbol.Pause);
         private FragmentSelection? _fragment;
         public ObservableCollection<Tuple<int, string>> AudioTracks { get; } = new();
-        private StorageFolder? _selectedFolder;
-        private StorageFile? _selectedFile;
+        private FileInfo? SelectedFile { get; set; }
+        private DirectoryInfo? _selectedFolder;
+        private DirectoryInfo? SelectedFolder
+        {
+            get => _selectedFolder;
+            set {
+                _selectedFolder = value;
+                if (_selectedFolder != null)
+                {
+                    using (RegistryKey key = Registry.CurrentUser.CreateSubKey(@"Software\ClipChopper"))
+                    {
+                        key.SetValue("PreviousPath", _selectedFolder.FullName);
+                    }
+                    RefreshFolder();
+                }
+            }
+        }
 
         public MainWindow()
         {
             IntPtr hWnd = WinRT.Interop.WindowNative.GetWindowHandle(this);
-            string sExe = System.Diagnostics.Process.GetCurrentProcess().MainModule.FileName;
+            string sExe = Process.GetCurrentProcess().MainModule.FileName;
             System.Drawing.Icon ico = System.Drawing.Icon.ExtractAssociatedIcon(sExe);
             SendMessage(hWnd, WM_SETICON, ICON_BIG, ico.Handle);
 
@@ -63,9 +81,9 @@ namespace ClipChopper.WinUIApp
             Engine.Start(new EngineConfig()
             {
                 #if DEBUG
-                LogOutput = ":debug",
+                LogOutput = @"C:\Flyleaf\log.txt",
                 LogLevel = LogLevel.Debug,
-                FFmpegLogLevel = FFmpegLogLevel.Warning,
+                FFmpegLogLevel = FFmpegLogLevel.Debug,
                 #endif
 
                 UIRefresh = true, // For Activity Mode usage
@@ -79,6 +97,7 @@ namespace ClipChopper.WinUIApp
             config.Video.BackgroundColor = (System.Windows.Media.Color)ColorConverter.ConvertFromString(color.ToHex());
             config.Player.SeekAccurate = true;
             config.Player.AutoPlay = false;
+            config.Decoder.AllowProfileMismatch = true;
             Player = new Player(config);
             Player.Audio.Volume = 100;
             Player.PropertyChanged += Player_PropertyChanged;
@@ -102,6 +121,29 @@ namespace ClipChopper.WinUIApp
                 VerticalAlignment = VerticalAlignment.Center,
                 Text = "\xE784",
             };
+
+            KeyboardAccelerator ka1 = new KeyboardAccelerator();
+            ka1.Key = (VirtualKey)188;
+            SeekFrameBackwardButton.KeyboardAcceleratorPlacementMode = KeyboardAcceleratorPlacementMode.Hidden;            
+            SeekFrameBackwardButton.KeyboardAccelerators.Add(ka1);
+
+            KeyboardAccelerator ka2 = new KeyboardAccelerator();
+            ka2.Key = (VirtualKey)190;
+            SeekFrameForwardButton.KeyboardAcceleratorPlacementMode = KeyboardAcceleratorPlacementMode.Hidden;
+            SeekFrameForwardButton.KeyboardAccelerators.Add(ka2);
+
+            InitializeFolder();
+        }
+
+        private async void InitializeFolder()
+        {
+            using (RegistryKey key = Registry.CurrentUser.CreateSubKey(@"Software\ClipChopper"))
+            {
+                if (key.GetValue("PreviousPath") is string previousPath && Directory.Exists(previousPath))
+                {
+                    SelectedFolder = new DirectoryInfo(previousPath);
+                }
+            }
         }
 
         private void AudioTracks_CollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
@@ -231,11 +273,11 @@ namespace ClipChopper.WinUIApp
             openPicker.FileTypeFilter.Add("*");
 
             StorageFolder folder = await openPicker.PickSingleFolderAsync();
-            if (folder != null)
+            if (folder == null)
             {
-                _selectedFolder = folder;
-                DirectoryList.ItemsSource = await folder.GetFilesAsync();
+                return;
             }
+            SelectedFolder = new DirectoryInfo(folder.Path);
         }
 
         private async void DirectoryList_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -243,11 +285,10 @@ namespace ClipChopper.WinUIApp
             if (e.AddedItems.Count < 1) {
                 return;
             }
-            _selectedFile = e.AddedItems[0] as StorageFile;
-            bool fileExists = (await _selectedFolder.TryGetItemAsync(_selectedFile.Name)) != null;
-            if (!fileExists)
+            SelectedFile = e.AddedItems[0] as FileInfo;
+            if (!SelectedFile.Exists)
             {
-                _selectedFile = null;
+                SelectedFile = null;
 
                 ContentDialog dialog = new ContentDialog()
                 {
@@ -261,7 +302,7 @@ namespace ClipChopper.WinUIApp
                 return;
             }
             AudioTracks.Clear();
-            Player.OpenAsync(_selectedFile.Path);
+            Player.OpenAsync(SelectedFile.FullName);
         }
 
         private void StartFragmentButton_Click(object sender, RoutedEventArgs e)
@@ -297,7 +338,7 @@ namespace ClipChopper.WinUIApp
             var hWnd = WinRT.Interop.WindowNative.GetWindowHandle(this);
             WinRT.Interop.InitializeWithWindow.Initialize(savePicker, hWnd);
             savePicker.SuggestedStartLocation = PickerLocationId.PicturesLibrary;
-            savePicker.SuggestedFileName = (DirectoryList.SelectedItem as StorageFile).DisplayName;
+            savePicker.SuggestedFileName = (DirectoryList.SelectedItem as FileInfo).Name;
             savePicker.FileTypeChoices.Add("PNG image", new List<string>() { ".png" });
             savePicker.FileTypeChoices.Add("JPG image", new List<string>() { ".jpg" });
             savePicker.FileTypeChoices.Add("BMP image", new List<string>() { ".bmp" });
@@ -314,7 +355,7 @@ namespace ClipChopper.WinUIApp
             var hWnd = WinRT.Interop.WindowNative.GetWindowHandle(this);
             WinRT.Interop.InitializeWithWindow.Initialize(savePicker, hWnd);
             savePicker.SuggestedStartLocation = PickerLocationId.VideosLibrary;
-            savePicker.SuggestedFileName = "Chopped " + (DirectoryList.SelectedItem as StorageFile).DisplayName;
+            savePicker.SuggestedFileName = "Chopped " + SelectedFile.Name;
             savePicker.FileTypeChoices.Add("MP4 video", new List<string>() { ".mp4" });
             savePicker.FileTypeChoices.Add("MKV video", new List<string>() { ".mkv" });
             StorageFile file = await savePicker.PickSaveFileAsync();
@@ -324,7 +365,7 @@ namespace ClipChopper.WinUIApp
             }
 
             var arguments = FFMpegArguments
-                .FromFileInput((DirectoryList.SelectedItem as StorageFile).Path, false, options => options
+                .FromFileInput(SelectedFile.FullName, false, options => options
                     .Seek(new TimeSpan(_fragment.Start))
                     .EndSeek(new TimeSpan(_fragment.Stop))
                  )
@@ -356,33 +397,38 @@ namespace ClipChopper.WinUIApp
 
         private async void RefreshFolder()
         {
-            if (_selectedFolder != null)
+            if (SelectedFolder == null)
             {
-                DirectoryList.ItemsSource = await _selectedFolder.GetFilesAsync();
+                return;
+            }
+
+            DirectoryList.ItemsSource = SelectedFolder.EnumerateFiles();
+            if (SelectedFile != null)
+            {
+                DirectoryList.SelectedItem = DirectoryList.Items.FirstOrDefault(item => SelectedFile.FullName.Equals(((FileInfo)item).FullName));
             }
         }
 
         private async void Grid_Drop(object sender, DragEventArgs e)
         {
-            if (e.DataView.Contains(StandardDataFormats.StorageItems)) {
-                var items = await e.DataView.GetStorageItemsAsync();
-                if (items != null && items.Count > 0) {
-                    switch (items[0])
-                    {
-                        case StorageFile file:
-                            _selectedFolder = await file.GetParentAsync();
-                            var files = await _selectedFolder.GetFilesAsync();
-                            DirectoryList.ItemsSource = files;
-                            _selectedFile = file;
-                            DirectoryList.SelectedItem = _selectedFile;
-                            Player.OpenAsync(file.Path);
-                            break;
-                        case StorageFolder folder:
-                            _selectedFolder = folder;
-                            DirectoryList.ItemsSource = await folder.GetFilesAsync();
-                            break;
-                    }
-                }
+            if (!e.DataView.Contains(StandardDataFormats.StorageItems))
+            {
+                return;
+            }
+            var items = await e.DataView.GetStorageItemsAsync();
+            if (items == null || items.Count <= 0)
+            {
+                return;
+            }
+            switch (items[0])
+            {
+                case StorageFile file:
+                    SelectedFolder = new DirectoryInfo((await file.GetParentAsync()).Path);
+                    SelectedFile = new FileInfo(file.Path);
+                    break;
+                case StorageFolder folder:
+                    SelectedFolder = new DirectoryInfo(folder.Path);
+                    break;
             }
         }
 
