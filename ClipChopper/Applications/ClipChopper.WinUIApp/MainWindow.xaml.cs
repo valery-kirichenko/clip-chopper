@@ -132,11 +132,6 @@ namespace ClipChopper.WinUIApp
             SeekFrameForwardButton.KeyboardAcceleratorPlacementMode = KeyboardAcceleratorPlacementMode.Hidden;
             SeekFrameForwardButton.KeyboardAccelerators.Add(ka2);
 
-            InitializeFolder();
-        }
-
-        private async void InitializeFolder()
-        {
             using (RegistryKey key = Registry.CurrentUser.CreateSubKey(@"Software\ClipChopper"))
             {
                 if (key.GetValue("PreviousPath") is string previousPath && Directory.Exists(previousPath))
@@ -285,11 +280,14 @@ namespace ClipChopper.WinUIApp
             if (e.AddedItems.Count < 1) {
                 return;
             }
-            SelectedFile = e.AddedItems[0] as FileInfo;
-            if (!SelectedFile.Exists)
+            var NewFile = e.AddedItems[0] as FileInfo;
+            if (NewFile == null)
             {
-                SelectedFile = null;
-
+                return;
+            }
+            NewFile.Refresh();
+            if (!NewFile.Exists)
+            {
                 ContentDialog dialog = new ContentDialog()
                 {
                     Title = "Error",
@@ -301,6 +299,11 @@ namespace ClipChopper.WinUIApp
                 RefreshFolder();
                 return;
             }
+            if (NewFile.FullName.Equals(SelectedFile?.FullName))
+            {
+                return;
+            }
+            SelectedFile = NewFile;            
             AudioTracks.Clear();
             Player.OpenAsync(SelectedFile.FullName);
         }
@@ -401,11 +404,15 @@ namespace ClipChopper.WinUIApp
             {
                 return;
             }
-
             DirectoryList.ItemsSource = SelectedFolder.EnumerateFiles();
-            if (SelectedFile != null)
+            SelectedFile?.Refresh();
+            if (SelectedFile != null && !SelectedFile.Exists)
             {
-                DirectoryList.SelectedItem = DirectoryList.Items.FirstOrDefault(item => SelectedFile.FullName.Equals(((FileInfo)item).FullName));
+                SelectedFile = null;
+            }
+            if (SelectedFile != null && (SelectedFile.Directory?.FullName.Equals(SelectedFolder.FullName) ?? false))
+            {
+                DirectoryList.SelectedIndex = DirectoryList.Items.TakeWhile(x => !SelectedFile.FullName.Equals(((FileInfo)x).FullName)).Count();
             }
         }
 
