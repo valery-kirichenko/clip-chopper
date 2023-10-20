@@ -10,7 +10,7 @@
     xmlns:flyleaf="using:FlyleafLib.Controls.WinUI"
     mc:Ignorable="d">
     <Window.SystemBackdrop>
-        <MicaBackdrop/>
+        <MicaBackdrop x:Name="MicaBackdrop"/>
     </Window.SystemBackdrop>
 
     <Grid AllowDrop="True" Drop="Grid_Drop" DragOver="Grid_DragOver">
@@ -72,8 +72,13 @@
                             </MenuFlyout>
                         </AppBarButton.Flyout>
                     </AppBarButton>
+                    <CommandBar.SecondaryCommands>
+                        <AppBarElementContainer>
+                            <CheckBox Grid.Row="1" Margin="12 0" x:Name="MicaKind" Checked="MicaKind_IsCheckedChanged" Unchecked="MicaKind_IsCheckedChanged" Content="Mica Alt"/>
+                        </AppBarElementContainer>
+                    </CommandBar.SecondaryCommands>
                 </CommandBar>
-                
+
                 <ListView Grid.Row="1" x:Name="DirectoryList" IsTabStop="False" SelectionChanged="DirectoryList_SelectionChanged" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
                     <ListView.ItemTemplate>
                         <DataTemplate>
