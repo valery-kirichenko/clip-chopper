@@ -242,6 +242,7 @@
                                     Maximum="{Binding Player.Config.Player.VolumeMax, Mode=OneWay}"
                                     Value="{Binding Player.Audio.Volume, Mode=TwoWay}"
                                     TickFrequency="100" TickPlacement="Outside"
+                                    PointerWheelChanged="VolumeSlider_PointerWheelChanged"
                                     Width="150" Margin="8,0,0,0"/>
                         </StackPanel>
                     </Grid>
