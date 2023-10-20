@@ -467,7 +467,8 @@ namespace ClipChopper.WinUIApp
             // There's probably a better way to differentiate between mouse scroll wheel (for which we want to do increments of 5 for each wheel step)
             // and touch pad input (we want smooth increase of volume slider), but for now it is what it is
             // TBH, I don't even know if this event will fire for touch pad two finger scrolling
-            Player.Audio.Volume += e.GetCurrentPoint((UIElement)sender).Properties.MouseWheelDelta / 24;
+            int newVolume = Player.Audio.Volume + e.GetCurrentPoint((UIElement)sender).Properties.MouseWheelDelta / 24;
+            Player.Audio.Volume = Math.Max(Math.Min(newVolume, Player.Config.Player.VolumeMax), 0);
         }
 
         private void MicaKind_IsCheckedChanged(object sender, RoutedEventArgs e)
