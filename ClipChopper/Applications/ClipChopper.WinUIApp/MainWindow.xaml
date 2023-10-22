@@ -253,6 +253,9 @@
                                     TickFrequency="100" TickPlacement="Outside"
                                     PointerWheelChanged="VolumeSlider_PointerWheelChanged"
                                     Width="150" Margin="8,0,0,0"/>
+                            <Button>
+                                <FontIcon Glyph="&#xE767;" />
+                            </Button>
                         </StackPanel>
                     </Grid>
                 </Grid>

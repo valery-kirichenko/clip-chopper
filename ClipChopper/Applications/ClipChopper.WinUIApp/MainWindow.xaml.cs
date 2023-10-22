@@ -572,7 +572,6 @@ namespace ClipChopper.WinUIApp
 
         private async void DirectoryList_DragItemsCompleted(ListViewBase sender, DragItemsCompletedEventArgs e)
         {
-            Debug.WriteLine(e.DropResult);
             if (e.DropResult == DataPackageOperation.Move)
             {
                 RefreshFolder();
@@ -580,7 +579,12 @@ namespace ClipChopper.WinUIApp
             if (e.DropResult == DataPackageOperation.None)
             {
                 await Task.Delay(200);
-                RefreshFolder();
+                var draggedFile = (FileInfo)e.Items.First();
+                draggedFile.Refresh();
+                if (!draggedFile.Exists)
+                {
+                    RefreshFolder();
+                }
             }
         }
     }
