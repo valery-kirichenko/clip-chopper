@@ -71,6 +71,63 @@ namespace ClipChopper.WinUIApp
             }
         }
 
+        public enum SortAttributeEnum { Name, Date, Size };
+        private SortAttributeEnum _sortAttribute = SortAttributeEnum.Name;
+        private SortAttributeEnum SortAttribute
+        {
+            get { return _sortAttribute; }
+            set
+            {
+                _sortAttribute = value;
+                using (RegistryKey key = Registry.CurrentUser.CreateSubKey(@"Software\ClipChopper"))
+                {
+                    key.SetValue("SortAttribute", _sortAttribute);
+                }
+                RefreshFolder();
+            }
+        }
+        public bool NameSortProperty
+        {
+            get { return SortAttribute == SortAttributeEnum.Name;}
+            set { if (value) SortAttribute = SortAttributeEnum.Name; }
+        }
+        public bool DateSortProperty
+        {
+            get { return SortAttribute == SortAttributeEnum.Date; }
+            set { if (value) SortAttribute = SortAttributeEnum.Date; }
+        }
+        public bool SizeSortProperty
+        {
+            get { return SortAttribute == SortAttributeEnum.Size; }
+            set { if (value) SortAttribute = SortAttributeEnum.Size; }
+        }
+
+        public enum SortKindEnum { Ascending, Descending };
+        private SortKindEnum _sortKind = SortKindEnum.Ascending;
+        private SortKindEnum SortKind
+        {
+            get { return _sortKind; }
+            set
+            {
+                _sortKind = value;
+                using (RegistryKey key = Registry.CurrentUser.CreateSubKey(@"Software\ClipChopper"))
+                {
+                    key.SetValue("SortKind", _sortKind);
+                }
+                RefreshFolder();
+            }
+        }
+        public bool AscendingSortProperty
+        {
+            get { return SortKind == SortKindEnum.Ascending; }
+            set { if (value) SortKind = SortKindEnum.Ascending; }
+        }
+        public bool DescendingSortProperty
+        {
+            get { return SortKind == SortKindEnum.Descending; }
+            set { if (value) SortKind = SortKindEnum.Descending; }
+        }
+
         public MainWindow()
         {
             IntPtr hWnd = WinRT.Interop.WindowNative.GetWindowHandle(this);
@@ -136,6 +193,22 @@ namespace ClipChopper.WinUIApp
 
             using (RegistryKey key = Registry.CurrentUser.CreateSubKey(@"Software\ClipChopper"))
             {
+                if (key.GetValue("SortKind") is string sortKindValue)
+                {
+                    SortKindEnum sortKind;
+                    if (Enum.TryParse<SortKindEnum>(sortKindValue, out sortKind) && Enum.IsDefined<SortKindEnum>(sortKind))
+                    {
+                        SortKind = sortKind;
+                    }
+                }
+                if (key.GetValue("SortAttribute") is string sortAttributeValue)
+                {
+                    SortAttributeEnum sortAttribute;
+                    if (Enum.TryParse<SortAttributeEnum>(sortAttributeValue, out sortAttribute) && Enum.IsDefined<SortAttributeEnum>(sortAttribute))
+                    {
+                        SortAttribute = sortAttribute;
+                    }
+                }
                 if (key.GetValue("PreviousPath") is string previousPath && Directory.Exists(previousPath))
                 {
                     SelectedFolder = new DirectoryInfo(previousPath);
@@ -406,7 +479,19 @@ namespace ClipChopper.WinUIApp
             {
                 return;
             }
-            DirectoryList.ItemsSource = SelectedFolder.EnumerateFiles();
+            DirectoryList.ItemsSource = SelectedFolder.EnumerateFiles().OrderBy(file => file, Comparer<FileInfo>.Create((x, y) => {
+                int comparisonResult = SortAttribute switch
+                {
+                    SortAttributeEnum.Name => x.Name.CompareTo(y.Name),
+                    SortAttributeEnum.Date => x.LastWriteTime.CompareTo(y.LastWriteTime),
+                    SortAttributeEnum.Size => x.Length.CompareTo(y.Length)
+                };
+                if (SortKind == SortKindEnum.Descending)
+                {
+                    comparisonResult *= -1;
+                }
+                return comparisonResult;
+            }));
             SelectedFile?.Refresh();
             if (SelectedFile != null && !SelectedFile.Exists)
             {
