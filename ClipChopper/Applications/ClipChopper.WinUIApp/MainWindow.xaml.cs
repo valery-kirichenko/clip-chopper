@@ -26,6 +26,8 @@ using System.IO;
 using Microsoft.Win32;
 using Microsoft.UI.Xaml.Input;
 using Windows.System;
+using CSharpLib;
+using System.Threading.Tasks;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -474,6 +476,27 @@ namespace ClipChopper.WinUIApp
         private void MicaKind_IsCheckedChanged(object sender, RoutedEventArgs e)
         {
             MicaBackdrop.Kind = (bool)MicaKind.IsChecked ? Microsoft.UI.Composition.SystemBackdrops.MicaKind.BaseAlt : Microsoft.UI.Composition.SystemBackdrops.MicaKind.Base;
+        }
+
+        private async void DirectoryList_DragItemsStarting(object sender, DragItemsStartingEventArgs e)
+        {
+            var fileInfo = (FileInfo) e.Items.First();
+            var file = await StorageFile.GetFileFromPathAsync(fileInfo.FullName);
+            e.Data.SetStorageItems(new[] { file });
+        }
+
+        private async void DirectoryList_DragItemsCompleted(ListViewBase sender, DragItemsCompletedEventArgs e)
+        {
+            Debug.WriteLine(e.DropResult);
+            if (e.DropResult == DataPackageOperation.Move)
+            {
+                RefreshFolder();
+            }
+            if (e.DropResult == DataPackageOperation.None)
+            {
+                await Task.Delay(200);
+                RefreshFolder();
+            }
         }
     }
 }

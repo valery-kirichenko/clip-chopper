@@ -79,7 +79,7 @@
                     </CommandBar.SecondaryCommands>
                 </CommandBar>
 
-                <ListView Grid.Row="1" x:Name="DirectoryList" IsTabStop="False" SelectionChanged="DirectoryList_SelectionChanged" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                <ListView Grid.Row="1" x:Name="DirectoryList" IsTabStop="False" SelectionChanged="DirectoryList_SelectionChanged" ScrollViewer.HorizontalScrollBarVisibility="Disabled" CanDragItems="True" DragItemsStarting="DirectoryList_DragItemsStarting" DragItemsCompleted="DirectoryList_DragItemsCompleted">
                     <ListView.ItemTemplate>
                         <DataTemplate>
                             <TextBlock IsTabStop="False" Text="{Binding Name}" Padding="0,4" TextWrapping="Wrap"/>
