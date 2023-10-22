@@ -83,11 +83,11 @@
 		<PackageReference Include="CSharpLib" Version="4.0.0" />
 		<PackageReference Include="FFmpeg.AutoGen" Version="6.0.0.2" />
 		<PackageReference Include="FFMpegCore" Version="5.1.0" />
-		<PackageReference Include="FlyleafLib" Version="3.7.28" />
+		<PackageReference Include="FlyleafLib" Version="3.7.29" />
 		<PackageReference Include="FlyleafLib.Controls.WinUI" Version="1.0.14" />
 		<PackageReference Include="MediaInfo.Wrapper.Core" Version="21.9.3" />
 		<PackageReference Include="Microsoft.Win32.Registry" Version="5.0.0" />
-		<PackageReference Include="Microsoft.WindowsAppSDK" Version="1.4.230913002" />
+		<PackageReference Include="Microsoft.WindowsAppSDK" Version="1.4.231008000" />
 		<PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.22621.756" />
 		<Manifest Include="$(ApplicationManifest)" />
 	</ItemGroup>
@@ -114,6 +114,9 @@
 		<Page Update="AdvancedSaveContent.xaml">
 			<Generator>MSBuild:Compile</Generator>
 		</Page>
+	</ItemGroup>
+	<ItemGroup>
+	  <Folder Include="Installer\bin\" />
 	</ItemGroup>
 
 	<!-- 
