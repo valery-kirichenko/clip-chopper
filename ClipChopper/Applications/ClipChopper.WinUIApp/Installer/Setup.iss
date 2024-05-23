@@ -142,12 +142,12 @@ begin
   Dependency_AddDotNet70Desktop;
   Dependency_AddVC2015To2022;
 
-  if not IsWindowsAppSDKRuntimeInstalled('4000.1010.1349.0') then begin
+  // if not IsWindowsAppSDKRuntimeInstalled('5001.70.1338.0') then begin
     Dependency_Add('windowsappruntimeinstall-x64.exe',
       '--quiet',
-      'Windows App SDK Runtime 1.4.2',
-      'https://aka.ms/windowsappsdk/1.4/1.4.231008000/windowsappruntimeinstall-x64.exe',
+      'Windows App SDK Runtime 1.5.3',
+      'https://aka.ms/windowsappsdk/1.5/1.5.240428000/windowsappruntimeinstall-x64.exe',
       '', False, False);
-  end;
+  // end;
   Result := True;
 end;

@@ -46,27 +46,36 @@
 
 	<ItemGroup>
 		<Content Include="FFmpeg\avcodec-60.dll">
+
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Content>
 		<Content Include="FFmpeg\avdevice-60.dll">
+
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Content>
 		<Content Include="FFmpeg\avfilter-9.dll">
+
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Content>
 		<Content Include="FFmpeg\avformat-60.dll">
+
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Content>
 		<Content Include="FFmpeg\avutil-58.dll">
+
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Content>
 		<Content Include="FFmpeg\postproc-57.dll">
+
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Content>
 		<Content Include="FFmpeg\swresample-4.dll">
+
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Content>
 		<Content Include="FFmpeg\swscale-7.dll">
+
+
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Content>
 		<Content Include="FFmpeg\ffmpeg.exe">
@@ -81,14 +90,14 @@
 		<PackageReference Include="CommunityToolkit.WinUI.UI.Controls.Input" Version="7.1.2" />
 		<PackageReference Include="CommunityToolkit.WinUI.UI.Controls.Layout" Version="7.1.2" />
 		<PackageReference Include="CSharpLib" Version="4.0.0" />
-		<PackageReference Include="FFmpeg.AutoGen" Version="6.0.0.2" />
+		<PackageReference Include="FFmpeg.AutoGen" Version="6.1.0.1" />
 		<PackageReference Include="FFMpegCore" Version="5.1.0" />
-		<PackageReference Include="FlyleafLib" Version="3.7.29" />
-		<PackageReference Include="FlyleafLib.Controls.WinUI" Version="1.0.14" />
+		<PackageReference Include="FlyleafLib" Version="3.7.48" />
+		<PackageReference Include="FlyleafLib.Controls.WinUI" Version="1.0.28" />
 		<PackageReference Include="MediaInfo.Wrapper.Core" Version="21.9.3" />
 		<PackageReference Include="Microsoft.Win32.Registry" Version="5.0.0" />
-		<PackageReference Include="Microsoft.WindowsAppSDK" Version="1.4.231008000" />
-		<PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.22621.756" />
+		<PackageReference Include="Microsoft.WindowsAppSDK" Version="1.5.240428000" />
+		<PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.26100.1" />
 		<Manifest Include="$(ApplicationManifest)" />
 	</ItemGroup>
 

@@ -13,7 +13,7 @@
         <MicaBackdrop x:Name="MicaBackdrop"/>
     </Window.SystemBackdrop>
 
-    <Grid AllowDrop="True" Drop="Grid_Drop" DragOver="Grid_DragOver">
+    <Grid AllowDrop="True" Drop="Grid_Drop" DragOver="Grid_DragOver" KeyDown="Grid_KeyDown" KeyUp="Grid_KeyUp">
         <Grid.RowDefinitions>
             <RowDefinition Height="32"/>
             <RowDefinition Height="*"/>
@@ -78,7 +78,10 @@
                     </AppBarButton>
                     <CommandBar.SecondaryCommands>
                         <AppBarElementContainer>
-                            <CheckBox Grid.Row="1" Margin="12 0" x:Name="MicaKind" Checked="MicaKind_IsCheckedChanged" Unchecked="MicaKind_IsCheckedChanged" Content="Mica Alt"/>
+                            <CheckBox Margin="12 0" x:Name="PreciseSeeking" Content="Precise Seeking" IsChecked="{Binding Player.Config.Player.SeekAccurate, Mode=TwoWay}"/>
+                        </AppBarElementContainer>
+                        <AppBarElementContainer>
+                            <CheckBox Margin="12 0" x:Name="MicaKind" Checked="MicaKind_IsCheckedChanged" Unchecked="MicaKind_IsCheckedChanged" Content="Mica Alt"/>
                         </AppBarElementContainer>
                     </CommandBar.SecondaryCommands>
                 </CommandBar>
@@ -253,9 +256,9 @@
                                     TickFrequency="100" TickPlacement="Outside"
                                     PointerWheelChanged="VolumeSlider_PointerWheelChanged"
                                     Width="150" Margin="8,0,0,0"/>
-                            <Button>
+                            <!--<Button>
                                 <FontIcon Glyph="&#xE767;" />
-                            </Button>
+                            </Button>-->
                         </StackPanel>
                     </Grid>
                 </Grid>

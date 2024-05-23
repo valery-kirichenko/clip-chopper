@@ -128,6 +128,9 @@ namespace ClipChopper.WinUIApp
             set { if (value) SortKind = SortKindEnum.Descending; }
         }
 
+        private bool preciseSeekingShortcutEnabled = false;
+        private bool preciseSeekingShortVideoEnabled = false;
+
         public MainWindow()
         {
             IntPtr hWnd = WinRT.Interop.WindowNative.GetWindowHandle(this);
@@ -154,7 +157,6 @@ namespace ClipChopper.WinUIApp
             Config config = new Config();
             Color color = ((SolidColorBrush)Application.Current.Resources["ApplicationPageBackgroundThemeBrush"]).Color;
             config.Video.BackgroundColor = (System.Windows.Media.Color)ColorConverter.ConvertFromString(color.ToHex());
-            config.Player.SeekAccurate = true;
             config.Player.AutoPlay = false;
             config.Decoder.AllowProfileMismatch = true;
             Player = new Player(config);
@@ -267,6 +269,21 @@ namespace ClipChopper.WinUIApp
             _fragment.PropertyChanged += Fragment_PropertyChanged;
             UpdateFragmentRange();
 
+            if (Player.Duration / 10000000 < 60 && !Player.Config.Player.SeekAccurate)
+            {
+                DispatcherQueue.TryEnqueue(() =>
+                {
+                    preciseSeekingShortVideoEnabled = true;
+                    Player.Config.Player.SeekAccurate = true;
+                });
+            } else if (Player.Duration / 10000000 > 60 && preciseSeekingShortVideoEnabled)
+            {
+                DispatcherQueue.TryEnqueue(() =>
+                {
+                    preciseSeekingShortVideoEnabled = false;
+                    Player.Config.Player.SeekAccurate = false;
+                });
+            }
         }
 
         private void Fragment_PropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -378,7 +395,7 @@ namespace ClipChopper.WinUIApp
             {
                 return;
             }
-            SelectedFile = NewFile;            
+            SelectedFile = NewFile;
             AudioTracks.Clear();
             Player.OpenAsync(SelectedFile.FullName);
         }
@@ -479,7 +496,7 @@ namespace ClipChopper.WinUIApp
             {
                 return;
             }
-            DirectoryList.ItemsSource = SelectedFolder.EnumerateFiles().OrderBy(file => file, Comparer<FileInfo>.Create((x, y) => {
+            DirectoryList.ItemsSource = SelectedFolder.EnumerateFiles().Where(file => file.Extension.ToLower() == ".mp4" || file.Extension.ToLower() == ".mkv").OrderBy(file => file, Comparer<FileInfo>.Create((x, y) => {
                 int comparisonResult = SortAttribute switch
                 {
                     SortAttributeEnum.Name => x.Name.CompareTo(y.Name),
@@ -517,8 +534,14 @@ namespace ClipChopper.WinUIApp
             switch (items[0])
             {
                 case StorageFile file:
-                    SelectedFolder = new DirectoryInfo((await file.GetParentAsync()).Path);
+                    if (file.FileType.ToLower() != ".mp4" && file.FileType.ToLower() != ".mkv")
+                    {
+                        return;
+                    }
                     SelectedFile = new FileInfo(file.Path);
+                    SelectedFolder = new DirectoryInfo((await file.GetParentAsync()).Path);
+                    AudioTracks.Clear();
+                    Player.OpenAsync(SelectedFile.FullName);
                     break;
                 case StorageFolder folder:
                     SelectedFolder = new DirectoryInfo(folder.Path);
@@ -585,6 +608,24 @@ namespace ClipChopper.WinUIApp
                 {
                     RefreshFolder();
                 }
+            }
+        }
+
+        private void Grid_KeyDown(object sender, KeyRoutedEventArgs e)
+        {
+            if (e.Key == VirtualKey.Shift && !Player.Config.Player.SeekAccurate)
+            {
+                Player.Config.Player.SeekAccurate = true;
+                preciseSeekingShortcutEnabled = true;
+            }
+        }
+
+        private void Grid_KeyUp(object sender, KeyRoutedEventArgs e)
+        {
+            if (e.Key == VirtualKey.Shift && preciseSeekingShortcutEnabled)
+            {
+                Player.Config.Player.SeekAccurate = false;
+                preciseSeekingShortcutEnabled = false;
             }
         }
     }
