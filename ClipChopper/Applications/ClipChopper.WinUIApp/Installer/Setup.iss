@@ -146,7 +146,7 @@ begin
     Dependency_Add('windowsappruntimeinstall-x64.exe',
       '--quiet',
       'Windows App SDK Runtime 1.5.3',
-      'https://aka.ms/windowsappsdk/1.5/1.5.240428000/windowsappruntimeinstall-x64.exe',
+      'https://aka.ms/windowsappsdk/1.5/latest/windowsappruntimeinstall-x64.exe',
       '', False, False);
   // end;
   Result := True;

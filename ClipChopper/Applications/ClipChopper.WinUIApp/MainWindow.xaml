@@ -115,7 +115,11 @@
                     <RowDefinition Height="auto"/>
                 </Grid.RowDefinitions>
 
-                <flyleaf:FlyleafHost x:Name="FlyleafHost" Player="{Binding Player}" KeyBindings="False" Grid.Row="0"></flyleaf:FlyleafHost>
+                <flyleaf:FlyleafHost x:Name="FlyleafHost" Player="{Binding Player}" KeyBindings="False" Grid.Row="0" PointerPressed="Canvas_PointerPressed" PointerMoved="Canvas_PointerMoved" SizeChanged="FlyleafHost_SizeChanged">
+                    <Canvas x:Name="SelectionCanvas" PointerPressed="Canvas_PointerPressed" PointerMoved="Canvas_PointerMoved">
+                        <Rectangle x:Name="SelectionRectangle" StrokeThickness="1" Stroke="LightBlue"  Fill="#220000FF" Visibility="Collapsed"/>
+                    </Canvas>
+                </flyleaf:FlyleafHost>
 
                 <Grid Grid.Row="1" VerticalAlignment="Bottom">
                     <Grid.RowDefinitions>
@@ -219,6 +223,10 @@
                             <Button x:Name="EndFragmentButton" Click="EndFragmentButton_Click" IsTabStop="False" IsEnabled="{Binding Player.CanPlay, Mode=OneWay}">
                                 <FontIcon Glyph="&#xE81A;" />
                             </Button>
+
+                            <ToggleButton x:Name="CropButton" Click="CropButton_Click" Margin="4,0,0,0" IsTabStop="False" IsEnabled="{Binding Player.CanPlay, Mode=OneWay}">
+                                <FontIcon Glyph="&#xE7A8;" />
+                            </ToggleButton>
                             <Button x:Name="TakeSnapshotButton" Click="TakeSnapshotButton_Click" ToolTipService.ToolTip="Save Current Frame (Ctrl+Alt+S)" IsTabStop="False" IsEnabled="{Binding Player.CanPlay, Mode=OneWay}" Margin="4,0,0,0">
                                 <Button.KeyboardAccelerators>
                                     <KeyboardAccelerator Key="S" Modifiers="Control,Menu"/>
