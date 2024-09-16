@@ -26,11 +26,10 @@ using System.IO;
 using Microsoft.Win32;
 using Microsoft.UI.Xaml.Input;
 using Windows.System;
-using CSharpLib;
 using System.Threading.Tasks;
-using CSharpLib.Windows;
 using FFMpegCore.Enums;
-using CommunityToolkit.WinUI.UI;
+using CommunityToolkit.WinUI.Controls;
+using CommunityToolkit.WinUI;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -181,13 +180,13 @@ namespace ClipChopper.WinUIApp
             settings.ColorValuesChanged += Listener_ThemeChanged;
             RootGrid.DataContext = this;
 
-            GridSplitter.Element = new TextBlock
-            {
-                FontFamily = new FontFamily("Segoe MDL2 Assets"),
-                HorizontalAlignment = HorizontalAlignment.Center,
-                VerticalAlignment = VerticalAlignment.Center,
-                Text = "\xE784",
-            };
+            //GridSplitter.Element = new TextBlock
+            //{
+            //    FontFamily = new FontFamily("Segoe MDL2 Assets"),
+            //    HorizontalAlignment = HorizontalAlignment.Center,
+            //    VerticalAlignment = VerticalAlignment.Center,
+            //    Text = "\xE784",
+            //};
 
             KeyboardAccelerator ka1 = new KeyboardAccelerator();
             ka1.Key = (VirtualKey)188;

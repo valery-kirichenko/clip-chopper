@@ -1,12 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
 		<OutputType>WinExe</OutputType>
-		<TargetFramework>net7.0-windows10.0.19041.0</TargetFramework>
+		<TargetFramework>net8.0-windows10.0.22621.0</TargetFramework>
 		<TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
+		<WindowsSdkPackageVersion>10.0.22621.38</WindowsSdkPackageVersion>
 		<RootNamespace>ClipChopper.WinUIApp</RootNamespace>
 		<ApplicationManifest>app.manifest</ApplicationManifest>
-		<Platforms>x86;x64;ARM64</Platforms>
-		<RuntimeIdentifiers>win10-x86;win10-x64;win10-arm64</RuntimeIdentifiers>
+		<Platforms>x64</Platforms>
+		<RuntimeIdentifiers>win-x64</RuntimeIdentifiers>
 		<PublishProfile>win10-$(Platform).pubxml</PublishProfile>
 		<UseWinUI>true</UseWinUI>
 		<EnableMsixTooling>true</EnableMsixTooling>
@@ -46,36 +47,27 @@
 
 	<ItemGroup>
 		<Content Include="FFmpeg\avcodec-60.dll">
-
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Content>
 		<Content Include="FFmpeg\avdevice-60.dll">
-
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Content>
 		<Content Include="FFmpeg\avfilter-9.dll">
-
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Content>
 		<Content Include="FFmpeg\avformat-60.dll">
-
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Content>
 		<Content Include="FFmpeg\avutil-58.dll">
-
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Content>
 		<Content Include="FFmpeg\postproc-57.dll">
-
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Content>
 		<Content Include="FFmpeg\swresample-4.dll">
-
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Content>
 		<Content Include="FFmpeg\swscale-7.dll">
-
-
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Content>
 		<Content Include="FFmpeg\ffmpeg.exe">
@@ -87,16 +79,16 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="CommunityToolkit.WinUI.UI.Controls.Input" Version="7.1.2" />
-		<PackageReference Include="CommunityToolkit.WinUI.UI.Controls.Layout" Version="7.1.2" />
-		<PackageReference Include="CSharpLib" Version="4.0.0" />
+		<PackageReference Include="CommunityToolkit.WinUI.Controls.Sizers" Version="8.1.240821" />
+		<PackageReference Include="CommunityToolkit.WinUI.Converters" Version="8.1.240821" />
+		<PackageReference Include="CommunityToolkit.WinUI.Helpers" Version="8.1.240821" />
 		<PackageReference Include="FFmpeg.AutoGen" Version="6.1.0.1" />
 		<PackageReference Include="FFMpegCore" Version="5.1.0" />
-		<PackageReference Include="FlyleafLib" Version="3.7.50" />
-		<PackageReference Include="FlyleafLib.Controls.WinUI" Version="1.0.29" />
+		<PackageReference Include="FlyleafLib" Version="3.7.52" />
+		<PackageReference Include="FlyleafLib.Controls.WinUI" Version="1.0.31" />
 		<PackageReference Include="MediaInfo.Wrapper.Core" Version="21.9.3" />
 		<PackageReference Include="Microsoft.Win32.Registry" Version="5.0.0" />
-		<PackageReference Include="Microsoft.WindowsAppSDK" Version="1.5.240607001" />
+		<PackageReference Include="Microsoft.WindowsAppSDK" Version="1.6.240829007" />
 		<PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.26100.1" />
 		<Manifest Include="$(ApplicationManifest)" />
 	</ItemGroup>
