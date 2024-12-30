@@ -150,7 +150,7 @@ namespace ClipChopper.WinUIApp
 #if DEBUG
                 LogOutput = @"C:\Flyleaf\log.txt",
                 LogLevel = LogLevel.Debug,
-                FFmpegLogLevel = FFmpegLogLevel.Debug,
+                FFmpegLogLevel = Flyleaf.FFmpeg.LogLevel.Debug,
 #endif
 
                 UIRefresh = true, // For Activity Mode usage
@@ -549,7 +549,7 @@ namespace ClipChopper.WinUIApp
             {
                 return;
             }
-            DirectoryList.ItemsSource = SelectedFolder.EnumerateFiles().Where(file => file.Extension.ToLower() == ".mp4" || file.Extension.ToLower() == ".mkv").OrderBy(file => file, Comparer<FileInfo>.Create((x, y) =>
+            DirectoryList.ItemsSource = SelectedFolder.EnumerateFiles().Where(file => file.Extension.ToLower() == ".mp4" || file.Extension.ToLower() == ".mkv" || file.Extension.ToLower() == ".webm").OrderBy(file => file, Comparer<FileInfo>.Create((x, y) =>
             {
                 int comparisonResult = SortAttribute switch
                 {
@@ -588,7 +588,7 @@ namespace ClipChopper.WinUIApp
             switch (items[0])
             {
                 case StorageFile file:
-                    if (file.FileType.ToLower() != ".mp4" && file.FileType.ToLower() != ".mkv")
+                    if (file.FileType.ToLower() != ".mp4" && file.FileType.ToLower() != ".mkv" && file.FileType.ToLower() != ".webm")
                     {
                         return;
                     }
