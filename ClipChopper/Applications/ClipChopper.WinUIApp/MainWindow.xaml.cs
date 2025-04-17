@@ -9,17 +9,16 @@ using System.Diagnostics;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
-using Windows.Foundation;
 using Windows.Storage;
 using Windows.Storage.Pickers;
 using Windows.UI.ViewManagement;
-
 using Color = Windows.UI.Color;
 using ColorConverter = System.Windows.Media.ColorConverter;
 using System.ComponentModel;
 using MediaInfo;
 using Microsoft.Extensions.Logging.Abstractions;
 using System.Collections.ObjectModel;
+using System.Drawing;
 using FFMpegCore;
 using Windows.ApplicationModel.DataTransfer;
 using System.IO;
@@ -30,6 +29,10 @@ using System.Threading.Tasks;
 using FFMpegCore.Enums;
 using CommunityToolkit.WinUI.Controls;
 using CommunityToolkit.WinUI;
+using FFMpegCore.Exceptions;
+using WinRT.Interop;
+using Point = Windows.Foundation.Point;
+using Size = Windows.Foundation.Size;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -58,6 +61,7 @@ namespace ClipChopper.WinUIApp
         public ObservableCollection<Tuple<int, string>> AudioTracks { get; } = new();
         private FileInfo? SelectedFile { get; set; }
         private DirectoryInfo? _selectedFolder;
+
         private DirectoryInfo? SelectedFolder
         {
             get => _selectedFolder;
@@ -70,13 +74,21 @@ namespace ClipChopper.WinUIApp
                     {
                         key.SetValue("PreviousPath", _selectedFolder.FullName);
                     }
+
                     RefreshFolder();
                 }
             }
         }
 
-        public enum SortAttributeEnum { Name, Date, Size };
+        public enum SortAttributeEnum
+        {
+            Name,
+            Date,
+            Size
+        };
+
         private SortAttributeEnum _sortAttribute = SortAttributeEnum.Name;
+
         private SortAttributeEnum SortAttribute
         {
             get { return _sortAttribute; }
@@ -87,27 +99,46 @@ namespace ClipChopper.WinUIApp
                 {
                     key.SetValue("SortAttribute", _sortAttribute);
                 }
+
                 RefreshFolder();
             }
         }
+
         public bool NameSortProperty
         {
             get { return SortAttribute == SortAttributeEnum.Name; }
-            set { if (value) SortAttribute = SortAttributeEnum.Name; }
+            set
+            {
+                if (value) SortAttribute = SortAttributeEnum.Name;
+            }
         }
+
         public bool DateSortProperty
         {
             get { return SortAttribute == SortAttributeEnum.Date; }
-            set { if (value) SortAttribute = SortAttributeEnum.Date; }
+            set
+            {
+                if (value) SortAttribute = SortAttributeEnum.Date;
+            }
         }
+
         public bool SizeSortProperty
         {
             get { return SortAttribute == SortAttributeEnum.Size; }
-            set { if (value) SortAttribute = SortAttributeEnum.Size; }
+            set
+            {
+                if (value) SortAttribute = SortAttributeEnum.Size;
+            }
         }
 
-        public enum SortKindEnum { Ascending, Descending };
+        public enum SortKindEnum
+        {
+            Ascending,
+            Descending
+        };
+
         private SortKindEnum _sortKind = SortKindEnum.Ascending;
+
         private SortKindEnum SortKind
         {
             get { return _sortKind; }
@@ -118,18 +149,27 @@ namespace ClipChopper.WinUIApp
                 {
                     key.SetValue("SortKind", _sortKind);
                 }
+
                 RefreshFolder();
             }
         }
+
         public bool AscendingSortProperty
         {
             get { return SortKind == SortKindEnum.Ascending; }
-            set { if (value) SortKind = SortKindEnum.Ascending; }
+            set
+            {
+                if (value) SortKind = SortKindEnum.Ascending;
+            }
         }
+
         public bool DescendingSortProperty
         {
             get { return SortKind == SortKindEnum.Descending; }
-            set { if (value) SortKind = SortKindEnum.Descending; }
+            set
+            {
+                if (value) SortKind = SortKindEnum.Descending;
+            }
         }
 
         private bool preciseSeekingShortcutEnabled = false;
@@ -138,14 +178,15 @@ namespace ClipChopper.WinUIApp
 
         public MainWindow()
         {
-            IntPtr hWnd = WinRT.Interop.WindowNative.GetWindowHandle(this);
+            IntPtr hWnd = WindowNative.GetWindowHandle(this);
             string sExe = Process.GetCurrentProcess().MainModule.FileName;
-            System.Drawing.Icon ico = System.Drawing.Icon.ExtractAssociatedIcon(sExe);
+            Icon ico = Icon.ExtractAssociatedIcon(sExe);
             SendMessage(hWnd, WM_SETICON, ICON_BIG, ico.Handle);
 
-            GlobalFFOptions.Configure(new FFOptions { BinaryFolder = Path.Combine(AppContext.BaseDirectory, "FFmpeg") });
+            GlobalFFOptions.Configure(new FFOptions
+                { BinaryFolder = Path.Combine(AppContext.BaseDirectory, "FFmpeg") });
             // Initializes Engine (Specifies FFmpeg libraries path which is required)
-            Engine.Start(new EngineConfig()
+            Engine.Start(new EngineConfig
             {
 #if DEBUG
                 LogOutput = @"C:\Flyleaf\log.txt",
@@ -203,19 +244,23 @@ namespace ClipChopper.WinUIApp
                 if (key.GetValue("SortKind") is string sortKindValue)
                 {
                     SortKindEnum sortKind;
-                    if (Enum.TryParse<SortKindEnum>(sortKindValue, out sortKind) && Enum.IsDefined<SortKindEnum>(sortKind))
+                    if (Enum.TryParse(sortKindValue, out sortKind) &&
+                        Enum.IsDefined(sortKind))
                     {
                         SortKind = sortKind;
                     }
                 }
+
                 if (key.GetValue("SortAttribute") is string sortAttributeValue)
                 {
                     SortAttributeEnum sortAttribute;
-                    if (Enum.TryParse<SortAttributeEnum>(sortAttributeValue, out sortAttribute) && Enum.IsDefined<SortAttributeEnum>(sortAttribute))
+                    if (Enum.TryParse(sortAttributeValue, out sortAttribute) &&
+                        Enum.IsDefined(sortAttribute))
                     {
                         SortAttribute = sortAttribute;
                     }
                 }
+
                 if (key.GetValue("PreviousPath") is string previousPath && Directory.Exists(previousPath))
                 {
                     SelectedFolder = new DirectoryInfo(previousPath);
@@ -223,7 +268,8 @@ namespace ClipChopper.WinUIApp
             }
         }
 
-        private void AudioTracks_CollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        private void AudioTracks_CollectionChanged(object? sender,
+            System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {
             AudioTrackSelector.Width = Double.NaN;
             double maxWidth = 0;
@@ -237,66 +283,71 @@ namespace ClipChopper.WinUIApp
                     maxWidth = textBlock.DesiredSize.Width;
                 }
             }
+
             AudioTrackSelector.Width = maxWidth > 0 ? maxWidth + 32 : Double.NaN;
         }
 
         private void Player_OpenCompleted(object? sender, OpenCompletedArgs e)
         {
-            DispatcherQueue.TryEnqueue(() =>
-            {
-                FragmentRange.Width = 0;
-            });
+            DispatcherQueue.TryEnqueue(() => { FragmentRange.Width = 0; });
             if (!Player.CanPlay)
             {
                 return;
             }
+
             if (Player.Audio.Streams.Count > 0)
             {
                 var media = new MediaInfoWrapper(Player.Playlist.Selected.Url, NullLogger.Instance);
                 DispatcherQueue.TryEnqueue(() =>
                 {
-                    var i = -1;
+                    var streamIndex = -1;
+                    var userIndex = 0;
                     foreach (var stream in Player.Audio.Streams)
                     {
-                        i++;
-                        var candidates = new[] { media.AudioStreams[i].Name, media.AudioStreams[i].Tags.Title };
-                        var name = candidates.Where(candidate => !string.IsNullOrWhiteSpace(candidate)).FirstOrDefault("Audio Track " + (i + 1));
-                        if (name.StartsWith("SoundHandle / "))
+                        streamIndex++;
+                        if (stream.CodecID == Flyleaf.FFmpeg.AVCodecID.None) { continue; }
+                        var candidates = new[] { media.AudioStreams[streamIndex].Name, media.AudioStreams[streamIndex].Tags.Title };
+                        var language = media.AudioStreams[streamIndex].Language;
+                        var name = candidates.Where(candidate => !string.IsNullOrWhiteSpace(candidate))
+                            .FirstOrDefault("Audio Track " + (++userIndex + 1) +
+                                            (!string.IsNullOrWhiteSpace(language) ? $" ({language})" : ""));
+                        if (name.StartsWith("SoundHandle / ")) // Special case for Nvidia ShadowPlay recordings
                         {
-                            name = name.Substring(14);
+                            name = name[14..];
                         }
-                        AudioTracks.Add(new Tuple<int, string>(i, name.Trim()));
+                        AudioTracks.Add(new Tuple<int, string>(streamIndex, name.Trim()));
                     }
+
                     AudioTrackSelector.SelectedIndex = 0;
                 });
             }
+
             _fragment = new FragmentSelection(Player.Duration);
             _fragment.PropertyChanged += Fragment_PropertyChanged;
             UpdateFragmentRange();
-            _selectionRectangle = new SelectionRectangle(new Point(0, 0), new Point(Player.Video.Width, Player.Video.Height));
+            _selectionRectangle =
+                new SelectionRectangle(new Point(0, 0), new Point(Player.Video.Width, Player.Video.Height));
             _selectionRectangle.PropertyChanged += SelectionRectangle_PropertyChanged;
 
-            if (Player.Duration / 10000000 < 60 && !Player.Config.Player.SeekAccurate)
+            switch (Player.Duration / 10000000)
             {
-                DispatcherQueue.TryEnqueue(() =>
-                {
-                    preciseSeekingShortVideoEnabled = true;
-                    Player.Config.Player.SeekAccurate = true;
-                });
-            }
-            else if (Player.Duration / 10000000 > 60 && preciseSeekingShortVideoEnabled)
-            {
-                DispatcherQueue.TryEnqueue(() =>
-                {
-                    preciseSeekingShortVideoEnabled = false;
-                    Player.Config.Player.SeekAccurate = false;
-                });
+                case < 60 when !Player.Config.Player.SeekAccurate:
+                    DispatcherQueue.TryEnqueue(() =>
+                    {
+                        preciseSeekingShortVideoEnabled = true;
+                        Player.Config.Player.SeekAccurate = true;
+                    });
+                    break;
+                case > 60 when preciseSeekingShortVideoEnabled:
+                    DispatcherQueue.TryEnqueue(() =>
+                    {
+                        preciseSeekingShortVideoEnabled = false;
+                        Player.Config.Player.SeekAccurate = false;
+                    });
+                    break;
             }
 
-            DispatcherQueue.TryEnqueue(() =>
-            {
-                RenderSelectionRectangle();
-            });
+            DispatcherQueue.TryEnqueue(RenderSelectionRectangle);
         }
 
         private void Fragment_PropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -310,10 +361,13 @@ namespace ClipChopper.WinUIApp
             {
                 return;
             }
+
             DispatcherQueue.TryEnqueue(() =>
             {
-                var width = Math.Min(FragmentRangeBackground.ActualWidth, (_fragment.Stop - _fragment.Start) * FragmentRangeBackground.ActualWidth / _fragment.Duration);
-                var marginValue = Math.Min(FragmentRangeBackground.ActualWidth - width, _fragment.Start * FragmentRangeBackground.ActualWidth / _fragment.Duration);
+                var width = Math.Min(FragmentRangeBackground.ActualWidth,
+                    (_fragment.Stop - _fragment.Start) * FragmentRangeBackground.ActualWidth / _fragment.Duration);
+                var marginValue = Math.Min(FragmentRangeBackground.ActualWidth - width,
+                    _fragment.Start * FragmentRangeBackground.ActualWidth / _fragment.Duration);
                 FragmentRange.Width = width;
                 var margin = FragmentRange.Margin;
                 margin.Left = marginValue;
@@ -323,17 +377,18 @@ namespace ClipChopper.WinUIApp
 
         private void Player_PropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
-            switch (e.PropertyName)
+            PlayButton.Content = e.PropertyName switch
             {
-                case nameof(Player.Status):
-                    PlayButton.Content = Player.Status == Status.Paused ? iconPlay : iconPause;
-                    break;
-            }
+                nameof(Player.Status) => Player.Status == Status.Paused ? iconPlay : iconPause,
+                _ => PlayButton.Content
+            };
         }
 
         private void MainWindow_Activated(object sender, WindowActivatedEventArgs args)
         {
-            var resource = args.WindowActivationState == WindowActivationState.Deactivated ? "WindowCaptionForegroundDisabled" : "WindowCaptionForeground";
+            var resource = args.WindowActivationState == WindowActivationState.Deactivated
+                ? "WindowCaptionForegroundDisabled"
+                : "WindowCaptionForeground";
             AppTitleTextBlock.Foreground = (SolidColorBrush)App.Current.Resources[resource];
         }
 
@@ -345,38 +400,35 @@ namespace ClipChopper.WinUIApp
 
         private void Listener_ThemeChanged(UISettings sender, object args)
         {
-            var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(this);
+            var hwnd = WindowNative.GetWindowHandle(this);
 
-            if (hwnd == GetActiveWindow())
-            {
-                SendMessage(hwnd, WMACTIVATE, WAACTIVE, IntPtr.Zero);
-            }
-            else
-            {
-                SendMessage(hwnd, WMACTIVATE, WAINACTIVE, IntPtr.Zero);
-            }
+            SendMessage(hwnd, WMACTIVATE, hwnd == GetActiveWindow() ? WAACTIVE : WAINACTIVE, IntPtr.Zero);
+
             DispatcherQueue.TryEnqueue(Microsoft.UI.Dispatching.DispatcherQueuePriority.High,
-            () =>
-            {
-                Color color = ((SolidColorBrush)Application.Current.Resources["ApplicationPageBackgroundThemeBrush"]).Color;
-                Player.Config.Video.BackgroundColor = (System.Windows.Media.Color)ColorConverter.ConvertFromString(color.ToHex());
-            });
+                () =>
+                {
+                    var color =
+                        ((SolidColorBrush)Application.Current.Resources["ApplicationPageBackgroundThemeBrush"]).Color;
+                    Player.Config.Video.BackgroundColor =
+                        (System.Windows.Media.Color)ColorConverter.ConvertFromString(color.ToHex());
+                });
         }
 
         private async void OpenFolderButton_Click(object sender, RoutedEventArgs e)
         {
             FolderPicker openPicker = new();
-            var hWnd = WinRT.Interop.WindowNative.GetWindowHandle(this);
-            WinRT.Interop.InitializeWithWindow.Initialize(openPicker, hWnd);
+            var hWnd = WindowNative.GetWindowHandle(this);
+            InitializeWithWindow.Initialize(openPicker, hWnd);
 
             openPicker.SuggestedStartLocation = PickerLocationId.VideosLibrary;
             openPicker.FileTypeFilter.Add("*");
 
-            StorageFolder folder = await openPicker.PickSingleFolderAsync();
+            var folder = await openPicker.PickSingleFolderAsync();
             if (folder == null)
             {
                 return;
             }
+
             SelectedFolder = new DirectoryInfo(folder.Path);
         }
 
@@ -386,15 +438,17 @@ namespace ClipChopper.WinUIApp
             {
                 return;
             }
-            var NewFile = e.AddedItems[0] as FileInfo;
-            if (NewFile == null)
+
+            var newFile = e.AddedItems[0] as FileInfo;
+            if (newFile == null)
             {
                 return;
             }
-            NewFile.Refresh();
-            if (!NewFile.Exists)
+
+            newFile.Refresh();
+            if (!newFile.Exists)
             {
-                ContentDialog dialog = new ContentDialog()
+                var dialog = new ContentDialog()
                 {
                     Title = "Error",
                     Content = "Selected file does not exist",
@@ -405,11 +459,13 @@ namespace ClipChopper.WinUIApp
                 RefreshFolder();
                 return;
             }
-            if (NewFile.FullName.Equals(SelectedFile?.FullName))
+
+            if (newFile.FullName.Equals(SelectedFile?.FullName))
             {
                 return;
             }
-            SelectedFile = NewFile;
+
+            SelectedFile = newFile;
             AudioTracks.Clear();
             Player.OpenAsync(SelectedFile.FullName);
         }
@@ -431,27 +487,32 @@ namespace ClipChopper.WinUIApp
 
         private void AudioTrackSelector_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (e.AddedItems.Count < 1) { return; }
+            if (e.AddedItems.Count < 1)
+            {
+                return;
+            }
+
             Player.Open(Player.Audio.Streams[(int)AudioTrackSelector.SelectedValue]);
         }
 
         private void SeekFrameBackwardButton_Click(object sender, RoutedEventArgs e)
         {
             Player.ShowFramePrev();
-            Player.ReversePlayback = false; // Workaround for the Flyleaf bug: ShowFramePrev does not restore normal playback direction
+            // Workaround for the Flyleaf bug: ShowFramePrev does not restore normal playback direction
+            Player.ReversePlayback = false;
         }
 
         private async void TakeSnapshotButton_Click(object sender, RoutedEventArgs e)
         {
             var savePicker = new FileSavePicker();
-            var hWnd = WinRT.Interop.WindowNative.GetWindowHandle(this);
-            WinRT.Interop.InitializeWithWindow.Initialize(savePicker, hWnd);
+            var hWnd = WindowNative.GetWindowHandle(this);
+            InitializeWithWindow.Initialize(savePicker, hWnd);
             savePicker.SuggestedStartLocation = PickerLocationId.PicturesLibrary;
             savePicker.SuggestedFileName = (DirectoryList.SelectedItem as FileInfo).Name;
             savePicker.FileTypeChoices.Add("PNG image", new List<string>() { ".png" });
             savePicker.FileTypeChoices.Add("JPG image", new List<string>() { ".jpg" });
             savePicker.FileTypeChoices.Add("BMP image", new List<string>() { ".bmp" });
-            StorageFile file = await savePicker.PickSaveFileAsync();
+            var file = await savePicker.PickSaveFileAsync();
             if (file != null)
             {
                 Player.TakeSnapshotToFile(file.Path);
@@ -461,81 +522,96 @@ namespace ClipChopper.WinUIApp
         private async void SaveButton_Click(object sender, RoutedEventArgs e)
         {
             var savePicker = new FileSavePicker();
-            var hWnd = WinRT.Interop.WindowNative.GetWindowHandle(this);
-            WinRT.Interop.InitializeWithWindow.Initialize(savePicker, hWnd);
+            var hWnd = WindowNative.GetWindowHandle(this);
+            InitializeWithWindow.Initialize(savePicker, hWnd);
             savePicker.SuggestedStartLocation = PickerLocationId.VideosLibrary;
             savePicker.SuggestedFileName = "Chopped " + SelectedFile.Name;
-            savePicker.FileTypeChoices.Add("MP4 video", new List<string>() { ".mp4" });
-            savePicker.FileTypeChoices.Add("MKV video", new List<string>() { ".mkv" });
-            StorageFile file = await savePicker.PickSaveFileAsync();
+            savePicker.FileTypeChoices.Add("Keep as is", new List<string>() { SelectedFile.Extension.ToLower() });
+
+            foreach (var extension in new[] { ".mp4", ".mkv", ".webm", ".mov" })
+            {
+                if (!extension.Equals(SelectedFile.Extension, StringComparison.OrdinalIgnoreCase))
+                {
+                    savePicker.FileTypeChoices.Add($"{extension[1..].ToUpper()} video", new List<string>() { extension });
+                }
+            }
+            var file = await savePicker.PickSaveFileAsync();
             if (file == null)
             {
                 return;
             }
 
-            Action<double> progressHandler = (p) =>
-            {
-                DispatcherQueue.TryEnqueue(() => SaveButton.FindChild<TextBlock>().Text = Math.Round(p) + "%...");
-            };
-
             var arguments = FFMpegArguments
                 .FromFileInput(SelectedFile.FullName, false, options => options
-                        .WithHardwareAcceleration()
-                        .WithCustomArgument("-init_hw_device opencl=ocl")
-                        .WithCustomArgument("-filter_hw_device ocl")
-                        .WithCustomArgument("-extra_hw_frames 3")
-                        .Seek(new TimeSpan(_fragment.Start))
-                        .EndSeek(new TimeSpan(_fragment.Stop))
-                 )
+                    .WithHardwareAcceleration()
+                    .WithCustomArgument("-init_hw_device opencl=ocl")
+                    .WithCustomArgument("-filter_hw_device ocl")
+                    .WithCustomArgument("-extra_hw_frames 3")
+                    .Seek(new TimeSpan(_fragment.Start))
+                    .EndSeek(new TimeSpan(_fragment.Stop))
+                )
                 .MapMetaData(0)
-                .OutputToFile(file.Path, true, options => {
+                .OutputToFile(file.Path, true, options =>
+                {
                     if ((bool)CropButton.IsChecked && _selectionRectangle != null)
                     {
                         options
-                        .WithVideoCodec("h264_nvenc")
-                        .WithCustomArgument("-preset p7")
-                        .WithVideoBitrate(20000)
-                        .WithVideoFilters(filterOptions =>
-                            {
-                                filterOptions.Arguments.Add(
-                                    new CropArgument((int)Math.Round(_selectionRectangle.Width),
-                                                     (int)Math.Round(_selectionRectangle.Height),
-                                                     (int)Math.Round(_selectionRectangle.TopLeft.X),
-                                                     (int)Math.Round(_selectionRectangle.TopLeft.Y)));
-                                if (Player.VideoDemuxer.VideoStream.ColorSpace == ColorSpace.BT2020)
+                            .WithVideoCodec("h264_nvenc")
+                            .WithCustomArgument("-preset p7")
+                            .WithVideoBitrate(20000)
+                            .WithVideoFilters(filterOptions =>
                                 {
-                                    filterOptions.Arguments.Add(new FormatArgument());
-                                    filterOptions.Arguments.Add(new HwUploadArgument());
-                                    filterOptions.Arguments.Add(new ToneMapOpenCLArgument(tonemap: "hable", desat: 0, range: "pc", format: "nv12"));
-                                    filterOptions.Arguments.Add(new HwDownloadArgument());
-                                    filterOptions.Arguments.Add(new FormatArgument("nv12"));
+                                    filterOptions.Arguments.Add(
+                                        new CropArgument((int)Math.Round(_selectionRectangle.Width),
+                                            (int)Math.Round(_selectionRectangle.Height),
+                                            (int)Math.Round(_selectionRectangle.TopLeft.X),
+                                            (int)Math.Round(_selectionRectangle.TopLeft.Y)));
+                                    if (Player.VideoDemuxer.VideoStream.ColorSpace == ColorSpace.BT2020)
+                                    {
+                                        filterOptions.Arguments.Add(new FormatArgument());
+                                        filterOptions.Arguments.Add(new HwUploadArgument());
+                                        filterOptions.Arguments.Add(new ToneMapOpenCLArgument(tonemap: "hable",
+                                            desat: 0, range: "pc", format: "nv12"));
+                                        filterOptions.Arguments.Add(new HwDownloadArgument());
+                                        filterOptions.Arguments.Add(new FormatArgument("nv12"));
+                                    }
                                 }
-                            }
-                        );
-                    } else
+                            );
+                    }
+                    else
                     {
                         options.WithVideoCodec("copy");
                     }
+
                     options
                         .WithAudioCodec("copy")
                         .SelectStreams(Player.Video.Streams.Select(stream => stream.StreamIndex))
                         .SelectStreams(Player.Audio.Streams.Select(stream => stream.StreamIndex))
-                        .SelectStreams(Player.Subtitles.Streams.Select(stream => stream.StreamIndex));
-                    })
-                .NotifyOnProgress(progressHandler, new TimeSpan(_fragment.Stop - _fragment.Start));
+                        .SelectStreams(Player.Subtitles.Streams.Select(stream => stream.StreamIndex))
+                        .SelectStreams(Player.MainDemuxer.DataStreams.Select(stream => stream.StreamIndex));
+                })
+                .NotifyOnProgress(p => DispatcherQueue.TryEnqueue(() => SaveButton.FindChild<TextBlock>().Text = Math.Round(p) + "%..."),
+                    new TimeSpan(_fragment.Stop - _fragment.Start));
             Debug.WriteLine(arguments.Arguments);
             SaveButton.IsEnabled = false;
-            await arguments.ProcessAsynchronously();
+            try
+            {
+                await arguments.ProcessAsynchronously();
+            } catch (FFMpegException exception)
+            {
+                await file.DeleteAsync(StorageDeleteOption.PermanentDelete);
+                var dialog = new EncodingErrorContentDialog()
+                {
+                    ViewModel = {
+                        Log = exception.FFMpegErrorOutput,
+                    },
+                    XamlRoot = Content.XamlRoot,
+                };
+                await dialog.ShowAsync();
+            }
+
             SaveButton.FindChild<TextBlock>().Text = "Save...";
             SaveButton.IsEnabled = true;
-        }
-
-        private void SortItem_Click(object sender, RoutedEventArgs e)
-        {
-            if (sender is MenuFlyoutItem selectedItem)
-            {
-                Debug.WriteLine(selectedItem.Tag.ToString());
-            }
         }
 
         private async void RefreshButton_Click(object sender, RoutedEventArgs e)
@@ -549,28 +625,37 @@ namespace ClipChopper.WinUIApp
             {
                 return;
             }
-            DirectoryList.ItemsSource = SelectedFolder.EnumerateFiles().Where(file => file.Extension.ToLower() == ".mp4" || file.Extension.ToLower() == ".mkv" || file.Extension.ToLower() == ".webm").OrderBy(file => file, Comparer<FileInfo>.Create((x, y) =>
-            {
-                int comparisonResult = SortAttribute switch
+
+            DirectoryList.ItemsSource = SelectedFolder.EnumerateFiles().Where(file =>
+                    file.Extension.Equals(".mp4", StringComparison.OrdinalIgnoreCase)
+                    || file.Extension.Equals(".mkv", StringComparison.OrdinalIgnoreCase)
+                    || file.Extension.Equals(".webm", StringComparison.OrdinalIgnoreCase)
+                    || file.Extension.Equals(".mov", StringComparison.OrdinalIgnoreCase))
+                .OrderBy(file => file, Comparer<FileInfo>.Create((x, y) =>
                 {
-                    SortAttributeEnum.Name => x.Name.CompareTo(y.Name),
-                    SortAttributeEnum.Date => x.LastWriteTime.CompareTo(y.LastWriteTime),
-                    SortAttributeEnum.Size => x.Length.CompareTo(y.Length)
-                };
-                if (SortKind == SortKindEnum.Descending)
-                {
-                    comparisonResult *= -1;
-                }
-                return comparisonResult;
-            }));
+                    var comparisonResult = SortAttribute switch
+                    {
+                        SortAttributeEnum.Name => String.Compare(x.Name, y.Name, StringComparison.Ordinal),
+                        SortAttributeEnum.Date => x.LastWriteTime.CompareTo(y.LastWriteTime),
+                        SortAttributeEnum.Size => x.Length.CompareTo(y.Length)
+                    };
+                    if (SortKind == SortKindEnum.Descending)
+                    {
+                        comparisonResult *= -1;
+                    }
+
+                    return comparisonResult;
+                }));
             SelectedFile?.Refresh();
             if (SelectedFile != null && !SelectedFile.Exists)
             {
                 SelectedFile = null;
             }
+
             if (SelectedFile != null && (SelectedFile.Directory?.FullName.Equals(SelectedFolder.FullName) ?? false))
             {
-                DirectoryList.SelectedIndex = DirectoryList.Items.TakeWhile(x => !SelectedFile.FullName.Equals(((FileInfo)x).FullName)).Count();
+                DirectoryList.SelectedIndex = DirectoryList.Items
+                    .TakeWhile(x => !SelectedFile.FullName.Equals(((FileInfo)x).FullName)).Count();
             }
         }
 
@@ -580,18 +665,24 @@ namespace ClipChopper.WinUIApp
             {
                 return;
             }
+
             var items = await e.DataView.GetStorageItemsAsync();
             if (items == null || items.Count <= 0)
             {
                 return;
             }
+
             switch (items[0])
             {
                 case StorageFile file:
-                    if (file.FileType.ToLower() != ".mp4" && file.FileType.ToLower() != ".mkv" && file.FileType.ToLower() != ".webm")
+                    if (!file.FileType.Equals(".mp4", StringComparison.OrdinalIgnoreCase)
+                        && !file.FileType.Equals(".mkv", StringComparison.OrdinalIgnoreCase)
+                        && !file.FileType.Equals(".webm", StringComparison.OrdinalIgnoreCase)
+                        && !file.FileType.Equals(".mov", StringComparison.OrdinalIgnoreCase))
                     {
                         return;
                     }
+
                     SelectedFile = new FileInfo(file.Path);
                     SelectedFolder = new DirectoryInfo((await file.GetParentAsync()).Path);
                     AudioTracks.Clear();
@@ -611,14 +702,16 @@ namespace ClipChopper.WinUIApp
 
         private async void AdvancedSave_Click(object sender, RoutedEventArgs e)
         {
-            ContentDialog dialog = new ContentDialog();
-            dialog.XamlRoot = RootGrid.XamlRoot;
-            dialog.Style = Application.Current.Resources["DefaultContentDialogStyle"] as Style;
-            dialog.Title = "Advanced Save";
-            dialog.PrimaryButtonText = "Save";
-            dialog.CloseButtonText = "Cancel";
-            dialog.DefaultButton = ContentDialogButton.Primary;
-            dialog.Content = new AdvancedSaveContent();
+            ContentDialog dialog = new ContentDialog
+            {
+                XamlRoot = RootGrid.XamlRoot,
+                Style = Application.Current.Resources["DefaultContentDialogStyle"] as Style,
+                Title = "Advanced Save",
+                PrimaryButtonText = "Save",
+                CloseButtonText = "Cancel",
+                DefaultButton = ContentDialogButton.Primary,
+                Content = new AdvancedSaveContent()
+            };
 
             var result = await dialog.ShowAsync();
             if (result != ContentDialogResult.Primary)
@@ -638,7 +731,9 @@ namespace ClipChopper.WinUIApp
 
         private void MicaKind_IsCheckedChanged(object sender, RoutedEventArgs e)
         {
-            MicaBackdrop.Kind = (bool)MicaKind.IsChecked ? Microsoft.UI.Composition.SystemBackdrops.MicaKind.BaseAlt : Microsoft.UI.Composition.SystemBackdrops.MicaKind.Base;
+            MicaBackdrop.Kind = (bool)MicaKind.IsChecked
+                ? Microsoft.UI.Composition.SystemBackdrops.MicaKind.BaseAlt
+                : Microsoft.UI.Composition.SystemBackdrops.MicaKind.Base;
         }
 
         private async void DirectoryList_DragItemsStarting(object sender, DragItemsStartingEventArgs e)
@@ -654,6 +749,7 @@ namespace ClipChopper.WinUIApp
             {
                 RefreshFolder();
             }
+
             if (e.DropResult == DataPackageOperation.None)
             {
                 await Task.Delay(200);
@@ -690,6 +786,7 @@ namespace ClipChopper.WinUIApp
             {
                 return;
             }
+
             var position = e.GetCurrentPoint(sender as UIElement);
             double videoPositionX;
             double videoPositionY;
@@ -701,21 +798,28 @@ namespace ClipChopper.WinUIApp
             if (hostRatio > videoRatio) // Pillar-boxed
             {
                 renderPositionY = Math.Max(0, position.Position.Y);
-                renderPositionX = Math.Max(0, position.Position.X - (FlyleafHost.ActualSize.X - videoRatio * FlyleafHost.ActualSize.Y) / 2);
+                renderPositionX = Math.Max(0,
+                    position.Position.X - (FlyleafHost.ActualSize.X - videoRatio * FlyleafHost.ActualSize.Y) / 2);
 
-                videoPositionX = Math.Min(Player.Video.Width, renderPositionX * Player.Video.Height / FlyleafHost.ActualSize.Y);
-                videoPositionY = Math.Min(Player.Video.Height, renderPositionY * Player.Video.Height / FlyleafHost.ActualSize.Y);
+                videoPositionX = Math.Min(Player.Video.Width,
+                    renderPositionX * Player.Video.Height / FlyleafHost.ActualSize.Y);
+                videoPositionY = Math.Min(Player.Video.Height,
+                    renderPositionY * Player.Video.Height / FlyleafHost.ActualSize.Y);
             }
             else // Letter-boxed
             {
                 renderPositionX = Math.Max(0, position.Position.X);
-                renderPositionY = Math.Max(0, position.Position.Y - (FlyleafHost.ActualSize.Y - FlyleafHost.ActualSize.X / videoRatio) / 2);
+                renderPositionY = Math.Max(0,
+                    position.Position.Y - (FlyleafHost.ActualSize.Y - FlyleafHost.ActualSize.X / videoRatio) / 2);
 
-                videoPositionX = Math.Min(Player.Video.Width, renderPositionX * Player.Video.Width / FlyleafHost.ActualSize.X);
-                videoPositionY = Math.Min(Player.Video.Height, renderPositionY * Player.Video.Width / FlyleafHost.ActualSize.X);
+                videoPositionX = Math.Min(Player.Video.Width,
+                    renderPositionX * Player.Video.Width / FlyleafHost.ActualSize.X);
+                videoPositionY = Math.Min(Player.Video.Height,
+                    renderPositionY * Player.Video.Width / FlyleafHost.ActualSize.X);
             }
 
-            _selectionRectangle = new SelectionRectangle(new Point(videoPositionX, videoPositionY), new Point(videoPositionX, videoPositionY));
+            _selectionRectangle = new SelectionRectangle(new Point(videoPositionX, videoPositionY),
+                new Point(videoPositionX, videoPositionY));
             RenderSelectionRectangle();
         }
 
@@ -737,24 +841,31 @@ namespace ClipChopper.WinUIApp
             if (hostRatio > videoRatio) // Pillar-boxed
             {
                 renderPositionY = Math.Max(0, position.Position.Y);
-                renderPositionX = Math.Max(0, position.Position.X - (FlyleafHost.ActualSize.X - videoRatio * FlyleafHost.ActualSize.Y) / 2);
+                renderPositionX = Math.Max(0,
+                    position.Position.X - (FlyleafHost.ActualSize.X - videoRatio * FlyleafHost.ActualSize.Y) / 2);
 
-                videoPositionX = Math.Min(Player.Video.Width, renderPositionX * Player.Video.Height / FlyleafHost.ActualSize.Y);
-                videoPositionY = Math.Min(Player.Video.Height, renderPositionY * Player.Video.Height / FlyleafHost.ActualSize.Y);
+                videoPositionX = Math.Min(Player.Video.Width,
+                    renderPositionX * Player.Video.Height / FlyleafHost.ActualSize.Y);
+                videoPositionY = Math.Min(Player.Video.Height,
+                    renderPositionY * Player.Video.Height / FlyleafHost.ActualSize.Y);
             }
             else // Letter-boxed
             {
                 renderPositionX = Math.Max(0, position.Position.X);
-                renderPositionY = Math.Max(0, position.Position.Y - (FlyleafHost.ActualSize.Y - FlyleafHost.ActualSize.X / videoRatio) / 2);
+                renderPositionY = Math.Max(0,
+                    position.Position.Y - (FlyleafHost.ActualSize.Y - FlyleafHost.ActualSize.X / videoRatio) / 2);
 
-                videoPositionX = Math.Min(Player.Video.Width, renderPositionX * Player.Video.Width / FlyleafHost.ActualSize.X);
-                videoPositionY = Math.Min(Player.Video.Height, renderPositionY * Player.Video.Width / FlyleafHost.ActualSize.X);
+                videoPositionX = Math.Min(Player.Video.Width,
+                    renderPositionX * Player.Video.Width / FlyleafHost.ActualSize.X);
+                videoPositionY = Math.Min(Player.Video.Height,
+                    renderPositionY * Player.Video.Width / FlyleafHost.ActualSize.X);
             }
 
             if (_selectionRectangle != null)
             {
                 _selectionRectangle.EndPoint = new Point(videoPositionX, videoPositionY);
             }
+
             RenderSelectionRectangle();
         }
 
@@ -786,7 +897,8 @@ namespace ClipChopper.WinUIApp
             double renderPositionY;
             if (hostRatio > videoRatio) // Pillar-boxed
             {
-                renderPositionX = _selectionRectangle.TopLeft.X * FlyleafHost.ActualSize.Y / Player.Video.Height + (FlyleafHost.ActualSize.X - videoRatio * FlyleafHost.ActualSize.Y) / 2;
+                renderPositionX = _selectionRectangle.TopLeft.X * FlyleafHost.ActualSize.Y / Player.Video.Height +
+                                  (FlyleafHost.ActualSize.X - videoRatio * FlyleafHost.ActualSize.Y) / 2;
                 renderPositionY = _selectionRectangle.TopLeft.Y * FlyleafHost.ActualSize.Y / Player.Video.Height;
 
                 Canvas.SetTop(SelectionRectangle, renderPositionY);
@@ -797,14 +909,14 @@ namespace ClipChopper.WinUIApp
             else
             {
                 renderPositionX = _selectionRectangle.TopLeft.X * FlyleafHost.ActualSize.X / Player.Video.Width;
-                renderPositionY = _selectionRectangle.TopLeft.Y * FlyleafHost.ActualSize.X / Player.Video.Width + (FlyleafHost.ActualSize.Y - FlyleafHost.ActualSize.X / videoRatio) / 2;
+                renderPositionY = _selectionRectangle.TopLeft.Y * FlyleafHost.ActualSize.X / Player.Video.Width +
+                                  (FlyleafHost.ActualSize.Y - FlyleafHost.ActualSize.X / videoRatio) / 2;
 
                 Canvas.SetTop(SelectionRectangle, renderPositionY);
                 Canvas.SetLeft(SelectionRectangle, renderPositionX);
                 SelectionRectangle.Width = _selectionRectangle.Width * FlyleafHost.ActualSize.X / Player.Video.Width;
                 SelectionRectangle.Height = _selectionRectangle.Height * FlyleafHost.ActualSize.X / Player.Video.Width;
             }
-
         }
     }
 }

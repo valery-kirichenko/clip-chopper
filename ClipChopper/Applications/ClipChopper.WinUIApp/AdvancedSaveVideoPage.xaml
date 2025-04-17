@@ -11,8 +11,6 @@
 
     <Page.Resources>
         <converters:BoolToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
-        <local:InvertedBoolToVisibilityConverter x:Key="InvertedBooleanToVisibilityConverter"/>
-        <local:InvertedBoolConverter x:Key="InvertedBoolConverter"/>
     </Page.Resources>
 
     <StackPanel VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
@@ -34,15 +32,23 @@
                 <x:String>P6: Slower (Better Quality)</x:String>
                 <x:String>P7: Slowest (Best Quality)</x:String>
             </ComboBox>
-            <CheckBox Content="Limit File Size" x:Name="LimitFileSizeCheckbox"/>
-            <Grid>
+            <Grid RowSpacing="8">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="4"/>
+                    <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
-                <NumberBox Grid.Column="2" Header="File Size (MiB)" IsEnabled="{Binding IsChecked, ElementName=LimitFileSizeCheckbox}"/>
-                <NumberBox Grid.Column="0" Margin="8,0,0,0" Header="Bitrate (Kbps)" IsEnabled="{Binding IsChecked, ElementName=LimitFileSizeCheckbox, Converter={StaticResource InvertedBoolConverter}}"/>
+                
+                <TextBlock Grid.Row="0" Grid.Column="0" Text="Bitrate (Kbps)"/>
+                <TextBlock Grid.Row="0" Grid.Column="2" Text="File Size (MiB)"/>
+                
+                <NumberBox Grid.Row="1" Grid.Column="0"/>
+                <FontIcon Grid.Row="1" Grid.Column="1" Glyph="&#xE895;" Margin="8,0"/>
+                <NumberBox Grid.Row="1" Grid.Column="2"/>
             </Grid>
         </StackPanel>
     </StackPanel>

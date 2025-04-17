@@ -247,7 +247,7 @@
                                 <FontIcon Glyph="&#xE70D;" FontSize="11" />
                                 <Button.Flyout>
                                     <MenuFlyout Placement="BottomEdgeAlignedRight">
-                                        <MenuFlyoutItem Click="AdvancedSave_Click">Advanced...</MenuFlyoutItem>
+                                        <MenuFlyoutItem Click="AdvancedSave_Click">Advanced Save...</MenuFlyoutItem>
                                     </MenuFlyout>
                                 </Button.Flyout>
                             </Button>

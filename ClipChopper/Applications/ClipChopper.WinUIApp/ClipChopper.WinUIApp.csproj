@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
 		<OutputType>WinExe</OutputType>
-		<TargetFramework>net8.0-windows10.0.22621.0</TargetFramework>
+		<TargetFramework>net9.0-windows10.0.22621.0</TargetFramework>
 		<TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
 		<WindowsSdkPackageVersion>10.0.22621.56</WindowsSdkPackageVersion>
 		<RootNamespace>ClipChopper.WinUIApp</RootNamespace>
@@ -25,11 +25,13 @@
 		<Nullable>enable</Nullable>
 		<ApplicationIcon>Assets\icon.ico</ApplicationIcon>
 		<AssemblyName>ClipChopper</AssemblyName>
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 	</PropertyGroup>
 	<ItemGroup>
 		<None Remove="AdvancedSaveAudioPage.xaml" />
 		<None Remove="AdvancedSaveContent.xaml" />
 		<None Remove="AdvancedSaveVideoPage.xaml" />
+		<None Remove="EncodingErrorContentDialog.xaml" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -79,16 +81,16 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="CommunityToolkit.WinUI.Controls.Sizers" Version="8.1.240916" />
-		<PackageReference Include="CommunityToolkit.WinUI.Converters" Version="8.1.240916" />
-		<PackageReference Include="CommunityToolkit.WinUI.Helpers" Version="8.1.240916" />
-		<PackageReference Include="FFmpeg.AutoGen" Version="7.0.0" />
-		<PackageReference Include="FFMpegCore" Version="5.1.0" />
-		<PackageReference Include="FlyleafLib" Version="3.8.1" />
-		<PackageReference Include="FlyleafLib.Controls.WinUI" Version="1.1.2" />
+		<PackageReference Include="CommunityToolkit.WinUI.Controls.Sizers" Version="8.2.250402" />
+		<PackageReference Include="CommunityToolkit.WinUI.Converters" Version="8.2.250402" />
+		<PackageReference Include="CommunityToolkit.WinUI.Helpers" Version="8.2.250402" />
+		<PackageReference Include="FFmpeg.AutoGen" Version="7.1.1" />
+		<PackageReference Include="FFMpegCore" Version="5.2.0" />
+		<PackageReference Include="FlyleafLib" Version="3.8.3" />
+		<PackageReference Include="FlyleafLib.Controls.WinUI" Version="1.1.4" />
 		<PackageReference Include="MediaInfo.Wrapper.Core" Version="21.9.3" />
 		<PackageReference Include="Microsoft.Win32.Registry" Version="5.0.0" />
-		<PackageReference Include="Microsoft.WindowsAppSDK" Version="1.6.241114003" />
+		<PackageReference Include="Microsoft.WindowsAppSDK" Version="1.7.250401001" />
 		<PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.26100.1742" />
 		<Manifest Include="$(ApplicationManifest)" />
 	</ItemGroup>
@@ -100,6 +102,11 @@
   -->
 	<ItemGroup Condition="'$(DisableMsixProjectCapabilityAddedByProject)'!='true' and '$(EnableMsixTooling)'=='true'">
 		<ProjectCapability Include="Msix" />
+	</ItemGroup>
+	<ItemGroup>
+	  <Page Update="EncodingErrorContentDialog.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </Page>
 	</ItemGroup>
 	<ItemGroup>
 		<Page Update="AdvancedSaveAudioPage.xaml">
