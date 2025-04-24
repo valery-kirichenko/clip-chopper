@@ -1,12 +1,4 @@
 ﻿; https://github.com/DomGries/InnoDependencyInstaller
-
-
-; requires netcorecheck.exe and netcorecheck_x64.exe (see CodeDependencies.iss)
-#define public Dependency_Path_NetCoreCheck "dependencies\"
-
-; requires dxwebsetup.exe (see CodeDependencies.iss)
-;#define public Dependency_Path_DirectX "dependencies\"
-
 #include "CodeDependencies.iss"
 
 [Setup]
@@ -33,8 +25,9 @@ AllowNoIcons=yes
 PrivilegesRequired=admin
 MinVersion=10.0.17763
 SetupIconFile=../Assets/icon.ico
-ArchitecturesAllowed=x64
-ArchitecturesInstallIn64BitMode=x64
+ArchitecturesAllowed=x64compatible
+ArchitecturesInstallIn64BitMode=x64compatible
+Compression=lzma2/ultra64
 
 [Files]
 Source: "publish\*"; DestDir: "{app}"; Flags: ignoreversion
@@ -111,21 +104,6 @@ begin
     Log('UninsIS.dll - installed package uninstall did not complete successfully');
 end;
 
-function IsWindowsAppSDKRuntimeInstalled(const Version: String): Boolean;
-var
-  ResultCode: Integer;
-  ExecOutput: AnsiString;
-  ResultString, TempFilename: String;
-begin
-  TempFilename := ExpandConstant('{tmp}\clipchopper-setup-was-output.txt');
-  Exec(ExpandConstant('powershell'), '"(get-appxpackage Microsoft.WindowsAppRuntime*).version" | out-file -encoding ASCII ' + TempFilename, '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
-  LoadStringFromFile(TempFilename, ExecOutput);
-  ResultString := String(ExecOutput);
-  Log('WAS Temp: ' + TempFilename);
-  Log('WAS Check: ' + ResultString);
-  Result := pos(Version, ResultString) > 0;
-  Log('WAS Check Result: ' + IntToStr(Integer(Result)));
-end;
 
 function InitializeSetup: Boolean;
 var
@@ -141,13 +119,10 @@ begin
 
   Dependency_AddDotNet90Desktop;
   Dependency_AddVC2015To2022;
-
-  // if not IsWindowsAppSDKRuntimeInstalled('5001.70.1338.0') then begin
-    Dependency_Add('windowsappruntimeinstall-x64.exe',
-      '--quiet',
-      'Windows App SDK Runtime 1.7.1',
-      'https://aka.ms/windowsappsdk/1.7/1.7.250401001/windowsappruntimeinstall-x64.exe',
-      '', False, False);
-  // end;
+  Dependency_Add('windowsappruntimeinstall-x64.exe',
+    '-q',
+    'Windows App SDK Runtime 1.7.1',
+    'https://aka.ms/windowsappsdk/1.7/1.7.250401001/windowsappruntimeinstall-x64.exe',
+    '', False, False, True);
   Result := True;
 end;

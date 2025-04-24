@@ -44,15 +44,8 @@ namespace ClipChopper.WinUIApp
     /// </summary>
     public sealed partial class MainWindow : Window
     {
+        private static string[] ALLOWED_EXTENSTIONS = [".mp4", ".mkv", ".webm", ".mov"];
         public Player Player { get; set; }
-        private const int WAINACTIVE = 0x00;
-        private const int WAACTIVE = 0x01;
-        private const int WMACTIVATE = 0x0006;
-        private const int ICON_SMALL = 0;
-        private const int ICON_BIG = 1;
-        private const int ICON_SMALL2 = 2;
-        private const int WM_GETICON = 0x007F;
-        private const int WM_SETICON = 0x0080;
         UISettings settings = new();
         SymbolIcon iconPlay = new SymbolIcon(Symbol.Play);
         SymbolIcon iconPause = new SymbolIcon(Symbol.Pause);
@@ -61,6 +54,7 @@ namespace ClipChopper.WinUIApp
         public ObservableCollection<Tuple<int, string>> AudioTracks { get; } = new();
         private FileInfo? SelectedFile { get; set; }
         private DirectoryInfo? _selectedFolder;
+        private double savedWidth = 256;
 
         private DirectoryInfo? SelectedFolder
         {
@@ -178,11 +172,6 @@ namespace ClipChopper.WinUIApp
 
         public MainWindow()
         {
-            IntPtr hWnd = WindowNative.GetWindowHandle(this);
-            string sExe = Process.GetCurrentProcess().MainModule.FileName;
-            Icon ico = Icon.ExtractAssociatedIcon(sExe);
-            SendMessage(hWnd, WM_SETICON, ICON_BIG, ico.Handle);
-
             GlobalFFOptions.Configure(new FFOptions
                 { BinaryFolder = Path.Combine(AppContext.BaseDirectory, "FFmpeg") });
             // Initializes Engine (Specifies FFmpeg libraries path which is required)
@@ -213,8 +202,7 @@ namespace ClipChopper.WinUIApp
 
             this.InitializeComponent();
             this.ExtendsContentIntoTitleBar = true;
-            this.SetTitleBar(AppTitleBar);
-            this.Activated += MainWindow_Activated;
+            this.SetTitleBar(DefaultTitleBar);
 
             AudioTracks.CollectionChanged += AudioTracks_CollectionChanged;
 
@@ -384,27 +372,9 @@ namespace ClipChopper.WinUIApp
             };
         }
 
-        private void MainWindow_Activated(object sender, WindowActivatedEventArgs args)
-        {
-            var resource = args.WindowActivationState == WindowActivationState.Deactivated
-                ? "WindowCaptionForegroundDisabled"
-                : "WindowCaptionForeground";
-            AppTitleTextBlock.Foreground = (SolidColorBrush)App.Current.Resources[resource];
-        }
-
-        [DllImport("user32.dll")]
-        private static extern IntPtr GetActiveWindow();
-
-        [DllImport("user32.dll", CharSet = CharSet.Auto)]
-        private static extern IntPtr SendMessage(IntPtr hWnd, int msg, int wParam, IntPtr lParam);
-
         private void Listener_ThemeChanged(UISettings sender, object args)
         {
-            var hwnd = WindowNative.GetWindowHandle(this);
-
-            SendMessage(hwnd, WMACTIVATE, hwnd == GetActiveWindow() ? WAACTIVE : WAINACTIVE, IntPtr.Zero);
-
-            DispatcherQueue.TryEnqueue(Microsoft.UI.Dispatching.DispatcherQueuePriority.High,
+            DispatcherQueue.TryEnqueue(Microsoft.UI.Dispatching.DispatcherQueuePriority.Low,
                 () =>
                 {
                     var color =
@@ -528,7 +498,7 @@ namespace ClipChopper.WinUIApp
             savePicker.SuggestedFileName = "Chopped " + SelectedFile.Name;
             savePicker.FileTypeChoices.Add("Keep as is", new List<string>() { SelectedFile.Extension.ToLower() });
 
-            foreach (var extension in new[] { ".mp4", ".mkv", ".webm", ".mov" })
+            foreach (var extension in ALLOWED_EXTENSTIONS)
             {
                 if (!extension.Equals(SelectedFile.Extension, StringComparison.OrdinalIgnoreCase))
                 {
@@ -626,11 +596,8 @@ namespace ClipChopper.WinUIApp
                 return;
             }
 
-            DirectoryList.ItemsSource = SelectedFolder.EnumerateFiles().Where(file =>
-                    file.Extension.Equals(".mp4", StringComparison.OrdinalIgnoreCase)
-                    || file.Extension.Equals(".mkv", StringComparison.OrdinalIgnoreCase)
-                    || file.Extension.Equals(".webm", StringComparison.OrdinalIgnoreCase)
-                    || file.Extension.Equals(".mov", StringComparison.OrdinalIgnoreCase))
+            DirectoryList.ItemsSource = SelectedFolder.EnumerateFiles()
+                .Where(file => ALLOWED_EXTENSTIONS.Any(extension => file.Extension.Equals(extension, StringComparison.OrdinalIgnoreCase)))
                 .OrderBy(file => file, Comparer<FileInfo>.Create((x, y) =>
                 {
                     var comparisonResult = SortAttribute switch
@@ -675,10 +642,7 @@ namespace ClipChopper.WinUIApp
             switch (items[0])
             {
                 case StorageFile file:
-                    if (!file.FileType.Equals(".mp4", StringComparison.OrdinalIgnoreCase)
-                        && !file.FileType.Equals(".mkv", StringComparison.OrdinalIgnoreCase)
-                        && !file.FileType.Equals(".webm", StringComparison.OrdinalIgnoreCase)
-                        && !file.FileType.Equals(".mov", StringComparison.OrdinalIgnoreCase))
+                    if (!ALLOWED_EXTENSTIONS.Any(extension => file.FileType.Equals(extension, StringComparison.OrdinalIgnoreCase)))
                     {
                         return;
                     }
@@ -916,6 +880,20 @@ namespace ClipChopper.WinUIApp
                 Canvas.SetLeft(SelectionRectangle, renderPositionX);
                 SelectionRectangle.Width = _selectionRectangle.Width * FlyleafHost.ActualSize.X / Player.Video.Width;
                 SelectionRectangle.Height = _selectionRectangle.Height * FlyleafHost.ActualSize.X / Player.Video.Width;
+            }
+        }
+
+        private void DefaultTitleBar_PaneToggleRequested(TitleBar sender, object args)
+        {
+            if (RootGrid.ColumnDefinitions[0].Width.Value > 0)
+            {
+                savedWidth = RootGrid.ColumnDefinitions[0].Width.Value;
+                RootGrid.ColumnDefinitions[0].Width = new GridLength(0);
+                RootGrid.ColumnDefinitions[1].Width = new GridLength(0);
+            } else
+            {
+                RootGrid.ColumnDefinitions[0].Width = new GridLength(savedWidth);
+                RootGrid.ColumnDefinitions[1].Width = GridLength.Auto;
             }
         }
     }

@@ -15,21 +15,15 @@
 
     <Grid AllowDrop="True" Drop="Grid_Drop" DragOver="Grid_DragOver" KeyDown="Grid_KeyDown" KeyUp="Grid_KeyUp">
         <Grid.RowDefinitions>
-            <RowDefinition Height="32"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-        
-        <Grid Grid.Row="0" x:Name="AppTitleBar" IsHitTestVisible="True">
-            <Image Source="Assets/icon.ico"
-                   HorizontalAlignment="Left" 
-                   Width="16" Height="16" 
-                   Margin="8,0"/>
-            <TextBlock x:Name="AppTitleTextBlock" Text="ClipChopper"
-                   TextWrapping="NoWrap"
-                   Style="{StaticResource CaptionTextBlockStyle}" 
-                   VerticalAlignment="Center"
-                   Margin="28,0,0,0"/>
-        </Grid>
+
+        <TitleBar x:Name="DefaultTitleBar" Title="ClipChopper" Subtitle="Preview" Grid.Row="0" IsPaneToggleButtonVisible="True" PaneToggleRequested="DefaultTitleBar_PaneToggleRequested">
+            <TitleBar.IconSource>
+                <ImageIconSource ImageSource="/Assets/icon.ico"/>
+            </TitleBar.IconSource>
+        </TitleBar>
 
         <Grid x:Name="RootGrid" Grid.Row="1">
             <Grid.Resources>
@@ -117,7 +111,7 @@
 
                 <flyleaf:FlyleafHost x:Name="FlyleafHost" Player="{Binding Player}" KeyBindings="False" Grid.Row="0" PointerPressed="Canvas_PointerPressed" PointerMoved="Canvas_PointerMoved" SizeChanged="FlyleafHost_SizeChanged">
                     <Canvas x:Name="SelectionCanvas" PointerPressed="Canvas_PointerPressed" PointerMoved="Canvas_PointerMoved">
-                        <Rectangle x:Name="SelectionRectangle" StrokeThickness="1" Stroke="LightBlue"  Fill="#220000FF" Visibility="Collapsed"/>
+                        <Rectangle x:Name="SelectionRectangle" StrokeThickness="1" Opacity="0.5" Stroke="{ThemeResource SystemAccentColorDark1}"  Fill="{ThemeResource SystemAccentColorLight1}" Visibility="Collapsed"/>
                     </Canvas>
                 </flyleaf:FlyleafHost>
 
@@ -243,7 +237,7 @@
                                     <TextBlock Text="Save..."/>
                                 </StackPanel>
                             </Button>
-                            <Button IsTabStop="False" CornerRadius="0,4,4,0" Margin="-4,0,0,0" VerticalAlignment="Stretch">
+                            <Button IsTabStop="False" CornerRadius="0,4,4,0" Margin="-4,0,0,0" VerticalAlignment="Stretch" IsEnabled="{Binding Player.CanPlay, Mode=OneWay}">
                                 <FontIcon Glyph="&#xE70D;" FontSize="11" />
                                 <Button.Flyout>
                                     <MenuFlyout Placement="BottomEdgeAlignedRight">
