@@ -117,12 +117,12 @@ begin
       Exit;
   end;
 
-  Dependency_AddDotNet90Desktop;
+  Dependency_AddDotNet100Desktop;
   Dependency_AddVC2015To2022;
   Dependency_Add('windowsappruntimeinstall-x64.exe',
     '-q',
-    'Windows App SDK Runtime 1.7.1',
-    'https://aka.ms/windowsappsdk/1.7/1.7.250401001/windowsappruntimeinstall-x64.exe',
+    'Windows App SDK Runtime 2.5.1',
+    'https://aka.ms/windowsappsdk/2.5/2.5.1/windowsappruntimeinstall-x64.exe',
     '', False, False, True);
   Result := True;
 end;
