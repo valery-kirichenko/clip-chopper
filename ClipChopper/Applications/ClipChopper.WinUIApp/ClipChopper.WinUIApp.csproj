@@ -1,9 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
 		<OutputType>WinExe</OutputType>
-		<TargetFramework>net9.0-windows10.0.22621.0</TargetFramework>
+		<TargetFramework>net10.0-windows10.0.22621.0</TargetFramework>
 		<TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
-		<WindowsSdkPackageVersion>10.0.22621.56</WindowsSdkPackageVersion>
 		<RootNamespace>ClipChopper.WinUIApp</RootNamespace>
 		<ApplicationManifest>app.manifest</ApplicationManifest>
 		<Platforms>x64</Platforms>
@@ -90,8 +89,8 @@
 		<PackageReference Include="FlyleafLib.Controls.WinUI" Version="1.1.4" />
 		<PackageReference Include="MediaInfo.Wrapper.Core" Version="21.9.3" />
 		<PackageReference Include="Microsoft.Win32.Registry" Version="5.0.0" />
-		<PackageReference Include="Microsoft.WindowsAppSDK" Version="1.7.250401001" />
-		<PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.26100.1742" />
+		<PackageReference Include="Microsoft.WindowsAppSDK" Version="2.5.1" />
+		<PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.26100.9169" />
 		<Manifest Include="$(ApplicationManifest)" />
 	</ItemGroup>
 
