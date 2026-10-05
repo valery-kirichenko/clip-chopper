@@ -83,7 +83,7 @@
 		<PackageReference Include="CommunityToolkit.WinUI.Converters" Version="8.2.250402" />
 		<PackageReference Include="CommunityToolkit.WinUI.Helpers" Version="8.2.250402" />
 		<PackageReference Include="FFmpeg.AutoGen" Version="7.1.1" />
-		<PackageReference Include="FFMpegCore" Version="5.2.0" />
+		<PackageReference Include="FFMpegCore" Version="5.5.0" />
 		<PackageReference Include="FlyleafLib" Version="3.11.11" />
 		<PackageReference Include="FlyleafLib.Controls.WinUI" Version="1.4.11" />
 		<PackageReference Include="MediaInfo.Wrapper.Core" Version="21.9.3" />
