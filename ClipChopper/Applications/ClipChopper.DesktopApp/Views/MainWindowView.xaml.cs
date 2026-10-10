@@ -1,46 +1,62 @@
 ﻿using System;
-using System.ComponentModel;
-using System.IO;
-using System.Linq;
-using System.Windows;
-using System.Windows.Controls;
-using System.Diagnostics;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using Ookii.Dialogs.Wpf;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Shell;
+using Acolyte.Common;
+using ClipChopper.Core.Wrappers.Tags;
 using ClipChopper.Domain;
 using ClipChopper.Domain.Errors;
-using System.Windows.Shell;
+using ClipChopper.Logging;
+using ClipChopper.Models.IO;
+using ClipChopper.Models.Wrappers.Tags;
+using FFmpeg.AutoGen;
+using Ookii.Dialogs.Wpf;
+using Unosquare.FFME;
+using Unosquare.FFME.Common;
 
-namespace ClipChopper.DesktopApp
+namespace ClipChopper.DesktopApp.Views
 {
     /// <summary>
-    /// Interaction logic for MainWindow.xaml
+    /// Interaction logic for MainWindowView.xaml
     /// </summary>
-    public sealed partial class MainWindow
+    public sealed partial class MainWindowView
     {
+        /// <summary>
+        /// Logger instance for current class.
+        /// </summary>
+        private static readonly ILogger _logger = LoggerFactory.CreateLoggerFor<MainWindowView>();
+
+        private readonly IExifTagLoader _tagLoader;
+
         private string? _selectedDirectory;
         private string? _loadedMedia;
         private FragmentSelection? _fragment;
         private int _selectedAudioStream;
-        public ObservableCollection<AudioTrack> AudioTracks { get; } = new ObservableCollection<AudioTrack>(new List<AudioTrack>()
+
+        public ObservableCollection<AudioTrack> AudioTracks { get; } = new(new List<AudioTrack>
         {
-            new AudioTrack
-            {
-                Name = "No Audio",
-                StreamIndex = 0
-            }
+            AudioTrack.NoAudio
         });
 
-        public MainWindow()
+
+        public MainWindowView()
         {
+            _tagLoader = new NExifToolTagLoader();
+
             InitializeComponent();
             Media.MediaOpened += Media_MediaOpened;
             Media.MediaChanging += Media_MediaChanging;
         }
         
-        private async void Media_MediaOpened(object? sender, Unosquare.FFME.Common.MediaOpenedEventArgs e)
+        private async void Media_MediaOpened(object? sender, MediaOpenedEventArgs e)
         {
             try
             {
@@ -48,12 +64,12 @@ namespace ClipChopper.DesktopApp
             }
             catch (Exception ex)
             {
-                Debug.WriteLine(ex);
+                _logger.Error(ex, "Failed to open media.");
                 TaskDialogHelper.ShowErrorTaskDialog(this, ex);
             }
         }
 
-        private async Task Media_MediaOpened_Internal(object? sender, Unosquare.FFME.Common.MediaOpenedEventArgs e)
+        private async Task Media_MediaOpened_Internal(object? sender, MediaOpenedEventArgs e)
         {
             var loadTags = LoadTags();
             loadTags.FireAndForgetSafeAsync(new DisplayTaskDialogErrorHandler(this));
@@ -66,27 +82,29 @@ namespace ClipChopper.DesktopApp
                 return;
             }
             var audioStreams = Media.MediaInfo.Streams
-                .Where(kvp => kvp.Value.CodecType == FFmpeg.AutoGen.AVMediaType.AVMEDIA_TYPE_AUDIO)
-                .Select(kvp => kvp.Value);
+                .Where(kvp => kvp.Value.CodecType == AVMediaType.AVMEDIA_TYPE_AUDIO)
+                .Select(kvp => kvp.Value)
+                .ToArray();
+            var videoStreamsCount = Media.MediaInfo.Streams.Count(kvp => kvp.Value.CodecType == AVMediaType.AVMEDIA_TYPE_VIDEO);
             
             if (!audioStreams.Any())
             {
-                AudioTracks.Add(new AudioTrack
-                {
-                    Name = "No Audio",
-                    StreamIndex = 0
-                });
+                AudioTracks.Add(AudioTrack.NoAudio);
                 AudioTrackSlider.IsEnabled = false;
             }
             else
             {
+                var filteredTags = tags
+                    .Where(tag => Regex.IsMatch(tag.Name, "^Track\\d*Name$"))
+                    .ToArray();
                 foreach (var stream in audioStreams)
                 {
+                    var tagIndex = stream.StreamIndex - videoStreamsCount;
+                    string audioTrackName = tagIndex < filteredTags.Length ? filteredTags[tagIndex].Value : "Unknown";
+
                     AudioTracks.Add(new AudioTrack
                     {
-                        Name = $"Audio #{stream.StreamIndex} - " + tags
-                            .Where(tag => tag.Name.Equals($"Track{stream.StreamId}Name")).Select(tag => tag.Value)
-                            .DefaultIfEmpty("Untitled").First(),
+                        Name = $"Audio #{stream.StreamIndex} - {audioTrackName}",
                         StreamIndex = stream.StreamIndex
                     });
                 }
@@ -95,7 +113,7 @@ namespace ClipChopper.DesktopApp
 
             AudioTrackSlider.SelectedIndex = 0;
 
-            Debug.WriteLine(e.Info.Duration);
+            _logger.Info($"Media info has been opened. Duration: [{e.Info.Duration}].");
             Save.IsEnabled = true;
             _fragment = new FragmentSelection(e.Info.Duration);
             PositionSlider.SelectionStart = _fragment.Start.TotalSeconds;
@@ -122,13 +140,14 @@ namespace ClipChopper.DesktopApp
 
         private async void Play_Click(object? sender, RoutedEventArgs e)
         {
+            e.Handled = true;
             try
             {
                 await Play_Click_Internal(sender, e);
             }
             catch (Exception ex)
             {
-                Debug.WriteLine(ex);
+                _logger.Error(ex, "Failed to play media.");
                 TaskDialogHelper.ShowErrorTaskDialog(this, ex);
             }
         }
@@ -151,6 +170,7 @@ namespace ClipChopper.DesktopApp
 
         private void Pframe_Click(object? sender, RoutedEventArgs e)
         {
+            e.Handled = true;
             if (Media.Position - Media.PositionStep > Media.PlaybackStartTime)
             {
                 Media.StepBackward();
@@ -159,6 +179,7 @@ namespace ClipChopper.DesktopApp
 
         private void Nframe_Click(object? sender, RoutedEventArgs e)
         {
+            e.Handled = true;
             // Don't make a step if current frame is the last one
             // fixes an issue when StepForward actually moves to a previous key frame
             if (Media.Position + Media.PositionStep < Media.PlaybackEndTime)
@@ -189,8 +210,7 @@ namespace ClipChopper.DesktopApp
             if (!Directory.Exists(_selectedDirectory))
             {
                 _selectedDirectory = null;
-                string message = "Directory no longer exists.";
-                TaskDialogHelper.ShowInfoTaskDialog(this, message);
+                ShowMessage("Directory no longer exists.");
                 return;
             }
 
@@ -204,8 +224,6 @@ namespace ClipChopper.DesktopApp
                 .Select(i => new DirectoryItem(files[i]))
                 .ToList();
 
-            DirectoryList.ItemsSource =
-                Enumerable.Range(0, files.Length).Select(i => new DirectoryItem(files[i])).ToList();
             if (_loadedMedia != null)
             {
                 DirectoryList.SelectedIndex = Array.IndexOf(files, _loadedMedia);
@@ -217,7 +235,7 @@ namespace ClipChopper.DesktopApp
             if (_fragment is null) return;
 
             _fragment.Start = Media.Position;
-            Debug.WriteLine(Media.Position);
+            _logger.Info($"Start position of the clip has been selected. Position: [{Media.Position}].");
         }
 
         private void Stop_Click(object? sender, RoutedEventArgs e)
@@ -240,6 +258,7 @@ namespace ClipChopper.DesktopApp
             if (!File.Exists(selectedFile.Path))
             {
                 ShowMessage($"Could not load non-existent file {selectedFile.Path}");
+                LoadDirectory();
                 return;
             }
 
@@ -249,6 +268,19 @@ namespace ClipChopper.DesktopApp
 
         private async void Save_Click(object? sender, RoutedEventArgs eventArgs)
         {
+            try
+            {
+                await Save_Click_Internal(sender, eventArgs);
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, "Failed to save media.");
+                TaskDialogHelper.ShowErrorTaskDialog(this, ex);
+            }
+        }
+
+        private async Task Save_Click_Internal(object? sender, RoutedEventArgs eventArgs)
+        {
             if (_fragment is null) return;
 
             if (_loadedMedia is null)
@@ -256,9 +288,7 @@ namespace ClipChopper.DesktopApp
                 throw new InvalidOperationException("Loaded media value is not initialized.");
             }
 
-            Debug.WriteLine(Path.GetExtension(_loadedMedia).Substring(1, 3));
-
-            var dialog = new VistaSaveFileDialog()
+            var dialog = new VistaSaveFileDialog
             {
                 AddExtension = true,
                 Filter = "MP4 Files (*.mp4)|*.mp4|MKV Files (*.mkv)|*.mkv",
@@ -270,26 +300,28 @@ namespace ClipChopper.DesktopApp
 
             if (!dialog.ShowDialog().GetValueOrDefault()) return;
 
-            Console.WriteLine(dialog.FileName);
+            _logger.Info($"Saving clip to [{dialog.FileName}].");
             var inputFile = _loadedMedia;
             var outputFile = dialog.FileName;
 
-            var ffmpegPath = Path.Combine(Unosquare.FFME.Library.FFmpegDirectory, "ffmpeg.exe");
+            var ffmpegPath = Path.Combine(Library.FFmpegDirectory, "ffmpeg.exe");
             Status.Text = "Looking for keyframes...";
             TaskbarProgress.ProgressState = TaskbarItemProgressState.Normal;
-            var progress = new Progress<int>((value) =>
+            var progress = new Progress<int>(value =>
             {
                 Status.Text = $"Looking for keyframes... {value}%";
                 TaskbarProgress.ProgressValue = value / 100.0d;
-                Console.WriteLine(TaskbarProgress.ProgressValue);
+                _logger.Info($"Saving progress: {TaskbarProgress.ProgressValue}");
             });
-            var startKeyframe = await Task.Run(() => KeyframeProber.FindClosestKeyframeTime(inputFile, _fragment.Start, progress));
+            var startKeyframe = await Task.Run(
+                () => KeyframeProber.FindClosestKeyframeTimeAsync(inputFile, _fragment.Start, progress)
+            );
 
             string args = $"-y -ss {startKeyframe} -i \"{inputFile}\" -map_metadata 0 " +
                           $"-to \"{_fragment.Stop - startKeyframe}\" -c:v copy -c:a copy " +
-                          $"-map 0 \"{outputFile}\"";
+                          $"-map 0 -map -0:d \"{outputFile}\"";
 
-            var startInfo = new ProcessStartInfo()
+            var startInfo = new ProcessStartInfo
             {
                 RedirectStandardOutput = true,
                 RedirectStandardInput = true,
@@ -305,44 +337,41 @@ namespace ClipChopper.DesktopApp
             {
                 using var ffmpeg = Process.Start(startInfo);
                 Debug.Assert(ffmpeg != null, nameof(ffmpeg) + " != null");
-                ffmpeg.OutputDataReceived += (s, e) => { Debug.WriteLine(e.Data); };
+                ffmpeg.OutputDataReceived += (s, e) => _logger.Info(e.Data.ToStringNullSafe());
                 ffmpeg.WaitForExit();
             });
             Status.Text = "Done";
             TaskbarProgress.ProgressState = TaskbarItemProgressState.None;
             RefreshDirectory_Click(sender, eventArgs);
             await Task.Delay(2000);
-            Status.Text = "";
+            Status.Text = string.Empty;
         }
 
         private void Volume_Change(object? sender, RoutedPropertyChangedEventArgs<double> eventArgs)
         {
             Media.Volume = (Math.Exp(eventArgs.NewValue) - 1) / (Math.E - 1);
         }
-
+        
         private void ShowMessage(string message)
         {
             TaskDialogHelper.ShowInfoTaskDialog(this, message);
         }
         
-        private async Task<List<NExifTool.Tag>> LoadTags()
+        private async Task<IReadOnlyList<ExifTag>> LoadTags()
         {
-            var etOptions = new NExifTool.ExifToolOptions()
+            if (string.IsNullOrEmpty(_loadedMedia))
             {
-                ExifToolPath = AppDomain.CurrentDomain.BaseDirectory + @"\exiftool.exe"
-            };
-            var et = new NExifTool.ExifTool(etOptions);
-            Debug.WriteLine(etOptions.ExifToolPath);
-            Debug.WriteLine(_loadedMedia);
-            var result = await et.GetTagsAsync(_loadedMedia);
-            return result.ToList();
+                return Array.Empty<ExifTag>();
+            }
+
+            return await _tagLoader.LoadTagsAsync(new FilePath(_loadedMedia));
         }
 
-        private void Media_MediaChanging(object? sender, Unosquare.FFME.Common.MediaOpeningEventArgs e)
+        private void Media_MediaChanging(object? sender, MediaOpeningEventArgs e)
         {
 
             var audioStream = Media.MediaInfo.Streams
-                .Where(kvp => kvp.Value.CodecType == FFmpeg.AutoGen.AVMediaType.AVMEDIA_TYPE_AUDIO)
+                .Where(kvp => kvp.Value.CodecType == AVMediaType.AVMEDIA_TYPE_AUDIO)
                 .Where(kvp => kvp.Value.StreamIndex == _selectedAudioStream)
                 .Select(kvp => kvp.Value);
 
@@ -365,8 +394,10 @@ namespace ClipChopper.DesktopApp
                 if (Directory.Exists(path))
                 {
                     _selectedDirectory = path;
-                } else if (File.Exists(path))
+                }
+                else if (File.Exists(path))
                 {
+                    // TODO: duplicated code -> to refactor.
                     _selectedDirectory = Path.GetDirectoryName(path);
                     if (path.EndsWith(".mp4", StringComparison.OrdinalIgnoreCase) ||
                         path.EndsWith(".mkv", StringComparison.OrdinalIgnoreCase))
@@ -381,11 +412,13 @@ namespace ClipChopper.DesktopApp
 
         private void SkipBack_Click(object sender, RoutedEventArgs e)
         {
+            e.Handled = true;
             Media.Position = Media.Position.Subtract(TimeSpan.FromSeconds(5));
         }
 
         private void SkipForward_Click(object sender, RoutedEventArgs e)
         {
+            e.Handled = true;
             Media.Position = Media.Position.Add(TimeSpan.FromSeconds(5));
         }
     }

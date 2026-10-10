@@ -1,0 +1,43 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <Platforms>$(AppPlatforms)</Platforms>
+    <Configurations>$(AppConfigurations)</Configurations>
+    <OutputType>Library</OutputType>
+    <TargetFramework>$(LibraryTargetFramework)</TargetFramework>
+    <LangVersion>$(CSharpLangVersion)</LangVersion>
+    <Nullable>enable</Nullable>
+    <Deterministic>true</Deterministic>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <MinVerTagPrefix>v</MinVerTagPrefix>
+    <RootNamespace>ClipChopper.Configuration</RootNamespace>
+    <IncludeSymbols>false</IncludeSymbols>
+    <IsPackable>false</IsPackable>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <Authors>Valery Kirichenko; Vasily Vasilyev</Authors>
+    <Product>ClipChopper</Product>
+    <Company>ClipChopper</Company>
+    <NeutralLanguage>en-US</NeutralLanguage>
+    <RepositoryUrl>https://github.com/valery-kirichenko/clip-chopper</RepositoryUrl>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+  </PropertyGroup>
+
+  
+  <ItemGroup>
+    <ProjectReference Include="$(SolutionDir)Libraries\ClipChopper.Common\ClipChopper.Common.csproj" />
+    <ProjectReference Include="$(SolutionDir)Libraries\ClipChopper.Logging\ClipChopper.Logging.csproj" />
+    <ProjectReference Include="$(SolutionDir)Libraries\ClipChopper.Models\ClipChopper.Models.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="$(MicrosoftExtensionsConfigurationPackageVersion)" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="$(MicrosoftExtensionsConfigurationBinderPackageVersion)" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="$(MicrosoftExtensionsConfigurationJsonPackageVersion)" />
+    <PackageReference Include="MinVer" Version="$(MinVerPackageVersion)" PrivateAssets="all" />
+  </ItemGroup>
+
+</Project>

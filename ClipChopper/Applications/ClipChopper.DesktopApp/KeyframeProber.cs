@@ -1,13 +1,17 @@
 ﻿using System;
 using System.Diagnostics;
+using System.IO;
+using System.Threading.Tasks;
+using Unosquare.FFME;
 
 namespace ClipChopper
 {
     internal static class KeyframeProber
     {
-        public static TimeSpan FindClosestKeyframeTime(string filePath, TimeSpan time, IProgress<int> progress)
+        public static async Task<TimeSpan> FindClosestKeyframeTimeAsync(string filePath,
+            TimeSpan time, IProgress<int> progress)
         {
-            var ffprobePath = Unosquare.FFME.Library.FFmpegDirectory + @"\ffprobe.exe";
+            var ffprobePath = Path.Combine(Library.FFmpegDirectory, "ffprobe.exe");
             var keyframe = TimeSpan.Zero;
 
             string args = $"-threads {Environment.ProcessorCount} -select_streams v -skip_frame nokey " +
@@ -54,7 +58,7 @@ namespace ClipChopper
                     }
                 };
                 probe.BeginOutputReadLine();
-                probe.WaitForExit();
+                await probe.WaitForExitAsync();
             }
 
             return keyframe;
