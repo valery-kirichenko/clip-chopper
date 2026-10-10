@@ -1,3 +1,8 @@
+# Clip Chopper
+
+[![Latest release](https://img.shields.io/github/v/release/valery-kirichenko/clip-chopper)](https://github.com/valery-kirichenko/clip-chopper/releases/latest)
+[![CodeQL](https://github.com/valery-kirichenko/clip-chopper/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/valery-kirichenko/clip-chopper/actions/workflows/codeql-analysis.yml)
+
 ### Clip Chopper allows you to quickly trim multiple videos preserving their original video and audio quality
 
 [Download latest release](https://github.com/valery-kirichenko/clip-chopper/releases/latest)
