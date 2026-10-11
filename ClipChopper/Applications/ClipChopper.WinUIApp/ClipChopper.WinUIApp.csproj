@@ -1,11 +1,12 @@
 <Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
 		<OutputType>WinExe</OutputType>
-		<TargetFramework>net10.0-windows10.0.22621.0</TargetFramework>
-		<TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
+		<TargetFramework>$(WinUIAppTargetFramework)</TargetFramework>
+		<TargetPlatformMinVersion>$(WinUIAppTargetPlatformMinVersion)</TargetPlatformMinVersion>
 		<RootNamespace>ClipChopper.WinUIApp</RootNamespace>
 		<ApplicationManifest>app.manifest</ApplicationManifest>
-		<Platforms>x64</Platforms>
+		<Platforms>$(AppPlatforms)</Platforms>
+		<Configurations>$(AppConfigurations)</Configurations>
 		<RuntimeIdentifiers>win-x64</RuntimeIdentifiers>
 		<PublishProfile>win10-$(Platform).pubxml</PublishProfile>
 		<UseWinUI>true</UseWinUI>
@@ -100,21 +101,15 @@
 		<ProjectCapability Include="Msix" />
 	</ItemGroup>
 	<ItemGroup>
-	  <Page Update="EncodingErrorContentDialog.xaml">
-	    <Generator>MSBuild:Compile</Generator>
-	  </Page>
-	</ItemGroup>
-	<ItemGroup>
+		<Page Update="EncodingErrorContentDialog.xaml">
+			<Generator>MSBuild:Compile</Generator>
+		</Page>
 		<Page Update="AdvancedSaveAudioPage.xaml">
 			<Generator>MSBuild:Compile</Generator>
 		</Page>
-	</ItemGroup>
-	<ItemGroup>
 		<Page Update="AdvancedSaveVideoPage.xaml">
 			<Generator>MSBuild:Compile</Generator>
 		</Page>
-	</ItemGroup>
-	<ItemGroup>
 		<Page Update="AdvancedSaveContent.xaml">
 			<Generator>MSBuild:Compile</Generator>
 		</Page>
