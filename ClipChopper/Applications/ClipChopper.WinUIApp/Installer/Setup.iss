@@ -30,7 +30,7 @@ ArchitecturesInstallIn64BitMode=x64compatible
 Compression=lzma2/ultra64
 
 [Files]
-; Build and publish the app first. The build downloads FFmpeg into "publish\FFmpeg".
+; Publish the app to "publish" first. The build downloads FFmpeg into the project folder, and the publish step copies it to "publish\FFmpeg".
 Source: "publish\*"; DestDir: "{app}"; Flags: ignoreversion
 Source: "publish\FFmpeg\*"; DestDir: "{app}\FFmpeg"; Flags: ignoreversion
 Source: "publish\Assets\*"; DestDir: "{app}\Assets"; Flags: ignoreversion
