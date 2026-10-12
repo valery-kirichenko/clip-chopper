@@ -1,12 +1,12 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
 		<OutputType>WinExe</OutputType>
-		<TargetFramework>net9.0-windows10.0.22621.0</TargetFramework>
-		<TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
-		<WindowsSdkPackageVersion>10.0.22621.56</WindowsSdkPackageVersion>
+		<TargetFramework>$(WinUIAppTargetFramework)</TargetFramework>
+		<TargetPlatformMinVersion>$(WinUIAppTargetPlatformMinVersion)</TargetPlatformMinVersion>
 		<RootNamespace>ClipChopper.WinUIApp</RootNamespace>
 		<ApplicationManifest>app.manifest</ApplicationManifest>
-		<Platforms>x64</Platforms>
+		<Platforms>$(AppPlatforms)</Platforms>
+		<Configurations>$(AppConfigurations)</Configurations>
 		<RuntimeIdentifiers>win-x64</RuntimeIdentifiers>
 		<PublishProfile>win10-$(Platform).pubxml</PublishProfile>
 		<UseWinUI>true</UseWinUI>
@@ -48,50 +48,47 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<Content Include="FFmpeg\avcodec-61.dll">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</Content>
-		<Content Include="FFmpeg\avdevice-61.dll">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</Content>
-		<Content Include="FFmpeg\avfilter-10.dll">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</Content>
-		<Content Include="FFmpeg\avformat-61.dll">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</Content>
-		<Content Include="FFmpeg\avutil-59.dll">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</Content>
-		<Content Include="FFmpeg\postproc-58.dll">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</Content>
-		<Content Include="FFmpeg\swresample-5.dll">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</Content>
-		<Content Include="FFmpeg\swscale-8.dll">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</Content>
-		<Content Include="FFmpeg\ffmpeg.exe">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</Content>
-		<Content Include="FFmpeg\ffprobe.exe">
+		<Content Include="FFmpeg\*.dll;FFmpeg\*.exe">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Content>
 	</ItemGroup>
+
+	<PropertyGroup>
+		<FFmpegVersion>9.0.2</FFmpegVersion>
+		<FFmpegDir>$(MSBuildProjectDirectory)\FFmpeg\</FFmpegDir>
+		<FFmpegMarker>$(FFmpegDir)ffmpeg-version.txt</FFmpegMarker>
+		<GetFFmpegScript>$([System.IO.Path]::GetFullPath('$(MSBuildProjectDirectory)\..\..\Scripts\Get-FFmpeg.ps1'))</GetFFmpegScript>
+	</PropertyGroup>
+
+	<!-- Downloads FFmpeg when the marker file for the pinned version is missing. See ClipChopper/Scripts/Get-FFmpeg.ps1. -->
+	<Target Name="DownloadFFmpeg" BeforeTargets="BeforeBuild">
+		<ReadLinesFromFile File="$(FFmpegMarker)" Condition="Exists('$(FFmpegMarker)')">
+			<Output TaskParameter="Lines" ItemName="_FFmpegMarkerLine" />
+		</ReadLinesFromFile>
+		<PropertyGroup>
+			<_FFmpegInstalledVersion>@(_FFmpegMarkerLine)</_FFmpegInstalledVersion>
+		</PropertyGroup>
+		<Exec Condition="'$(_FFmpegInstalledVersion)' != '$(FFmpegVersion)'"
+			  Command="powershell.exe -NoProfile -ExecutionPolicy Bypass -File &quot;$(GetFFmpegScript)&quot; -Destination &quot;$(FFmpegDir.TrimEnd('\'))&quot;" />
+		<!-- The glob above ran before the download, so add the files again. -->
+		<ItemGroup>
+			<Content Remove="FFmpeg\*.dll;FFmpeg\*.exe" />
+			<Content Include="FFmpeg\*.dll;FFmpeg\*.exe">
+				<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			</Content>
+		</ItemGroup>
+	</Target>
 
 	<ItemGroup>
 		<PackageReference Include="CommunityToolkit.WinUI.Controls.Sizers" Version="8.2.250402" />
 		<PackageReference Include="CommunityToolkit.WinUI.Converters" Version="8.2.250402" />
 		<PackageReference Include="CommunityToolkit.WinUI.Helpers" Version="8.2.250402" />
-		<PackageReference Include="FFmpeg.AutoGen" Version="7.1.1" />
-		<PackageReference Include="FFMpegCore" Version="5.2.0" />
-		<PackageReference Include="FlyleafLib" Version="3.8.3" />
-		<PackageReference Include="FlyleafLib.Controls.WinUI" Version="1.1.4" />
+		<PackageReference Include="FFMpegCore" Version="5.5.0" />
+		<PackageReference Include="FlyleafLib" Version="3.11.11" />
+		<PackageReference Include="FlyleafLib.Controls.WinUI" Version="1.4.11" />
 		<PackageReference Include="MediaInfo.Wrapper.Core" Version="21.9.3" />
-		<PackageReference Include="Microsoft.Win32.Registry" Version="5.0.0" />
-		<PackageReference Include="Microsoft.WindowsAppSDK" Version="1.7.250401001" />
-		<PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.26100.1742" />
+		<PackageReference Include="Microsoft.WindowsAppSDK" Version="2.5.1" />
+		<PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.26100.9169" />
 		<Manifest Include="$(ApplicationManifest)" />
 	</ItemGroup>
 
@@ -104,21 +101,15 @@
 		<ProjectCapability Include="Msix" />
 	</ItemGroup>
 	<ItemGroup>
-	  <Page Update="EncodingErrorContentDialog.xaml">
-	    <Generator>MSBuild:Compile</Generator>
-	  </Page>
-	</ItemGroup>
-	<ItemGroup>
+		<Page Update="EncodingErrorContentDialog.xaml">
+			<Generator>MSBuild:Compile</Generator>
+		</Page>
 		<Page Update="AdvancedSaveAudioPage.xaml">
 			<Generator>MSBuild:Compile</Generator>
 		</Page>
-	</ItemGroup>
-	<ItemGroup>
 		<Page Update="AdvancedSaveVideoPage.xaml">
 			<Generator>MSBuild:Compile</Generator>
 		</Page>
-	</ItemGroup>
-	<ItemGroup>
 		<Page Update="AdvancedSaveContent.xaml">
 			<Generator>MSBuild:Compile</Generator>
 		</Page>

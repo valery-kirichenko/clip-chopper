@@ -30,6 +30,7 @@ ArchitecturesInstallIn64BitMode=x64compatible
 Compression=lzma2/ultra64
 
 [Files]
+; Publish the app to "publish" first. The build downloads FFmpeg into the project folder, and the publish step copies it to "publish\FFmpeg".
 Source: "publish\*"; DestDir: "{app}"; Flags: ignoreversion
 Source: "publish\FFmpeg\*"; DestDir: "{app}\FFmpeg"; Flags: ignoreversion
 Source: "publish\Assets\*"; DestDir: "{app}\Assets"; Flags: ignoreversion
@@ -117,12 +118,12 @@ begin
       Exit;
   end;
 
-  Dependency_AddDotNet90Desktop;
+  Dependency_AddDotNet100Desktop;
   Dependency_AddVC2015To2022;
   Dependency_Add('windowsappruntimeinstall-x64.exe',
     '-q',
-    'Windows App SDK Runtime 1.7.1',
-    'https://aka.ms/windowsappsdk/1.7/1.7.250401001/windowsappruntimeinstall-x64.exe',
+    'Windows App SDK Runtime 2.5.1',
+    'https://aka.ms/windowsappsdk/2.5/2.5.1/windowsappruntimeinstall-x64.exe',
     '', False, False, True);
   Result := True;
 end;

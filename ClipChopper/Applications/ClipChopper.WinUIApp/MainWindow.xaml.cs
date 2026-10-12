@@ -184,14 +184,13 @@ namespace ClipChopper.WinUIApp
 #endif
 
                 UIRefresh = true, // For Activity Mode usage
-                UICurTimePerSecond = false,
                 UIRefreshInterval = 8,
                 FFmpegPath = Path.Combine(AppContext.BaseDirectory, "FFmpeg"),
-                FFmpegDevices = false,
+                FFmpegLoadProfile = Flyleaf.FFmpeg.LoadProfile.Filters,
             });
             Config config = new Config();
             Color color = ((SolidColorBrush)Application.Current.Resources["ApplicationPageBackgroundThemeBrush"]).Color;
-            config.Video.BackgroundColor = (System.Windows.Media.Color)ColorConverter.ConvertFromString(color.ToHex());
+            config.Video.BackColor = (System.Windows.Media.Color)ColorConverter.ConvertFromString(color.ToHex());
             config.Player.AutoPlay = false;
             config.Decoder.AllowProfileMismatch = true;
             Player = new Player(config);
@@ -379,7 +378,7 @@ namespace ClipChopper.WinUIApp
                 {
                     var color =
                         ((SolidColorBrush)Application.Current.Resources["ApplicationPageBackgroundThemeBrush"]).Color;
-                    Player.Config.Video.BackgroundColor =
+                    Player.Config.Video.BackColor =
                         (System.Windows.Media.Color)ColorConverter.ConvertFromString(color.ToHex());
                 });
         }
@@ -536,7 +535,7 @@ namespace ClipChopper.WinUIApp
                                             (int)Math.Round(_selectionRectangle.Height),
                                             (int)Math.Round(_selectionRectangle.TopLeft.X),
                                             (int)Math.Round(_selectionRectangle.TopLeft.Y)));
-                                    if (Player.VideoDemuxer.VideoStream.ColorSpace == ColorSpace.BT2020)
+                                    if (Player.VideoDemuxer.VideoStream.ColorSpace == ColorSpace.Bt2020)
                                     {
                                         filterOptions.Arguments.Add(new FormatArgument());
                                         filterOptions.Arguments.Add(new HwUploadArgument());
@@ -690,7 +689,7 @@ namespace ClipChopper.WinUIApp
             // and touch pad input (we want smooth increase of volume slider), but for now it is what it is
             // TBH, I don't even know if this event will fire for touch pad two finger scrolling
             int newVolume = Player.Audio.Volume + e.GetCurrentPoint((UIElement)sender).Properties.MouseWheelDelta / 24;
-            Player.Audio.Volume = Math.Max(Math.Min(newVolume, Player.Config.Player.VolumeMax), 0);
+            Player.Audio.Volume = Math.Max(Math.Min(newVolume, Player.Config.Audio.VolumeMax), 0);
         }
 
         private void MicaKind_IsCheckedChanged(object sender, RoutedEventArgs e)

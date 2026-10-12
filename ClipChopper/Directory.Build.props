@@ -4,10 +4,13 @@
   <PropertyGroup>
     <AppPlatforms>x64</AppPlatforms>
     <AppConfigurations>Debug;Release</AppConfigurations>
-    <AppTargetFramework>net6.0</AppTargetFramework>
-    <WindowsAppTargetFramework>net6.0-windows</WindowsAppTargetFramework>
-    <LibraryTargetFramework>net6.0</LibraryTargetFramework>
-    <TestTargetFramework>net6.0</TestTargetFramework>
+    <DotNetTargetFramework>net10.0</DotNetTargetFramework>
+    <AppTargetFramework>$(DotNetTargetFramework)</AppTargetFramework>
+    <WindowsAppTargetFramework>$(DotNetTargetFramework)-windows</WindowsAppTargetFramework>
+    <WinUIAppTargetFramework>$(DotNetTargetFramework)-windows10.0.22621.0</WinUIAppTargetFramework>
+    <WinUIAppTargetPlatformMinVersion>10.0.17763.0</WinUIAppTargetPlatformMinVersion>
+    <LibraryTargetFramework>$(DotNetTargetFramework)</LibraryTargetFramework>
+    <TestTargetFramework>$(DotNetTargetFramework)</TestTargetFramework>
     <CSharpLangVersion>10.0</CSharpLangVersion>
   </PropertyGroup>
 
@@ -16,9 +19,9 @@
     <AcolyteNETPackageVersion>2.2.0</AcolyteNETPackageVersion>
     <FFMEWindowsPackageVersion>4.4.350</FFMEWindowsPackageVersion>
     <NExifToolPackageVersion>0.11.0</NExifToolPackageVersion>
-    <MicrosoftExtensionsConfigurationPackageVersion>6.0.1</MicrosoftExtensionsConfigurationPackageVersion>
-    <MicrosoftExtensionsConfigurationBinderPackageVersion>6.0.0</MicrosoftExtensionsConfigurationBinderPackageVersion>
-    <MicrosoftExtensionsConfigurationJsonPackageVersion>6.0.0</MicrosoftExtensionsConfigurationJsonPackageVersion>
+    <MicrosoftExtensionsConfigurationPackageVersion>10.0.12</MicrosoftExtensionsConfigurationPackageVersion>
+    <MicrosoftExtensionsConfigurationBinderPackageVersion>10.0.12</MicrosoftExtensionsConfigurationBinderPackageVersion>
+    <MicrosoftExtensionsConfigurationJsonPackageVersion>10.0.12</MicrosoftExtensionsConfigurationJsonPackageVersion>
     <MinVerPackageVersion>3.1.0</MinVerPackageVersion>
     <NewtonsoftJsonPackageVersion>13.0.1</NewtonsoftJsonPackageVersion>
     <NLogPackageVersion>4.7.15</NLogPackageVersion>
