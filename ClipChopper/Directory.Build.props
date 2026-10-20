@@ -11,6 +11,7 @@
     <LibraryTargetFramework>$(DotNetTargetFramework)</LibraryTargetFramework>
     <TestTargetFramework>$(DotNetTargetFramework)</TestTargetFramework>
     <CSharpLangVersion>10.0</CSharpLangVersion>
+    <UiTestTargetFramework>$(DotNetTargetFramework)-windows</UiTestTargetFramework>
   </PropertyGroup>
 
   <!-- NuGet packages -->
@@ -20,11 +21,16 @@
     <MicrosoftExtensionsConfigurationPackageVersion>10.0.12</MicrosoftExtensionsConfigurationPackageVersion>
     <MicrosoftExtensionsConfigurationBinderPackageVersion>10.0.12</MicrosoftExtensionsConfigurationBinderPackageVersion>
     <MicrosoftExtensionsConfigurationJsonPackageVersion>10.0.12</MicrosoftExtensionsConfigurationJsonPackageVersion>
+    <FlaUICorePackageVersion>5.0.0</FlaUICorePackageVersion>
+    <FlaUIUIA3PackageVersion>5.0.0</FlaUIUIA3PackageVersion>
+    <MicrosoftNETTestSdkPackageVersion>18.11.0</MicrosoftNETTestSdkPackageVersion>
     <MinVerPackageVersion>3.1.0</MinVerPackageVersion>
     <NewtonsoftJsonPackageVersion>13.0.1</NewtonsoftJsonPackageVersion>
     <NLogPackageVersion>4.7.15</NLogPackageVersion>
     <NLogConfigPackageVersion>4.7.15</NLogConfigPackageVersion>
     <NLogSchemaPackageVersion>4.7.15</NLogSchemaPackageVersion>
+    <XunitPackageVersion>2.9.3</XunitPackageVersion>
+    <XunitRunnerVisualStudioPackageVersion>3.1.5</XunitRunnerVisualStudioPackageVersion>
   </PropertyGroup>
 
 </Project>

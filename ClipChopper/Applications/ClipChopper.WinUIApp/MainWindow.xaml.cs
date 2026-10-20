@@ -2,6 +2,7 @@ using CommunityToolkit.WinUI.Helpers;
 using FlyleafLib;
 using FlyleafLib.MediaPlayer;
 using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Automation;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
 using System;
@@ -358,6 +359,7 @@ namespace ClipChopper.WinUIApp
                 var margin = FragmentRange.Margin;
                 margin.Left = marginValue;
                 FragmentRange.Margin = margin;
+                AutomationProperties.SetItemStatus(SeekSlider, FormattableString.Invariant($"start={_fragment.Start / TimeSpan.TicksPerMillisecond};stop={_fragment.Stop / TimeSpan.TicksPerMillisecond}"));
             });
         }
 
@@ -431,6 +433,19 @@ namespace ClipChopper.WinUIApp
             }
 
             SelectedFile = newFile;
+            AudioTracks.Clear();
+            Player.OpenAsync(SelectedFile.FullName);
+        }
+
+        /// <summary>
+        /// Opens a file from the "--open" option and shows its folder in the list.
+        /// It does not save the folder as PreviousPath.
+        /// </summary>
+        public void OpenFile(string path)
+        {
+            SelectedFile = new FileInfo(path);
+            _selectedFolder = SelectedFile.Directory;
+            RefreshFolder();
             AudioTracks.Clear();
             Player.OpenAsync(SelectedFile.FullName);
         }
