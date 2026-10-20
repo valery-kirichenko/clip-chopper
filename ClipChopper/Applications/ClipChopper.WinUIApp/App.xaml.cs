@@ -33,6 +33,13 @@ namespace ClipChopper.WinUIApp
         public App()
         {
             this.InitializeComponent();
+            var themeName = GetLaunchOption("--theme");
+            if (themeName != null
+                && Enum.TryParse(themeName, ignoreCase: true, out ApplicationTheme theme)
+                && Enum.IsDefined(theme))
+            {
+                RequestedTheme = theme;
+            }
         }
 
         /// <summary>
@@ -41,8 +48,26 @@ namespace ClipChopper.WinUIApp
         /// <param name="args">Details about the launch request and process.</param>
         protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
         {
-            m_window = new MainWindow();
-            m_window.Activate();
+            var window = new MainWindow();
+            m_window = window;
+            window.Activate();
+
+            var path = GetLaunchOption("--open");
+            if (path != null && File.Exists(path))
+            {
+                window.OpenFile(path);
+            }
+        }
+
+        /// <summary>
+        /// Returns the value after the given option in the command line, or null.
+        /// The options "--theme" and "--open" are for UI tests. Without them the app starts as before.
+        /// </summary>
+        private static string? GetLaunchOption(string name)
+        {
+            var args = Environment.GetCommandLineArgs();
+            var index = Array.IndexOf(args, name);
+            return index > 0 && index + 1 < args.Length ? args[index + 1] : null;
         }
 
         private Window m_window;
