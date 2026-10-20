@@ -10,7 +10,6 @@ namespace ClipChopper.WinUIApp.UiTests.Tests;
 [Collection("UI")]
 public sealed class ThemeRangeTests
 {
-    private const int ToleranceMs = 34;
     private const int StartMs = 2000;
     private const int EndMs = 7000;
 
@@ -36,7 +35,7 @@ public sealed class ThemeRangeTests
         var windowBounds = app.Window.BoundingRectangle;
         using var capture = app.Capture($"range-{theme}");
 
-        var titleLuminance = MeanLuminance(capture, (capture.Width / 2) - 10, 10 - 3, 20, 6);
+        var titleLuminance = MeanLuminance(capture, (capture.Width / 2) - 10, 7, 20, 6);
         if (theme == "Light")
         {
             Assert.True(titleLuminance > 200, $"ThemeApplied: title bar luminance is {titleLuminance:F0}, expected over 200.");
@@ -47,9 +46,9 @@ public sealed class ThemeRangeTests
         }
 
         Assert.NotNull(state.FragmentStartMs);
-        Assert.InRange(state.FragmentStartMs.Value, StartMs - ToleranceMs, StartMs + ToleranceMs);
+        Assert.InRange(state.FragmentStartMs.Value, StartMs - MainWindowPage.FrameToleranceMs, StartMs + MainWindowPage.FrameToleranceMs);
         Assert.NotNull(state.FragmentStopMs);
-        Assert.InRange(state.FragmentStopMs.Value, EndMs - ToleranceMs, EndMs + ToleranceMs);
+        Assert.InRange(state.FragmentStopMs.Value, EndMs - MainWindowPage.FrameToleranceMs, EndMs + MainWindowPage.FrameToleranceMs);
 
         var videoDeviation = LuminanceDeviation(capture, (capture.Width / 2) - 50, (capture.Height / 2) - 50, 100, 100);
         Assert.True(videoDeviation > 10, $"VideoRendered: luminance deviation of the video area is {videoDeviation:F1}, expected over 10.");
