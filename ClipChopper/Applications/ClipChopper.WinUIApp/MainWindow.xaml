@@ -134,8 +134,8 @@
                                    VerticalAlignment="Center"
                                    Text="{Binding Player.CurTime, Converter={StaticResource TicksToTime}}"/>
                         <Grid Grid.Column="1" Margin="10,0,10,0">
-                            <Rectangle x:Name="FragmentRangeBackground" SizeChanged="FragmentRangeBackground_SizeChanged" Fill="{ThemeResource ControlStrongFillColorDefaultBrush}" Height="4" RadiusX="2" RadiusY="2" Grid.Row="0"/>
-                            <Rectangle x:Name="FragmentRange" Fill="{ThemeResource AccentFillColorDefaultBrush}" Height="4" RadiusX="2" RadiusY="2" Grid.Row="0" HorizontalAlignment="Left" />
+                            <Rectangle x:Name="FragmentRangeBackground" SizeChanged="FragmentRangeBackground_SizeChanged" Fill="{ThemeResource FragmentRangeTrackBrush}" Height="4" RadiusX="2" RadiusY="2" Grid.Row="0"/>
+                            <Rectangle x:Name="FragmentRange" Fill="{ThemeResource FragmentRangeFillBrush}" Height="4" RadiusX="2" RadiusY="2" Grid.Row="0" HorizontalAlignment="Left" />
                             <Slider IsTabStop="False"
                                 VerticalAlignment="Center"
                                 IsThumbToolTipEnabled="False"
