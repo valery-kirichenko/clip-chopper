@@ -10,7 +10,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 using Windows.Storage;
-using Windows.Storage.Pickers;
+using Microsoft.Windows.Storage.Pickers;
 using Windows.UI.ViewManagement;
 using Color = Windows.UI.Color;
 using ColorConverter = System.Windows.Media.ColorConverter;
@@ -30,7 +30,6 @@ using FFMpegCore.Enums;
 using CommunityToolkit.WinUI.Controls;
 using CommunityToolkit.WinUI;
 using FFMpegCore.Exceptions;
-using WinRT.Interop;
 using Point = Windows.Foundation.Point;
 using Size = Windows.Foundation.Size;
 
@@ -385,12 +384,9 @@ namespace ClipChopper.WinUIApp
 
         private async void OpenFolderButton_Click(object sender, RoutedEventArgs e)
         {
-            FolderPicker openPicker = new();
-            var hWnd = WindowNative.GetWindowHandle(this);
-            InitializeWithWindow.Initialize(openPicker, hWnd);
+            FolderPicker openPicker = new(AppWindow.Id);
 
             openPicker.SuggestedStartLocation = PickerLocationId.VideosLibrary;
-            openPicker.FileTypeFilter.Add("*");
 
             var folder = await openPicker.PickSingleFolderAsync();
             if (folder == null)
@@ -473,9 +469,7 @@ namespace ClipChopper.WinUIApp
 
         private async void TakeSnapshotButton_Click(object sender, RoutedEventArgs e)
         {
-            var savePicker = new FileSavePicker();
-            var hWnd = WindowNative.GetWindowHandle(this);
-            InitializeWithWindow.Initialize(savePicker, hWnd);
+            var savePicker = new FileSavePicker(AppWindow.Id);
             savePicker.SuggestedStartLocation = PickerLocationId.PicturesLibrary;
             savePicker.SuggestedFileName = (DirectoryList.SelectedItem as FileInfo).Name;
             savePicker.FileTypeChoices.Add("PNG image", new List<string>() { ".png" });
@@ -490,9 +484,7 @@ namespace ClipChopper.WinUIApp
 
         private async void SaveButton_Click(object sender, RoutedEventArgs e)
         {
-            var savePicker = new FileSavePicker();
-            var hWnd = WindowNative.GetWindowHandle(this);
-            InitializeWithWindow.Initialize(savePicker, hWnd);
+            var savePicker = new FileSavePicker(AppWindow.Id);
             savePicker.SuggestedStartLocation = PickerLocationId.VideosLibrary;
             savePicker.SuggestedFileName = "Chopped " + SelectedFile.Name;
             savePicker.FileTypeChoices.Add("Keep as is", new List<string>() { SelectedFile.Extension.ToLower() });
@@ -568,7 +560,7 @@ namespace ClipChopper.WinUIApp
                 await arguments.ProcessAsynchronously();
             } catch (FFMpegException exception)
             {
-                await file.DeleteAsync(StorageDeleteOption.PermanentDelete);
+                File.Delete(file.Path);
                 var dialog = new EncodingErrorContentDialog()
                 {
                     ViewModel = {
