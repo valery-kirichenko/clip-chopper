@@ -30,6 +30,7 @@ public sealed record AppLaunchOptions
 public sealed class ClipChopperApp : IDisposable
 {
     private readonly Process _process;
+    private readonly UIA3Automation _automation;
     private const uint PrintWindowRenderFullContent = 2;
 
     private readonly IntPtr _job;
@@ -38,7 +39,7 @@ public sealed class ClipChopperApp : IDisposable
     private ClipChopperApp(Process process, UIA3Automation automation, IntPtr job, IntPtr windowHandle, Window window)
     {
         _process = process;
-        Automation = automation;
+        _automation = automation;
         _job = job;
         _windowHandle = windowHandle;
         Window = window;
@@ -46,10 +47,6 @@ public sealed class ClipChopperApp : IDisposable
     }
 
     public Window Window { get; }
-
-    public UIA3Automation Automation { get; }
-
-    public int ProcessId => _process.Id;
 
     public MainWindowPage Page { get; }
 
@@ -110,7 +107,7 @@ public sealed class ClipChopperApp : IDisposable
 
     public void Dispose()
     {
-        Cleanup(_process, Automation, _job);
+        Cleanup(_process, _automation, _job);
     }
 
     private static IntPtr WaitForMainWindowHandle(Process process, TimeSpan timeout)

@@ -8,7 +8,6 @@ namespace ClipChopper.WinUIApp.UiTests.Tests;
 [Collection("UI")]
 public sealed class MainWindowTests
 {
-    private const int ToleranceMs = 34;
     private const string AppRegistryKey = @"Software\ClipChopper";
 
     private readonly TestClipFixture _clip;
@@ -56,7 +55,7 @@ public sealed class MainWindowTests
         app.Page.MarkStart();
         var afterStart = app.Page.ReadStateWhen(s => s.FragmentStartMs > 1000, TimeSpan.FromSeconds(10));
         Assert.NotNull(afterStart.FragmentStartMs);
-        Assert.InRange(afterStart.FragmentStartMs.Value, 2000 - ToleranceMs, 2000 + ToleranceMs);
+        Assert.InRange(afterStart.FragmentStartMs.Value, 2000 - MainWindowPage.FrameToleranceMs, 2000 + MainWindowPage.FrameToleranceMs);
         Assert.NotNull(afterStart.FragmentStopMs);
         Assert.InRange(afterStart.FragmentStopMs.Value, afterStart.SeekMaximum - 1, afterStart.SeekMaximum + 1);
 
@@ -64,10 +63,10 @@ public sealed class MainWindowTests
         app.Page.MarkEnd();
         var afterEnd = app.Page.ReadStateWhen(s => s.FragmentStopMs < 8000, TimeSpan.FromSeconds(10));
         Assert.NotNull(afterEnd.FragmentStopMs);
-        Assert.InRange(afterEnd.FragmentStopMs.Value, 7000 - ToleranceMs, 7000 + ToleranceMs);
+        Assert.InRange(afterEnd.FragmentStopMs.Value, 7000 - MainWindowPage.FrameToleranceMs, 7000 + MainWindowPage.FrameToleranceMs);
         Assert.NotNull(afterEnd.FragmentStartMs);
-        Assert.InRange(afterEnd.FragmentStartMs.Value, 2000 - ToleranceMs, 2000 + ToleranceMs);
-        Assert.InRange(afterEnd.SeekValue, 7000 - ToleranceMs, 7000 + ToleranceMs);
+        Assert.InRange(afterEnd.FragmentStartMs.Value, 2000 - MainWindowPage.FrameToleranceMs, 2000 + MainWindowPage.FrameToleranceMs);
+        Assert.InRange(afterEnd.SeekValue, 7000 - MainWindowPage.FrameToleranceMs, 7000 + MainWindowPage.FrameToleranceMs);
 
         app.Capture("marked").Dispose();
     }

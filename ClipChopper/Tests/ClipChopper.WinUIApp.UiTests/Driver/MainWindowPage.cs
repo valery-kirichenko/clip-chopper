@@ -8,7 +8,7 @@ namespace ClipChopper.WinUIApp.UiTests.Driver;
 
 public sealed class MainWindowPage
 {
-    private const int FrameToleranceMs = 34;
+    public const int FrameToleranceMs = 34;
 
     private readonly Window _window;
     private readonly UIA3Automation _automation;
