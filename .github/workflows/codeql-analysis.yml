@@ -16,7 +16,7 @@ permissions:
 jobs:
   analyze:
     name: Analyze
-    # The solution has WPF and WinUI apps, so the job must run on Windows.
+    # The WinUI app builds only on Windows, so the job must run on Windows.
     runs-on: windows-2025
 
     strategy:
