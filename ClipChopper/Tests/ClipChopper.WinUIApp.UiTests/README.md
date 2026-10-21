@@ -25,7 +25,7 @@ The command builds the app with the runtime identifier `win-x64` first. The test
 
 ## What you see
 
-App windows open at position 100, 100 with size 1280 x 720 and take the focus. Do not use the mouse or the keyboard during the run. Each test closes its window. A failed test closes it too.
+App windows open at position 100, 100 with size 1280 x 720 and take the focus. Do not use the mouse or the keyboard during the run. The app has keyboard shortcuts: J, K, L, Space, and the arrow keys seek or play the video. A key press or a click in the app window can make a test fail. Do not use the app window while the tests run. Each test closes its window. A failed test closes it too.
 
 ## Output
 

@@ -10,9 +10,6 @@ public sealed class MainWindowPage
 {
     public const int FrameToleranceMs = 34;
 
-    private static readonly TimeSpan MarkTimeout = TimeSpan.FromSeconds(10);
-    private static readonly TimeSpan MarkInterval = TimeSpan.FromMilliseconds(200);
-
     private readonly Window _window;
     private readonly UIA3Automation _automation;
 
@@ -45,7 +42,7 @@ public sealed class MainWindowPage
         var opened = Retry.WhileFalse(
             () => PlayButton.IsEnabled,
             timeout,
-            TimeSpan.FromMilliseconds(100),
+            UiTiming.PollInterval,
             throwOnTimeout: false,
             ignoreException: true
         );
@@ -62,8 +59,8 @@ public sealed class MainWindowPage
         var expectedTime = FormatTime(ms);
         var reached = Retry.WhileFalse(
             () => Math.Abs(range.Value.Value - ms) <= FrameToleranceMs && CurrentTimeText.Name == expectedTime,
-            TimeSpan.FromSeconds(10),
-            TimeSpan.FromMilliseconds(50),
+            UiTiming.Timeout,
+            UiTiming.PollInterval,
             throwOnTimeout: false,
             ignoreException: true
         );
@@ -73,22 +70,22 @@ public sealed class MainWindowPage
         }
     }
 
-    public void MarkStart()
+    public void MarkStart(int expectedMs)
     {
-        Mark("StartFragmentButton", status => status.Start);
+        Mark("StartFragmentButton", status => status.Start, expectedMs);
     }
 
-    public void MarkEnd()
+    public void MarkEnd(int expectedMs)
     {
-        Mark("EndFragmentButton", status => status.Stop);
+        Mark("EndFragmentButton", status => status.Stop, expectedMs);
     }
 
     public void MarkRange(int startMs, int endMs)
     {
         SeekTo(startMs);
-        MarkStart();
+        MarkStart(startMs);
         SeekTo(endMs);
-        MarkEnd();
+        MarkEnd(endMs);
     }
 
     public MainWindowState ReadState()
@@ -128,20 +125,19 @@ public sealed class MainWindowPage
                 return condition(state);
             },
             timeout,
-            TimeSpan.FromMilliseconds(50),
+            UiTiming.PollInterval,
             throwOnTimeout: false,
             ignoreException: true
         );
         return met.Result ? state! : ReadState();
     }
 
-    private void Mark(string buttonId, Func<(int? Start, int? Stop), int?> pick)
+    private void Mark(string buttonId, Func<(int? Start, int? Stop), int?> pick, int expectedMs)
     {
-        var position = SeekSlider.Patterns.RangeValue.Pattern.Value.Value;
         var invoked = Retry.WhileException(
             () => Find(buttonId).Patterns.Invoke.Pattern.Invoke(),
-            MarkTimeout,
-            MarkInterval
+            UiTiming.Timeout,
+            UiTiming.PollInterval
         );
         if (!invoked.Success)
         {
@@ -149,15 +145,15 @@ public sealed class MainWindowPage
         }
 
         var marked = Retry.WhileFalse(
-            () => pick(ParseStatus(SeekSlider.Properties.ItemStatus.ValueOrDefault)) is { } mark && Math.Abs(mark - position) <= FrameToleranceMs,
-            MarkTimeout,
-            MarkInterval,
+            () => pick(ParseStatus(SeekSlider.Properties.ItemStatus.ValueOrDefault)) is { } mark && Math.Abs(mark - expectedMs) <= FrameToleranceMs,
+            UiTiming.Timeout,
+            UiTiming.PollInterval,
             throwOnTimeout: false,
             ignoreException: true
         );
         if (!marked.Result)
         {
-            throw new TimeoutException($"The fragment mark of '{buttonId}' did not reach {position}.");
+            throw new TimeoutException($"The fragment mark of '{buttonId}' did not reach {expectedMs}.", marked.LastException);
         }
     }
 

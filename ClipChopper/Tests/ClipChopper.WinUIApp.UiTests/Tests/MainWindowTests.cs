@@ -52,7 +52,7 @@ public sealed class MainWindowTests
         app.Page.SeekTo(2000);
         Assert.Equal("00:00:02", app.Page.ReadState().CurrentTime);
 
-        app.Page.MarkStart();
+        app.Page.MarkStart(2000);
         var afterStart = app.Page.ReadStateWhen(s => s.FragmentStartMs > 1000, TimeSpan.FromSeconds(10));
         Assert.NotNull(afterStart.FragmentStartMs);
         Assert.InRange(afterStart.FragmentStartMs.Value, 2000 - MainWindowPage.FrameToleranceMs, 2000 + MainWindowPage.FrameToleranceMs);
@@ -60,7 +60,7 @@ public sealed class MainWindowTests
         Assert.InRange(afterStart.FragmentStopMs.Value, afterStart.SeekMaximum - 1, afterStart.SeekMaximum + 1);
 
         app.Page.SeekTo(7000);
-        app.Page.MarkEnd();
+        app.Page.MarkEnd(7000);
         var afterEnd = app.Page.ReadStateWhen(s => s.FragmentStopMs < 8000, TimeSpan.FromSeconds(10));
         Assert.NotNull(afterEnd.FragmentStopMs);
         Assert.InRange(afterEnd.FragmentStopMs.Value, 7000 - MainWindowPage.FrameToleranceMs, 7000 + MainWindowPage.FrameToleranceMs);
