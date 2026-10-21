@@ -42,7 +42,7 @@ The app has three options for tests: `--theme Light|Dark`, `--open <path>`, and 
 
 The names live in `ClipChopper/Applications/ClipChopper.WinUIApp/CommandLine/LaunchOptionNames.cs`. The app reads the command line once, with `LaunchOptionsParser`, and keeps the result in a `LaunchOptions` record. The parser ignores unknown arguments and bad values. If an option repeats, the last valid value wins.
 
-The test project compiles the files of that folder, so the tests use the same names, the same `LaunchTheme` enum, and the same range format (`RangeStatusFormat`). `LaunchArguments` builds the command line from a `LaunchOptions` record. To add an option, change `LaunchOptions`, `LaunchOptionNames`, `LaunchOptionsParser`, and `LaunchArguments`, and add a parser test.
+The `.csproj` of the test project lists five files of that folder and one file of the `Automation` folder (`RangeStatusFormat`) one by one, so the tests use the same names, the same `LaunchTheme` enum, and the same range format. `LaunchArguments` builds the command line from a `LaunchOptions` record. To add an option, change `LaunchOptions`, `LaunchOptionNames`, `LaunchOptionsParser`, and `LaunchArguments`, and add a parser test.
 
 ## Write a new test
 

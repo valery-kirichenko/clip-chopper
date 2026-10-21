@@ -37,7 +37,6 @@ public sealed class LaunchOptionsParserTests
     [InlineData("Blue")]
     [InlineData("1")]
     [InlineData("Default")]
-    [InlineData("")]
     public void IgnoresBadTheme(string value)
     {
         var options = LaunchOptionsParser.Parse([LaunchOptionNames.Theme, value]);
@@ -63,16 +62,33 @@ public sealed class LaunchOptionsParserTests
         Assert.True(options.ExposeRange);
     }
 
-    [Theory]
-    [InlineData(0)]
-    [InlineData(1)]
-    public void ReadsAllOptionsInAnyOrder(int order)
+    [Fact]
+    public void ReadsAllOptionsWhenFlagComesFirst()
     {
-        string[] args = order == 0
-            ? [LaunchOptionNames.ExposeRange, LaunchOptionNames.Open, "x", LaunchOptionNames.Theme, "Dark"]
-            : [LaunchOptionNames.Theme, "Dark", LaunchOptionNames.Open, "x", LaunchOptionNames.ExposeRange];
+        AssertAllOptionsRead(
+            LaunchOptionNames.ExposeRange,
+            LaunchOptionNames.Open,
+            "x",
+            LaunchOptionNames.Theme,
+            nameof(LaunchTheme.Dark)
+        );
+    }
 
-        var options = LaunchOptionsParser.Parse(args);
+    [Fact]
+    public void ReadsAllOptionsWhenFlagComesLast()
+    {
+        AssertAllOptionsRead(
+            LaunchOptionNames.Theme,
+            nameof(LaunchTheme.Dark),
+            LaunchOptionNames.Open,
+            "x",
+            LaunchOptionNames.ExposeRange
+        );
+    }
+
+    private static void AssertAllOptionsRead(params string[] arguments)
+    {
+        var options = LaunchOptionsParser.Parse(arguments);
 
         Assert.Equal(new LaunchOptions { Theme = LaunchTheme.Dark, OpenFile = "x", ExposeRange = true }, options);
     }
@@ -102,6 +118,14 @@ public sealed class LaunchOptionsParserTests
     }
 
     [Fact]
+    public void IgnoresEmptyThemeValue()
+    {
+        var options = LaunchOptionsParser.Parse([LaunchOptionNames.Theme, string.Empty]);
+
+        Assert.Null(options.Theme);
+    }
+
+    [Fact]
     public void IgnoresEmptyOpenPath()
     {
         var options = LaunchOptionsParser.Parse([LaunchOptionNames.Open, string.Empty]);
@@ -120,7 +144,7 @@ public sealed class LaunchOptionsParserTests
     [Fact]
     public void UsesLastThemeOfRepeatedOption()
     {
-        var options = LaunchOptionsParser.Parse([LaunchOptionNames.Theme, "Light", LaunchOptionNames.Theme, "Dark"]);
+        var options = LaunchOptionsParser.Parse([LaunchOptionNames.Theme, nameof(LaunchTheme.Light), LaunchOptionNames.Theme, nameof(LaunchTheme.Dark)]);
 
         Assert.Equal(LaunchTheme.Dark, options.Theme);
     }
@@ -128,7 +152,7 @@ public sealed class LaunchOptionsParserTests
     [Fact]
     public void KeepsEarlierThemeWhenLaterThemeIsBad()
     {
-        var options = LaunchOptionsParser.Parse([LaunchOptionNames.Theme, "Dark", LaunchOptionNames.Theme, "Blue"]);
+        var options = LaunchOptionsParser.Parse([LaunchOptionNames.Theme, nameof(LaunchTheme.Dark), LaunchOptionNames.Theme, "Blue"]);
 
         Assert.Equal(LaunchTheme.Dark, options.Theme);
     }
