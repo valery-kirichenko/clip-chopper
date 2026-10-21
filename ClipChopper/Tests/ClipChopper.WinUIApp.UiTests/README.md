@@ -18,7 +18,7 @@ The first build downloads FFmpeg, as for the app. The tests use it to make the t
 Run this command from the repository root:
 
 ```powershell
-dotnet test ClipChopper/Tests/ClipChopper.WinUIApp.UiTests/ClipChopper.WinUIApp.UiTests.csproj
+dotnet test ClipChopper/Tests/ClipChopper.WinUIApp.UiTests -p:Platform=x64
 ```
 
 The command builds the app with the runtime identifier `win-x64` first. The test run itself takes about 10 to 20 seconds.

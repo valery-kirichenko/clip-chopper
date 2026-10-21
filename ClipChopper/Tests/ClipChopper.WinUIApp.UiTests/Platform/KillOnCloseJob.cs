@@ -7,7 +7,7 @@ namespace ClipChopper.WinUIApp.UiTests.Platform;
 
 internal sealed class KillOnCloseJob : IDisposable
 {
-    private readonly IntPtr _handle;
+    private IntPtr _handle;
 
     private KillOnCloseJob(IntPtr handle)
     {
@@ -54,6 +54,12 @@ internal sealed class KillOnCloseJob : IDisposable
 
     public void Dispose()
     {
+        if (_handle == IntPtr.Zero)
+        {
+            return;
+        }
+
         NativeMethods.CloseHandle(_handle);
+        _handle = IntPtr.Zero;
     }
 }
