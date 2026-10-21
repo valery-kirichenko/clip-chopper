@@ -1,7 +1,6 @@
 using System.Diagnostics;
 using System.Drawing;
 using ClipChopper.WinUIApp.UiTests.Platform;
-using FlaUI.Core;
 using FlaUI.Core.AutomationElements;
 using FlaUI.UIA3;
 
@@ -34,15 +33,14 @@ public sealed class ClipChopperApp : IDisposable
 
     public static ClipChopperApp Launch(AppLaunchOptions options)
     {
-        var application = Application.Launch(CreateStartInfo(options));
-        var process = Process.GetProcessById(application.ProcessId);
+        var process = Process.Start(CreateStartInfo(options))!;
         KillOnCloseJob? job = null;
         UIA3Automation? automation = null;
         try
         {
             job = KillOnCloseJob.Assign(process);
             automation = new UIA3Automation();
-            var windowHandle = MainWindowFinder.WaitForHandle(process, options.StartTimeout);
+            var windowHandle = MainWindowFinder.WaitForHandle(process, options.StartTimeout, UiTiming.PollInterval);
             var window = automation.FromHandle(windowHandle).AsWindow();
             var transform = window.Patterns.Transform.Pattern;
             transform.Move(options.WindowPosition.X, options.WindowPosition.Y);

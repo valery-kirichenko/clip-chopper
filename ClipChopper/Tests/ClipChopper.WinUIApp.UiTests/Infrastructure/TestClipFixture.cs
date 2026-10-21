@@ -15,7 +15,7 @@ public sealed class TestClipFixture : IDisposable
             return;
         }
 
-        _folder = Path.Combine(Path.GetTempPath(), "ClipChopperUiTests", Guid.NewGuid().ToString("N"));
+        _folder = Path.Combine(Path.GetTempPath(), "ClipChopperUiTests-" + Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(_folder);
         ClipPath = Path.Combine(_folder, "test-clip.mp4");
         MakeClip(ClipPath);
