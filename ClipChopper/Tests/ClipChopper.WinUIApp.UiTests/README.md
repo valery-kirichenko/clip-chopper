@@ -25,7 +25,7 @@ The command builds the app with the runtime identifier `win-x64` first. The test
 
 ## What you see
 
-App windows open at position 100, 100 with size 1280 x 720 in physical screen pixels and take the focus. The test host is per-monitor DPI aware, so the UI Automation bounds and the screenshots use the same pixels at any display scale. At a display scale over 100%, the app content is larger, so less of it fits in the window. Do not use the mouse or the keyboard during the run. The app has keyboard shortcuts: J, K, L, Space, and the arrow keys seek or play the video. A key press or a click in the app window can make a test fail. Do not use the app window while the tests run. Each test closes its window. A failed test closes it too.
+App windows open at position 100, 100 with size 1280 x 720 in physical screen pixels and take the focus. The test host is per-monitor DPI aware, so the UI Automation bounds and the screenshots use physical pixels. The checks run at 100% display scale. At a higher scale, the app content is larger, so less of it fits in the window. Do not use the mouse or the keyboard during the run. The app has keyboard shortcuts: J, K, L, Space, and the arrow keys seek or play the video. A key press or a click in the app window can make a test fail. Do not use the app window while the tests run. Each test closes its window. A failed test closes it too.
 
 ## Output
 

@@ -101,10 +101,21 @@ public sealed class ClipChopperApp : IDisposable
 
     private static void WaitForSize(Window window, Size size)
     {
-        var resized = Retry.WhileFalse(() => window.BoundingRectangle.Size == size, UiTiming.Timeout, UiTiming.PollInterval, throwOnTimeout: false, ignoreException: true);
+        var actual = Size.Empty;
+        var resized = Retry.WhileFalse(
+            () =>
+            {
+                actual = window.BoundingRectangle.Size;
+                return actual == size;
+            },
+            UiTiming.Timeout,
+            UiTiming.PollInterval,
+            throwOnTimeout: false,
+            ignoreException: true
+        );
         if (!resized.Result)
         {
-            throw new TimeoutException($"The app window did not reach {size.Width} x {size.Height} physical pixels.", resized.LastException);
+            throw new TimeoutException($"The app window is {actual.Width} x {actual.Height}, expected {size.Width} x {size.Height} physical pixels.", resized.LastException);
         }
     }
 

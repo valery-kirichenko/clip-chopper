@@ -1,12 +1,10 @@
-using System.ComponentModel;
-using System.Runtime.InteropServices;
 using ClipChopper.WinUIApp.UiTests.Native;
 
 namespace ClipChopper.WinUIApp.UiTests.Platform;
 
 /// <summary>
 /// Makes the test host per-monitor DPI aware (v2), so that UI Automation bounds, window rectangles,
-/// and PrintWindow bitmaps use the same physical pixels at any display scale.
+/// and PrintWindow bitmaps use the same physical pixels at the display scale of the monitor.
 /// </summary>
 internal static class DpiAwareness
 {
@@ -15,15 +13,14 @@ internal static class DpiAwareness
 
     public static void EnablePerMonitorV2()
     {
-        if (NativeMethods.AreDpiAwarenessContextsEqual(NativeMethods.GetThreadDpiAwarenessContext(), PerMonitorAwareV2))
+        if (NativeMethods.AreDpiAwarenessContextsEqual(NativeMethods.GetDpiAwarenessContextForProcess(IntPtr.Zero), PerMonitorAwareV2))
         {
             return;
         }
 
         if (!NativeMethods.SetProcessDpiAwarenessContext(PerMonitorAwareV2))
         {
-            var error = Marshal.GetLastPInvokeError();
-            throw new Win32Exception(error, $"SetProcessDpiAwarenessContext failed: {Marshal.GetPInvokeErrorMessage(error)} (0x{error:X8})");
+            throw Win32Errors.CreateFromLastCall("SetProcessDpiAwarenessContext");
         }
     }
 }
