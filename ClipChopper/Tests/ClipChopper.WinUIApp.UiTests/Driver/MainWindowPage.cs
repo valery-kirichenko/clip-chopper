@@ -42,13 +42,7 @@ public sealed class MainWindowPage
     /// </summary>
     public void WaitUntilOpened(TimeSpan timeout)
     {
-        var opened = Retry.WhileFalse(
-            IsOpened,
-            timeout,
-            UiTiming.PollInterval,
-            throwOnTimeout: false,
-            ignoreException: true
-        );
+        var opened = Retry.WhileFalse(IsOpened, timeout, UiTiming.PollInterval, throwOnTimeout: false, ignoreException: true);
         if (!opened.Result)
         {
             throw new TimeoutException("The video did not open: the play button stayed disabled or the range is not set.", opened.LastException);
@@ -58,16 +52,10 @@ public sealed class MainWindowPage
     public void SeekTo(int ms)
     {
         SeekSlider.Patterns.RangeValue.Pattern.SetValue(ms);
-        var reached = Retry.WhileFalse(
-            () => IsAt(ms),
-            UiTiming.Timeout,
-            UiTiming.PollInterval,
-            throwOnTimeout: false,
-            ignoreException: true
-        );
+        var reached = Retry.WhileFalse(() => IsAt(ms), UiTiming.Timeout, UiTiming.PollInterval, throwOnTimeout: false, ignoreException: true);
         if (!reached.Result)
         {
-            throw new TimeoutException($"The player did not reach {FormatTime(ms)}. Time text: {CurrentTimeText.Name}.");
+            throw new TimeoutException($"The player did not reach {FormatTime(ms)}. Time text: {CurrentTimeText.Name}.", reached.LastException);
         }
     }
 
@@ -118,26 +106,28 @@ public sealed class MainWindowPage
     private void Mark(RangeEdge edge, int expectedMs)
     {
         var buttonId = edge == RangeEdge.Start ? "StartFragmentButton" : "EndFragmentButton";
-        var invoked = Retry.WhileException(
-            () => Find(buttonId).Patterns.Invoke.Pattern.Invoke(),
-            UiTiming.Timeout,
-            UiTiming.PollInterval
-        );
+        var invoked = Retry.WhileException(() => Find(buttonId).Patterns.Invoke.Pattern.Invoke(), UiTiming.Timeout, UiTiming.PollInterval);
         if (!invoked.Success)
         {
             throw new TimeoutException($"Cannot invoke '{buttonId}'.", invoked.LastException);
         }
 
-        var marked = Retry.WhileFalse(
-            () => IsMarkedAt(edge, expectedMs),
-            UiTiming.Timeout,
-            UiTiming.PollInterval,
-            throwOnTimeout: false,
-            ignoreException: true
-        );
+        var marked = Retry.WhileFalse(() => IsMarkedAt(edge, expectedMs), UiTiming.Timeout, UiTiming.PollInterval, throwOnTimeout: false, ignoreException: true);
         if (!marked.Result)
         {
-            throw new TimeoutException($"The {edge} mark did not reach {expectedMs}. Range: {ReadRange()}.", marked.LastException);
+            throw new TimeoutException($"The {edge} mark did not reach {expectedMs}. Range: {DescribeRange()}.", marked.LastException);
+        }
+    }
+
+    private string DescribeRange()
+    {
+        try
+        {
+            return ReadRange()?.ToString() ?? "not set";
+        }
+        catch (Exception)
+        {
+            return "unknown";
         }
     }
 
