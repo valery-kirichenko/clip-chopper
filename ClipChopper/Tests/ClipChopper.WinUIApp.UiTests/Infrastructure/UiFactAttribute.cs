@@ -9,11 +9,3 @@ public sealed class UiFactAttribute : FactAttribute
         Skip = UiEnvironment.SkipReason;
     }
 }
-
-public sealed class UiTheoryAttribute : TheoryAttribute
-{
-    public UiTheoryAttribute()
-    {
-        Skip = UiEnvironment.SkipReason;
-    }
-}
