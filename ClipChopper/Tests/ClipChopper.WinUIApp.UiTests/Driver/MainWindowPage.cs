@@ -37,10 +37,13 @@ public sealed class MainWindowPage
 
     public AutomationElement DurationText => Find("DurationText");
 
+    /// <summary>
+    /// Waits until the play button is enabled and the slider shows the marked range of the new video.
+    /// </summary>
     public void WaitUntilOpened(TimeSpan timeout)
     {
         var opened = Retry.WhileFalse(
-            () => PlayButton.IsEnabled,
+            IsOpened,
             timeout,
             UiTiming.PollInterval,
             throwOnTimeout: false,
@@ -48,17 +51,15 @@ public sealed class MainWindowPage
         );
         if (!opened.Result)
         {
-            throw new TimeoutException("The video did not open: the play button stayed disabled.");
+            throw new TimeoutException("The video did not open: the play button stayed disabled or the range is not set.", opened.LastException);
         }
     }
 
     public void SeekTo(int ms)
     {
-        var range = SeekSlider.Patterns.RangeValue.Pattern;
-        range.SetValue(ms);
-        var expectedTime = FormatTime(ms);
+        SeekSlider.Patterns.RangeValue.Pattern.SetValue(ms);
         var reached = Retry.WhileFalse(
-            () => Math.Abs(range.Value.Value - ms) <= FrameToleranceMs && CurrentTimeText.Name == expectedTime,
+            () => IsAt(ms),
             UiTiming.Timeout,
             UiTiming.PollInterval,
             throwOnTimeout: false,
@@ -66,18 +67,18 @@ public sealed class MainWindowPage
         );
         if (!reached.Result)
         {
-            throw new TimeoutException($"The player did not reach {expectedTime}. Time text: {CurrentTimeText.Name}.");
+            throw new TimeoutException($"The player did not reach {FormatTime(ms)}. Time text: {CurrentTimeText.Name}.");
         }
     }
 
     public void MarkStart(int expectedMs)
     {
-        Mark("StartFragmentButton", status => status.Start, expectedMs);
+        Mark(RangeEdge.Start, expectedMs);
     }
 
     public void MarkEnd(int expectedMs)
     {
-        Mark("EndFragmentButton", status => status.Stop, expectedMs);
+        Mark(RangeEdge.Stop, expectedMs);
     }
 
     public void MarkRange(int startMs, int endMs)
@@ -91,8 +92,6 @@ public sealed class MainWindowPage
     public MainWindowState ReadState()
     {
         var range = SeekSlider.Patterns.RangeValue.Pattern;
-        var status = SeekSlider.Properties.ItemStatus.ValueOrDefault;
-        var (start, stop) = ParseStatus(status);
         var selected = DirectoryList
             .FindAllDescendants(_automation.ConditionFactory.ByControlType(ControlType.ListItem))
             .FirstOrDefault(item => item.Patterns.SelectionItem.Pattern.IsSelected.Value);
@@ -107,33 +106,18 @@ public sealed class MainWindowPage
             CropButton.Patterns.Toggle.Pattern.ToggleState.Value == ToggleState.On,
             selected?.Name,
             AudioTrackSelector.IsEnabled,
-            start,
-            stop
+            ReadRange()
         );
     }
 
-    /// <summary>
-    /// Reads the state until the condition holds or the timeout ends. Returns the last state, so the caller asserts it.
-    /// </summary>
-    public MainWindowState ReadStateWhen(Func<MainWindowState, bool> condition, TimeSpan timeout)
+    public MarkedRange? ReadRange()
     {
-        MainWindowState? state = null;
-        var met = Retry.WhileFalse(
-            () =>
-            {
-                state = ReadState();
-                return condition(state);
-            },
-            timeout,
-            UiTiming.PollInterval,
-            throwOnTimeout: false,
-            ignoreException: true
-        );
-        return met.Result ? state! : ReadState();
+        return MarkedRange.Parse(SeekSlider.Properties.ItemStatus.ValueOrDefault);
     }
 
-    private void Mark(string buttonId, Func<(int? Start, int? Stop), int?> pick, int expectedMs)
+    private void Mark(RangeEdge edge, int expectedMs)
     {
+        var buttonId = edge == RangeEdge.Start ? "StartFragmentButton" : "EndFragmentButton";
         var invoked = Retry.WhileException(
             () => Find(buttonId).Patterns.Invoke.Pattern.Invoke(),
             UiTiming.Timeout,
@@ -145,7 +129,7 @@ public sealed class MainWindowPage
         }
 
         var marked = Retry.WhileFalse(
-            () => pick(ParseStatus(SeekSlider.Properties.ItemStatus.ValueOrDefault)) is { } mark && Math.Abs(mark - expectedMs) <= FrameToleranceMs,
+            () => IsMarkedAt(edge, expectedMs),
             UiTiming.Timeout,
             UiTiming.PollInterval,
             throwOnTimeout: false,
@@ -153,38 +137,23 @@ public sealed class MainWindowPage
         );
         if (!marked.Result)
         {
-            throw new TimeoutException($"The fragment mark of '{buttonId}' did not reach {expectedMs}.", marked.LastException);
+            throw new TimeoutException($"The {edge} mark did not reach {expectedMs}. Range: {ReadRange()}.", marked.LastException);
         }
     }
 
-    private static (int? Start, int? Stop) ParseStatus(string? status)
+    private bool IsOpened()
     {
-        if (string.IsNullOrEmpty(status))
-        {
-            return (null, null);
-        }
+        return PlayButton.IsEnabled && ReadRange() != null;
+    }
 
-        int? start = null;
-        int? stop = null;
-        foreach (var part in status.Split(';'))
-        {
-            var pair = part.Split('=');
-            if (pair.Length != 2 || !int.TryParse(pair[1], NumberStyles.Integer, CultureInfo.InvariantCulture, out var value))
-            {
-                throw new FormatException($"Unexpected ItemStatus of the seek slider: '{status}'.");
-            }
+    private bool IsAt(int ms)
+    {
+        return Math.Abs(SeekSlider.Patterns.RangeValue.Pattern.Value.Value - ms) <= FrameToleranceMs && CurrentTimeText.Name == FormatTime(ms);
+    }
 
-            if (pair[0] == "start")
-            {
-                start = value;
-            }
-            else if (pair[0] == "stop")
-            {
-                stop = value;
-            }
-        }
-
-        return (start, stop);
+    private bool IsMarkedAt(RangeEdge edge, int expectedMs)
+    {
+        return ReadRange() is { } range && Math.Abs(range[edge] - expectedMs) <= FrameToleranceMs;
     }
 
     private static string FormatTime(int ms)
