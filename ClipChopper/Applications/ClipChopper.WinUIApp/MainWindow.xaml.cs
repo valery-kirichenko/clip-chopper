@@ -1,7 +1,10 @@
+using ClipChopper.WinUIApp.Automation;
+using ClipChopper.WinUIApp.CommandLine;
 using CommunityToolkit.WinUI.Helpers;
 using FlyleafLib;
 using FlyleafLib.MediaPlayer;
 using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Automation;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
 using System;
@@ -45,6 +48,12 @@ namespace ClipChopper.WinUIApp
     public sealed partial class MainWindow : Window
     {
         private static string[] ALLOWED_EXTENSTIONS = [".mp4", ".mkv", ".webm", ".mov"];
+
+        private static bool IsAllowedExtension(string extension)
+        {
+            return ALLOWED_EXTENSTIONS.Any(allowed => allowed.Equals(extension, StringComparison.OrdinalIgnoreCase));
+        }
+
         public Player Player { get; set; }
         UISettings settings = new();
         SymbolIcon iconPlay = new SymbolIcon(Symbol.Play);
@@ -169,9 +178,11 @@ namespace ClipChopper.WinUIApp
         private bool preciseSeekingShortcutEnabled = false;
         private bool preciseSeekingShortVideoEnabled = false;
 
+        private readonly LaunchOptions _launchOptions;
 
-        public MainWindow()
+        public MainWindow(LaunchOptions launchOptions)
         {
+            _launchOptions = launchOptions;
             GlobalFFOptions.Configure(new FFOptions
                 { BinaryFolder = Path.Combine(AppContext.BaseDirectory, "FFmpeg") });
             // Initializes Engine (Specifies FFmpeg libraries path which is required)
@@ -359,6 +370,12 @@ namespace ClipChopper.WinUIApp
                 var margin = FragmentRange.Margin;
                 margin.Left = marginValue;
                 FragmentRange.Margin = margin;
+                if (_launchOptions.ExposeRange)
+                {
+                    var startMs = (int)(_fragment.Start / TimeSpan.TicksPerMillisecond);
+                    var stopMs = (int)(_fragment.Stop / TimeSpan.TicksPerMillisecond);
+                    AutomationProperties.SetItemStatus(SeekSlider, RangeStatusFormat.Format(startMs, stopMs));
+                }
             });
         }
 
@@ -435,6 +452,24 @@ namespace ClipChopper.WinUIApp
             }
 
             SelectedFile = newFile;
+            AudioTracks.Clear();
+            Player.OpenAsync(SelectedFile.FullName);
+        }
+
+        /// <summary>
+        /// Opens a file from the launch options and shows its folder in the list.
+        /// It does not save the folder as PreviousPath.
+        /// </summary>
+        public void OpenFile(string path)
+        {
+            if (!IsAllowedExtension(Path.GetExtension(path)))
+            {
+                return;
+            }
+
+            SelectedFile = new FileInfo(path);
+            _selectedFolder = SelectedFile.Directory;
+            RefreshFolder();
             AudioTracks.Clear();
             Player.OpenAsync(SelectedFile.FullName);
         }
@@ -596,7 +631,7 @@ namespace ClipChopper.WinUIApp
             }
 
             DirectoryList.ItemsSource = SelectedFolder.EnumerateFiles()
-                .Where(file => ALLOWED_EXTENSTIONS.Any(extension => file.Extension.Equals(extension, StringComparison.OrdinalIgnoreCase)))
+                .Where(file => IsAllowedExtension(file.Extension))
                 .OrderBy(file => file, Comparer<FileInfo>.Create((x, y) =>
                 {
                     var comparisonResult = SortAttribute switch
@@ -641,7 +676,7 @@ namespace ClipChopper.WinUIApp
             switch (items[0])
             {
                 case StorageFile file:
-                    if (!ALLOWED_EXTENSTIONS.Any(extension => file.FileType.Equals(extension, StringComparison.OrdinalIgnoreCase)))
+                    if (!IsAllowedExtension(file.FileType))
                     {
                         return;
                     }

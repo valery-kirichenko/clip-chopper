@@ -1,4 +1,5 @@
-﻿using Microsoft.UI.Xaml;
+﻿using ClipChopper.WinUIApp.CommandLine;
+using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
 using Microsoft.UI.Xaml.Data;
@@ -33,6 +34,11 @@ namespace ClipChopper.WinUIApp
         public App()
         {
             this.InitializeComponent();
+            _launchOptions = LaunchOptionsParser.Parse(Environment.GetCommandLineArgs()[1..]);
+            if (_launchOptions.Theme is { } theme)
+            {
+                RequestedTheme = ToApplicationTheme(theme);
+            }
         }
 
         /// <summary>
@@ -41,9 +47,27 @@ namespace ClipChopper.WinUIApp
         /// <param name="args">Details about the launch request and process.</param>
         protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
         {
-            m_window = new MainWindow();
-            m_window.Activate();
+            var window = new MainWindow(_launchOptions);
+            m_window = window;
+            window.Activate();
+
+            if (_launchOptions.OpenFile is { } path && File.Exists(path))
+            {
+                window.OpenFile(path);
+            }
         }
+
+        private static ApplicationTheme ToApplicationTheme(LaunchTheme theme)
+        {
+            return theme switch
+            {
+                LaunchTheme.Light => ApplicationTheme.Light,
+                LaunchTheme.Dark => ApplicationTheme.Dark,
+                _ => throw new ArgumentOutOfRangeException(nameof(theme), theme, null),
+            };
+        }
+
+        private readonly LaunchOptions _launchOptions;
 
         private Window m_window;
     }
