@@ -45,6 +45,12 @@ namespace ClipChopper.WinUIApp
     public sealed partial class MainWindow : Window
     {
         private static string[] ALLOWED_EXTENSTIONS = [".mp4", ".mkv", ".webm", ".mov"];
+
+        private static bool IsAllowedExtension(string extension)
+        {
+            return ALLOWED_EXTENSTIONS.Any(allowed => allowed.Equals(extension, StringComparison.OrdinalIgnoreCase));
+        }
+
         public Player Player { get; set; }
         UISettings settings = new();
         SymbolIcon iconPlay = new SymbolIcon(Symbol.Play);
@@ -443,6 +449,11 @@ namespace ClipChopper.WinUIApp
         /// </summary>
         public void OpenFile(string path)
         {
+            if (!IsAllowedExtension(Path.GetExtension(path)))
+            {
+                return;
+            }
+
             SelectedFile = new FileInfo(path);
             _selectedFolder = SelectedFile.Directory;
             RefreshFolder();
@@ -603,7 +614,7 @@ namespace ClipChopper.WinUIApp
             }
 
             DirectoryList.ItemsSource = SelectedFolder.EnumerateFiles()
-                .Where(file => ALLOWED_EXTENSTIONS.Any(extension => file.Extension.Equals(extension, StringComparison.OrdinalIgnoreCase)))
+                .Where(file => IsAllowedExtension(file.Extension))
                 .OrderBy(file => file, Comparer<FileInfo>.Create((x, y) =>
                 {
                     var comparisonResult = SortAttribute switch
@@ -648,7 +659,7 @@ namespace ClipChopper.WinUIApp
             switch (items[0])
             {
                 case StorageFile file:
-                    if (!ALLOWED_EXTENSTIONS.Any(extension => file.FileType.Equals(extension, StringComparison.OrdinalIgnoreCase)))
+                    if (!IsAllowedExtension(file.FileType))
                     {
                         return;
                     }

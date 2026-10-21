@@ -35,6 +35,8 @@ public sealed class ClipChopperApp : IDisposable
 
     public uint WindowDpi => WindowDpiReader.Read(_windowHandle);
 
+    public bool HasExited => _process.HasExited;
+
     public static ClipChopperApp Launch(AppLaunchOptions options)
     {
         DpiAwareness.EnablePerMonitorV2();
