@@ -6,6 +6,9 @@ public static class RangeProbe
 {
     private const int ColorTolerance = 6;
 
+    /// <summary>
+    /// The bounds are screen rectangles in physical pixels, the same pixels as the capture.
+    /// </summary>
     public static RangeMeasurement Measure(
         Bitmap capture,
         Rectangle windowBounds,

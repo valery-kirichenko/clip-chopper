@@ -22,6 +22,17 @@ internal static partial class NativeMethods
     [return: MarshalAs(UnmanagedType.Bool)]
     internal static partial bool CloseDesktop(IntPtr desktop);
 
+    [LibraryImport(User32, SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    internal static partial bool SetProcessDpiAwarenessContext(IntPtr context);
+
+    [LibraryImport(User32)]
+    internal static partial IntPtr GetThreadDpiAwarenessContext();
+
+    [LibraryImport(User32)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    internal static partial bool AreDpiAwarenessContextsEqual(IntPtr first, IntPtr second);
+
     [LibraryImport(Kernel32, EntryPoint = "CreateJobObjectW", SetLastError = true, StringMarshalling = StringMarshalling.Utf16)]
     internal static partial IntPtr CreateJobObject(IntPtr attributes, string? name);
 
