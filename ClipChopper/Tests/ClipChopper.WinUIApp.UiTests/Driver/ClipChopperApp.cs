@@ -2,12 +2,14 @@ using System.Diagnostics;
 using System.Drawing;
 using ClipChopper.WinUIApp.UiTests.Platform;
 using FlaUI.Core.AutomationElements;
+using FlaUI.Core.Tools;
 using FlaUI.UIA3;
 
 namespace ClipChopper.WinUIApp.UiTests.Driver;
 
 /// <summary>
 /// The only code that starts the app, attaches UI Automation, and sets the window position and size.
+/// It makes the test host per-monitor DPI aware first, so all positions and sizes are physical pixels.
 /// A hidden (windowless) mode can be added here later.
 /// </summary>
 public sealed class ClipChopperApp : IDisposable
@@ -33,6 +35,7 @@ public sealed class ClipChopperApp : IDisposable
 
     public static ClipChopperApp Launch(AppLaunchOptions options)
     {
+        DpiAwareness.EnablePerMonitorV2();
         var process = Process.Start(CreateStartInfo(options))!;
         KillOnCloseJob? job = null;
         UIA3Automation? automation = null;
@@ -45,6 +48,7 @@ public sealed class ClipChopperApp : IDisposable
             var transform = window.Patterns.Transform.Pattern;
             transform.Move(options.WindowPosition.X, options.WindowPosition.Y);
             transform.Resize(options.WindowSize.Width, options.WindowSize.Height);
+            WaitForSize(window, options.WindowSize);
             return new ClipChopperApp(process, automation, job, windowHandle, window);
         }
         catch
@@ -93,6 +97,15 @@ public sealed class ClipChopperApp : IDisposable
         }
 
         return startInfo;
+    }
+
+    private static void WaitForSize(Window window, Size size)
+    {
+        var resized = Retry.WhileFalse(() => window.BoundingRectangle.Size == size, UiTiming.Timeout, UiTiming.PollInterval, throwOnTimeout: false, ignoreException: true);
+        if (!resized.Result)
+        {
+            throw new TimeoutException($"The app window did not reach {size.Width} x {size.Height} physical pixels.", resized.LastException);
+        }
     }
 
     private static void Cleanup(Process process, UIA3Automation? automation, KillOnCloseJob? job)
