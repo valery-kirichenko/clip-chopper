@@ -35,7 +35,7 @@ public sealed class ThemeRangeTests
         var windowBounds = app.Window.BoundingRectangle;
         using var capture = app.Capture($"range-{theme}");
 
-        var titleLuminance = MeanLuminance(capture, (capture.Width / 2) - 10, 7, 20, 6);
+        var titleLuminance = MeanLuminance(capture, CaptureRegions.TitleBar(windowBounds));
         if (theme == "Light")
         {
             Assert.True(titleLuminance > 200, $"ThemeApplied: title bar luminance is {titleLuminance:F0}, expected over 200.");
@@ -49,7 +49,7 @@ public sealed class ThemeRangeTests
         Assert.InRange(state.Fragment.StartMs, StartMs - MainWindowPage.FrameToleranceMs, StartMs + MainWindowPage.FrameToleranceMs);
         Assert.InRange(state.Fragment.StopMs, EndMs - MainWindowPage.FrameToleranceMs, EndMs + MainWindowPage.FrameToleranceMs);
 
-        var videoDeviation = LuminanceDeviation(capture, (capture.Width / 2) - 50, (capture.Height / 2) - 50, 100, 100);
+        var videoDeviation = LuminanceDeviation(capture, CaptureRegions.Video(windowBounds, sliderBounds));
         Assert.True(videoDeviation > 10, $"VideoRendered: luminance deviation of the video area is {videoDeviation:F1}, expected over 10.");
 
         var measurement = RangeProbe.Measure(
@@ -67,23 +67,23 @@ public sealed class ThemeRangeTests
         _output.WriteLine(text);
     }
 
-    private static double MeanLuminance(Bitmap bitmap, int x, int y, int width, int height)
+    private static double MeanLuminance(Bitmap bitmap, Rectangle area)
     {
-        return Luminances(bitmap, x, y, width, height).Average();
+        return Luminances(bitmap, area).Average();
     }
 
-    private static double LuminanceDeviation(Bitmap bitmap, int x, int y, int width, int height)
+    private static double LuminanceDeviation(Bitmap bitmap, Rectangle area)
     {
-        var values = Luminances(bitmap, x, y, width, height).ToList();
+        var values = Luminances(bitmap, area).ToList();
         var mean = values.Average();
         return Math.Sqrt(values.Average(value => (value - mean) * (value - mean)));
     }
 
-    private static IEnumerable<double> Luminances(Bitmap bitmap, int x, int y, int width, int height)
+    private static IEnumerable<double> Luminances(Bitmap bitmap, Rectangle area)
     {
-        for (var row = y; row < y + height; row++)
+        for (var row = area.Top; row < area.Bottom; row++)
         {
-            for (var column = x; column < x + width; column++)
+            for (var column = area.Left; column < area.Right; column++)
             {
                 var color = bitmap.GetPixel(column, row);
                 yield return (0.2126 * color.R) + (0.7152 * color.G) + (0.0722 * color.B);
