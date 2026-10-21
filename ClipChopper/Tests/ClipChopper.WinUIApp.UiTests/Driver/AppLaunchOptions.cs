@@ -8,6 +8,11 @@ public sealed record AppLaunchOptions
 
     public string? OpenFile { get; init; }
 
+    /// <summary>
+    /// When true, the app shows the marked range in the ItemStatus of the seek slider.
+    /// </summary>
+    public bool ExposeRange { get; init; } = true;
+
     public IReadOnlyList<string> ExtraArguments { get; init; } = [];
 
     /// <summary>

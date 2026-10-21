@@ -49,6 +49,18 @@ public sealed class MainWindowPage
         }
     }
 
+    /// <summary>
+    /// Waits until the play button is enabled. It does not need the marked range.
+    /// </summary>
+    public void WaitUntilPlayable(TimeSpan timeout)
+    {
+        var playable = Retry.WhileFalse(() => PlayButton.IsEnabled, timeout, UiTiming.PollInterval, throwOnTimeout: false, ignoreException: true);
+        if (!playable.Result)
+        {
+            throw new TimeoutException("The video did not open: the play button stayed disabled.", playable.LastException);
+        }
+    }
+
     public void SeekTo(int ms)
     {
         SeekSlider.Patterns.RangeValue.Pattern.SetValue(ms);
