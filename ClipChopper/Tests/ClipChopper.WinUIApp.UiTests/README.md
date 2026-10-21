@@ -71,4 +71,6 @@ dotnet test ClipChopper/Tests/ClipChopper.WinUIApp.UiTests -p:Platform=x64 --fil
 
 - The app builds with the runtime identifier `win-x64`. Without it, the app can fail to start from a deep folder path, for example a git worktree.
 - The Debug build of the app writes the Flyleaf log to `C:\Flyleaf\log.txt`.
-- In the dark theme, the tests assert a range contrast of 2.5 or more against the track (#36). The light theme has no contrast check, because #36 does not change it. Both themes check that the range starts at the marked position.
+- In the dark theme, the test `MarkedRangeIsVisibleInDarkTheme` asserts a range contrast of 2.5 or more against the track (#36). The light theme has no contrast check, because #36 does not change it. Both themes check that the range starts at the marked position.
+- The theme range checks pass only at 100% display scale. The test maps UI Automation bounds onto `PrintWindow` pixels and has no DPI awareness.
+- The dark theme contrast check depends on the Windows accent color. The threshold is 2.5, and a custom dark accent can fail it even with the fix.
