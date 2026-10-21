@@ -40,12 +40,16 @@ The tests write these files to `artifacts/ui-tests` in the repository root. Git 
 
 The app has three options for tests: `--theme Light|Dark`, `--open <path>`, and `--expose-range`. The last one makes the app publish the marked range in the `ItemStatus` of the seek slider. `ClipChopperApp` sets it by default. The options are off by default and have no effect on a normal start.
 
+The names live in `ClipChopper/Applications/ClipChopper.WinUIApp/CommandLine/LaunchOptionNames.cs`. The app reads the command line once, with `LaunchOptionsParser`, and keeps the result in a `LaunchOptions` record. The parser ignores unknown arguments and bad values. If an option repeats, the last valid value wins.
+
+The test project compiles the files of that folder, so the tests use the same names, the same `LaunchTheme` enum, and the same range format (`RangeStatusFormat`). `LaunchArguments` builds the command line from a `LaunchOptions` record. To add an option, change `LaunchOptions`, `LaunchOptionNames`, `LaunchOptionsParser`, and `LaunchArguments`, and add a parser test.
+
 ## Write a new test
 
 Start the app only through `ClipChopperApp`. This class holds the launch arguments, the window position, and the window size.
 
 ```csharp
-using var app = ClipChopperApp.Launch(new AppLaunchOptions { OpenFile = path, ExtraArguments = ["--option"] });
+using var app = ClipChopperApp.Launch(new AppLaunchOptions { OpenFile = path, Theme = LaunchTheme.Dark });
 app.Page.WaitUntilOpened(TimeSpan.FromSeconds(20));
 using var shot = app.Capture("my-screenshot");
 ```
@@ -55,6 +59,12 @@ Use `app.Page` to find controls, to seek, to mark, and to read the state. Mark a
 ## Skips
 
 A test skips when the test host runs as administrator or when no interactive desktop exists. A skip is not a pass. A locked screen also skips the tests, because the input desktop is not available then. The tests do not check a remote desktop session. CI does not run these tests.
+
+The tests of the launch option parser, the command line builder, and the range format are plain `[Fact]` and `[Theory]` tests. They run without a desktop. To run only them, use this command:
+
+```powershell
+dotnet test ClipChopper/Tests/ClipChopper.WinUIApp.UiTests -p:Platform=x64 --filter "FullyQualifiedName~LaunchOptionsParserTests|FullyQualifiedName~LaunchArgumentsTests|FullyQualifiedName~RangeStatusFormatTests"
+```
 
 ## Notes
 
