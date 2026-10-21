@@ -32,6 +32,15 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!-- The app and the tests compile the same files, so both use the same option names, parser and range format. -->
+    <Compile Include="$(MSBuildThisFileDirectory)..\..\Applications\ClipChopper.WinUIApp\CommandLine\LaunchOptionNames.cs" Link="CommandLine\LaunchOptionNames.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)..\..\Applications\ClipChopper.WinUIApp\CommandLine\LaunchOptions.cs" Link="CommandLine\LaunchOptions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)..\..\Applications\ClipChopper.WinUIApp\CommandLine\LaunchOptionsParser.cs" Link="CommandLine\LaunchOptionsParser.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)..\..\Applications\ClipChopper.WinUIApp\CommandLine\LaunchTheme.cs" Link="CommandLine\LaunchTheme.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)..\..\Applications\ClipChopper.WinUIApp\CommandLine\RangeStatusFormat.cs" Link="CommandLine\RangeStatusFormat.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
       <_Parameter1>AppExePath</_Parameter1>
       <_Parameter2>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\..\Applications\ClipChopper.WinUIApp\bin\x64\$(Configuration)\$(WinUIAppTargetFramework)\win-x64\ClipChopper.exe'))</_Parameter2>
