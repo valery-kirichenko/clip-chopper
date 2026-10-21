@@ -1,3 +1,4 @@
+using ClipChopper.WinUIApp.CommandLine;
 using CommunityToolkit.WinUI.Helpers;
 using FlyleafLib;
 using FlyleafLib.MediaPlayer;
@@ -175,9 +176,11 @@ namespace ClipChopper.WinUIApp
         private bool preciseSeekingShortcutEnabled = false;
         private bool preciseSeekingShortVideoEnabled = false;
 
+        private readonly LaunchOptions _launchOptions;
 
-        public MainWindow()
+        public MainWindow(LaunchOptions launchOptions)
         {
+            _launchOptions = launchOptions;
             GlobalFFOptions.Configure(new FFOptions
                 { BinaryFolder = Path.Combine(AppContext.BaseDirectory, "FFmpeg") });
             // Initializes Engine (Specifies FFmpeg libraries path which is required)
@@ -365,9 +368,9 @@ namespace ClipChopper.WinUIApp
                 var margin = FragmentRange.Margin;
                 margin.Left = marginValue;
                 FragmentRange.Margin = margin;
-                if (App.ExposeRange)
+                if (_launchOptions.ExposeRange)
                 {
-                    AutomationProperties.SetItemStatus(SeekSlider, FormattableString.Invariant($"start={_fragment.Start / TimeSpan.TicksPerMillisecond};stop={_fragment.Stop / TimeSpan.TicksPerMillisecond}"));
+                    AutomationProperties.SetItemStatus(SeekSlider, RangeStatusFormat.Format(_fragment.Start / TimeSpan.TicksPerMillisecond, _fragment.Stop / TimeSpan.TicksPerMillisecond));
                 }
             });
         }
@@ -447,7 +450,7 @@ namespace ClipChopper.WinUIApp
         }
 
         /// <summary>
-        /// Opens a file from the "--open" option and shows its folder in the list.
+        /// Opens a file from the launch options and shows its folder in the list.
         /// It does not save the folder as PreviousPath.
         /// </summary>
         public void OpenFile(string path)

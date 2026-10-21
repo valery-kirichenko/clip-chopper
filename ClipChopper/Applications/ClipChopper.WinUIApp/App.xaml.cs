@@ -1,4 +1,5 @@
-﻿using Microsoft.UI.Xaml;
+﻿using ClipChopper.WinUIApp.CommandLine;
+using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
 using Microsoft.UI.Xaml.Data;
@@ -33,12 +34,10 @@ namespace ClipChopper.WinUIApp
         public App()
         {
             this.InitializeComponent();
-            var themeName = GetLaunchOption("--theme");
-            if (themeName != null
-                && Enum.TryParse(themeName, ignoreCase: true, out ApplicationTheme theme)
-                && Enum.IsDefined(theme))
+            _launchOptions = LaunchOptionsParser.Parse(Environment.GetCommandLineArgs()[1..]);
+            if (_launchOptions.Theme is { } theme)
             {
-                RequestedTheme = theme;
+                RequestedTheme = ToApplicationTheme(theme);
             }
         }
 
@@ -48,32 +47,27 @@ namespace ClipChopper.WinUIApp
         /// <param name="args">Details about the launch request and process.</param>
         protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
         {
-            var window = new MainWindow();
+            var window = new MainWindow(_launchOptions);
             m_window = window;
             window.Activate();
 
-            var path = GetLaunchOption("--open");
-            if (path != null && File.Exists(path))
+            if (_launchOptions.OpenFile is { } path && File.Exists(path))
             {
                 window.OpenFile(path);
             }
         }
 
-        /// <summary>
-        /// True when the command line has the option "--expose-range" for UI tests.
-        /// </summary>
-        public static bool ExposeRange { get; } = Environment.GetCommandLineArgs().Contains("--expose-range");
-
-        /// <summary>
-        /// Returns the value after the given option in the command line, or null.
-        /// The options "--theme", "--open" and "--expose-range" are for UI tests. Without them the app starts as before.
-        /// </summary>
-        private static string? GetLaunchOption(string name)
+        private static ApplicationTheme ToApplicationTheme(LaunchTheme theme)
         {
-            var args = Environment.GetCommandLineArgs();
-            var index = Array.IndexOf(args, name);
-            return index > 0 && index + 1 < args.Length ? args[index + 1] : null;
+            return theme switch
+            {
+                LaunchTheme.Light => ApplicationTheme.Light,
+                LaunchTheme.Dark => ApplicationTheme.Dark,
+                _ => throw new ArgumentOutOfRangeException(nameof(theme), theme, null),
+            };
         }
+
+        private readonly LaunchOptions _launchOptions;
 
         private Window m_window;
     }
