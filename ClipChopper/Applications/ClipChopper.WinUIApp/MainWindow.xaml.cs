@@ -1,3 +1,4 @@
+using ClipChopper.WinUIApp.Automation;
 using ClipChopper.WinUIApp.CommandLine;
 using CommunityToolkit.WinUI.Helpers;
 using FlyleafLib;
@@ -371,7 +372,9 @@ namespace ClipChopper.WinUIApp
                 FragmentRange.Margin = margin;
                 if (_launchOptions.ExposeRange)
                 {
-                    AutomationProperties.SetItemStatus(SeekSlider, RangeStatusFormat.Format(_fragment.Start / TimeSpan.TicksPerMillisecond, _fragment.Stop / TimeSpan.TicksPerMillisecond));
+                    var startMs = (int)(_fragment.Start / TimeSpan.TicksPerMillisecond);
+                    var stopMs = (int)(_fragment.Stop / TimeSpan.TicksPerMillisecond);
+                    AutomationProperties.SetItemStatus(SeekSlider, RangeStatusFormat.Format(startMs, stopMs));
                 }
             });
         }

@@ -35,7 +35,7 @@ public sealed class LaunchArgumentsTests
         var arguments = LaunchArguments.From(options);
 
         Assert.Equal(
-            [LaunchOptionNames.Theme, "Dark", LaunchOptionNames.Open, "x", LaunchOptionNames.ExposeRange],
+            [LaunchOptionNames.Theme, nameof(LaunchTheme.Dark), LaunchOptionNames.Open, "x", LaunchOptionNames.ExposeRange],
             arguments
         );
     }

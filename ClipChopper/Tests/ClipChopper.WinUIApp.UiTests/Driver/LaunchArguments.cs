@@ -16,10 +16,10 @@ public static class LaunchArguments
             arguments.Add(theme.ToString());
         }
 
-        if (options.OpenFile is { } path)
+        if (!string.IsNullOrEmpty(options.OpenFile))
         {
             arguments.Add(LaunchOptionNames.Open);
-            arguments.Add(path);
+            arguments.Add(options.OpenFile);
         }
 
         if (options.ExposeRange)

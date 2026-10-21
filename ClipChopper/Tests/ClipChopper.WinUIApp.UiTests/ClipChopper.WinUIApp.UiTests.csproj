@@ -37,7 +37,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)..\..\Applications\ClipChopper.WinUIApp\CommandLine\LaunchOptions.cs" Link="CommandLine\LaunchOptions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)..\..\Applications\ClipChopper.WinUIApp\CommandLine\LaunchOptionsParser.cs" Link="CommandLine\LaunchOptionsParser.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)..\..\Applications\ClipChopper.WinUIApp\CommandLine\LaunchTheme.cs" Link="CommandLine\LaunchTheme.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)..\..\Applications\ClipChopper.WinUIApp\CommandLine\RangeStatusFormat.cs" Link="CommandLine\RangeStatusFormat.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)..\..\Applications\ClipChopper.WinUIApp\Automation\RangeStatusFormat.cs" Link="Automation\RangeStatusFormat.cs" />
   </ItemGroup>
 
   <ItemGroup>

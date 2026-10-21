@@ -1,7 +1,7 @@
 using System;
 using System.Globalization;
 
-namespace ClipChopper.WinUIApp.CommandLine
+namespace ClipChopper.WinUIApp.Automation
 {
     /// <summary>
     /// The text that the app shows in the ItemStatus of the seek slider when "--expose-range" is set.
@@ -13,7 +13,7 @@ namespace ClipChopper.WinUIApp.CommandLine
 
         private const string StopKey = "stop";
 
-        public static string Format(long startMs, long stopMs)
+        public static string Format(int startMs, int stopMs)
         {
             return FormattableString.Invariant($"{StartKey}={startMs};{StopKey}={stopMs}");
         }

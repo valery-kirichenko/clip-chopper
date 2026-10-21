@@ -1,4 +1,4 @@
-using ClipChopper.WinUIApp.CommandLine;
+using ClipChopper.WinUIApp.Automation;
 using Xunit;
 
 namespace ClipChopper.WinUIApp.UiTests.Tests;
