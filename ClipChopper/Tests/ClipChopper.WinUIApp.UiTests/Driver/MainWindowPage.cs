@@ -10,6 +10,9 @@ public sealed class MainWindowPage
 {
     public const int FrameToleranceMs = 34;
 
+    private static readonly TimeSpan MarkTimeout = TimeSpan.FromSeconds(10);
+    private static readonly TimeSpan MarkInterval = TimeSpan.FromMilliseconds(200);
+
     private readonly Window _window;
     private readonly UIA3Automation _automation;
 
@@ -72,12 +75,12 @@ public sealed class MainWindowPage
 
     public void MarkStart()
     {
-        StartFragmentButton.Patterns.Invoke.Pattern.Invoke();
+        Mark("StartFragmentButton", status => status.Start);
     }
 
     public void MarkEnd()
     {
-        EndFragmentButton.Patterns.Invoke.Pattern.Invoke();
+        Mark("EndFragmentButton", status => status.Stop);
     }
 
     public void MarkRange(int startMs, int endMs)
@@ -130,6 +133,32 @@ public sealed class MainWindowPage
             ignoreException: true
         );
         return met.Result ? state! : ReadState();
+    }
+
+    private void Mark(string buttonId, Func<(int? Start, int? Stop), int?> pick)
+    {
+        var position = SeekSlider.Patterns.RangeValue.Pattern.Value.Value;
+        var invoked = Retry.WhileException(
+            () => Find(buttonId).Patterns.Invoke.Pattern.Invoke(),
+            MarkTimeout,
+            MarkInterval
+        );
+        if (!invoked.Success)
+        {
+            throw new TimeoutException($"Cannot invoke '{buttonId}'.", invoked.LastException);
+        }
+
+        var marked = Retry.WhileFalse(
+            () => pick(ParseStatus(SeekSlider.Properties.ItemStatus.ValueOrDefault)) is { } mark && Math.Abs(mark - position) <= FrameToleranceMs,
+            MarkTimeout,
+            MarkInterval,
+            throwOnTimeout: false,
+            ignoreException: true
+        );
+        if (!marked.Result)
+        {
+            throw new TimeoutException($"The fragment mark of '{buttonId}' did not reach {position}.");
+        }
     }
 
     private static (int? Start, int? Stop) ParseStatus(string? status)
