@@ -19,7 +19,7 @@ internal sealed class KillOnCloseJob : IDisposable
         var handle = NativeMethods.CreateJobObject(IntPtr.Zero, null);
         if (handle == IntPtr.Zero)
         {
-            throw new Win32Exception(Marshal.GetLastPInvokeError(), "CreateJobObject failed.");
+            throw CreateError("CreateJobObject");
         }
 
         var info = new JobObjectExtendedLimitInformation();
@@ -29,12 +29,12 @@ internal sealed class KillOnCloseJob : IDisposable
         {
             if (!NativeMethods.SetInformationJobObject(handle, JobObjectInfoClass.ExtendedLimitInformation, ref info, length))
             {
-                throw new Win32Exception(Marshal.GetLastPInvokeError(), "SetInformationJobObject failed.");
+                throw CreateError("SetInformationJobObject");
             }
 
             if (!NativeMethods.AssignProcessToJobObject(handle, process.Handle))
             {
-                throw new Win32Exception(Marshal.GetLastPInvokeError(), "AssignProcessToJobObject failed.");
+                throw CreateError("AssignProcessToJobObject");
             }
         }
         catch
@@ -44,6 +44,12 @@ internal sealed class KillOnCloseJob : IDisposable
         }
 
         return new KillOnCloseJob(handle);
+    }
+
+    private static Win32Exception CreateError(string call)
+    {
+        var error = Marshal.GetLastPInvokeError();
+        return new Win32Exception(error, $"{call} failed: {Marshal.GetPInvokeErrorMessage(error)} (0x{error:X8})");
     }
 
     public void Dispose()

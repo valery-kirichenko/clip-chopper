@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using ClipChopper.WinUIApp.UiTests.Driver;
 using ClipChopper.WinUIApp.UiTests.Native;
 using FlaUI.Core.Tools;
 
@@ -17,7 +18,7 @@ internal static class MainWindowFinder
                 return handle != IntPtr.Zero && NativeMethods.IsWindowVisible(handle);
             },
             timeout,
-            TimeSpan.FromMilliseconds(100),
+            UiTiming.PollInterval,
             throwOnTimeout: false
         );
         return found.Result ? handle : throw new TimeoutException("The app main window did not appear.");
