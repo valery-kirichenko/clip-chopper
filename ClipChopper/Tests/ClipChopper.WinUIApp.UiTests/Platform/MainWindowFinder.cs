@@ -8,18 +8,14 @@ internal static class MainWindowFinder
 {
     public static IntPtr WaitForHandle(Process process, TimeSpan timeout, TimeSpan pollInterval)
     {
-        var handle = IntPtr.Zero;
-        var found = Retry.WhileFalse(
-            () =>
-            {
-                process.Refresh();
-                handle = process.MainWindowHandle;
-                return handle != IntPtr.Zero && NativeMethods.IsWindowVisible(handle);
-            },
-            timeout,
-            pollInterval,
-            throwOnTimeout: false
-        );
-        return found.Result ? handle : throw new TimeoutException("The app main window did not appear.");
+        var found = Retry.WhileNull(() => FindVisibleHandle(process), timeout, pollInterval);
+        return found.Result ?? throw new TimeoutException("The app main window did not appear.");
+    }
+
+    private static IntPtr? FindVisibleHandle(Process process)
+    {
+        process.Refresh();
+        var handle = process.MainWindowHandle;
+        return handle != IntPtr.Zero && NativeMethods.IsWindowVisible(handle) ? handle : null;
     }
 }

@@ -10,5 +10,4 @@ public sealed record MainWindowState(
     bool IsCropOn,
     string? SelectedFileName,
     bool IsAudioSelectorEnabled,
-    int? FragmentStartMs,
-    int? FragmentStopMs);
+    MarkedRange? Fragment);

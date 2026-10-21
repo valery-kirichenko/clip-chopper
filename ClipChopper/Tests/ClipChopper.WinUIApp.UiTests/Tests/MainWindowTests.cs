@@ -25,7 +25,7 @@ public sealed class MainWindowTests
         using (var app = ClipChopperApp.Launch(new AppLaunchOptions { OpenFile = _clip.ClipPath }))
         {
             app.Page.WaitUntilOpened(TimeSpan.FromSeconds(20));
-            state = app.Page.ReadStateWhen(s => s.FragmentStopMs != null, TimeSpan.FromSeconds(10));
+            state = app.Page.ReadState();
             app.Capture("opened").Dispose();
         }
 
@@ -37,9 +37,9 @@ public sealed class MainWindowTests
         Assert.Equal("test-clip.mp4", state.SelectedFileName);
         Assert.True(state.IsAudioSelectorEnabled, "AudioTrackFound: the audio selector is enabled.");
         Assert.False(state.IsCropOn, "CropOff: the crop button is off.");
-        Assert.Equal(0, state.FragmentStartMs);
-        Assert.NotNull(state.FragmentStopMs);
-        Assert.InRange(state.FragmentStopMs.Value, state.SeekMaximum - 1, state.SeekMaximum + 1);
+        Assert.NotNull(state.Fragment);
+        Assert.Equal(0, state.Fragment.StartMs);
+        Assert.InRange(state.Fragment.StopMs, state.SeekMaximum - 1, state.SeekMaximum + 1);
         Assert.Equal(previousPathBefore, ReadPreviousPath());
     }
 
@@ -53,19 +53,17 @@ public sealed class MainWindowTests
         Assert.Equal("00:00:02", app.Page.ReadState().CurrentTime);
 
         app.Page.MarkStart(2000);
-        var afterStart = app.Page.ReadStateWhen(s => s.FragmentStartMs > 1000, TimeSpan.FromSeconds(10));
-        Assert.NotNull(afterStart.FragmentStartMs);
-        Assert.InRange(afterStart.FragmentStartMs.Value, 2000 - MainWindowPage.FrameToleranceMs, 2000 + MainWindowPage.FrameToleranceMs);
-        Assert.NotNull(afterStart.FragmentStopMs);
-        Assert.InRange(afterStart.FragmentStopMs.Value, afterStart.SeekMaximum - 1, afterStart.SeekMaximum + 1);
+        var afterStart = app.Page.ReadState();
+        Assert.NotNull(afterStart.Fragment);
+        Assert.InRange(afterStart.Fragment.StartMs, 2000 - MainWindowPage.FrameToleranceMs, 2000 + MainWindowPage.FrameToleranceMs);
+        Assert.InRange(afterStart.Fragment.StopMs, afterStart.SeekMaximum - 1, afterStart.SeekMaximum + 1);
 
         app.Page.SeekTo(7000);
         app.Page.MarkEnd(7000);
-        var afterEnd = app.Page.ReadStateWhen(s => s.FragmentStopMs < 8000, TimeSpan.FromSeconds(10));
-        Assert.NotNull(afterEnd.FragmentStopMs);
-        Assert.InRange(afterEnd.FragmentStopMs.Value, 7000 - MainWindowPage.FrameToleranceMs, 7000 + MainWindowPage.FrameToleranceMs);
-        Assert.NotNull(afterEnd.FragmentStartMs);
-        Assert.InRange(afterEnd.FragmentStartMs.Value, 2000 - MainWindowPage.FrameToleranceMs, 2000 + MainWindowPage.FrameToleranceMs);
+        var afterEnd = app.Page.ReadState();
+        Assert.NotNull(afterEnd.Fragment);
+        Assert.InRange(afterEnd.Fragment.StopMs, 7000 - MainWindowPage.FrameToleranceMs, 7000 + MainWindowPage.FrameToleranceMs);
+        Assert.InRange(afterEnd.Fragment.StartMs, 2000 - MainWindowPage.FrameToleranceMs, 2000 + MainWindowPage.FrameToleranceMs);
         Assert.InRange(afterEnd.SeekValue, 7000 - MainWindowPage.FrameToleranceMs, 7000 + MainWindowPage.FrameToleranceMs);
 
         app.Capture("marked").Dispose();
