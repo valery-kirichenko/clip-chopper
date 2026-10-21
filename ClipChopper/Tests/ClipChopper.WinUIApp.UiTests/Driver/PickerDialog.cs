@@ -25,7 +25,7 @@ public sealed class PickerDialog
 
     public void Cancel()
     {
-        var cancel = _window.FindFirstDescendant(factory => factory.ByAutomationId(CancelButtonId).And(factory.ByControlType(ControlType.Button)))
+        var cancel = _window.FindFirstChild(factory => factory.ByAutomationId(CancelButtonId).And(factory.ByControlType(ControlType.Button)))
             ?? throw new InvalidOperationException("The Cancel button of the picker dialog was not found.");
         cancel.Patterns.Invoke.Pattern.Invoke();
         var closed = Retry.WhileFalse(() => !OwnedDialogFinder.IsOpen(_handle), UiTiming.Timeout, UiTiming.PollInterval, throwOnTimeout: false, ignoreException: true);

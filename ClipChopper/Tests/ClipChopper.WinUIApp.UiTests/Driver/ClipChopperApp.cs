@@ -38,6 +38,8 @@ public sealed class ClipChopperApp : IDisposable
 
     public bool HasExited => _process.HasExited;
 
+    public bool IsElevated => ProcessElevation.IsElevated(_process);
+
     public static ClipChopperApp Launch(AppLaunchOptions options)
     {
         DpiAwareness.EnablePerMonitorV2();
@@ -63,10 +65,6 @@ public sealed class ClipChopperApp : IDisposable
         }
     }
 
-    public bool HasExited => _process.HasExited;
-
-    public bool IsElevated => ProcessElevation.IsElevated(_process);
-
     /// <summary>
     /// Invokes a picker button and waits until the app shows the file dialog, owned by the main window.
     /// </summary>
@@ -74,8 +72,8 @@ public sealed class ClipChopperApp : IDisposable
     {
         var button = Page.FindPickerButton(picker);
         var invoke = Task.Run(() => button.Patterns.Invoke.Pattern.Invoke());
-        var found = Retry.WhileNull(() => OwnedDialogFinder.FindVisible(_windowHandle), UiTiming.Timeout, UiTiming.PollInterval, throwOnTimeout: false, ignoreException: true);
-        if (found.Result is not { } handle)
+        var found = Retry.WhileNull(() => OwnedDialogFinder.FindVisible(_windowHandle) ?? (_process.HasExited ? IntPtr.Zero : null), UiTiming.Timeout, UiTiming.PollInterval, throwOnTimeout: false, ignoreException: true);
+        if (found.Result is not { } handle || handle == IntPtr.Zero)
         {
             var appState = _process.HasExited ? $"The app exited with code 0x{_process.ExitCode:X8}." : "The app still runs.";
             throw new TimeoutException($"The {picker} picker did not open. {appState}", invoke.Exception);

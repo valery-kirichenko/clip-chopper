@@ -24,6 +24,8 @@ public static class UiEnvironment
         ? DesktopSkipReason
         : "The test host does not run as administrator. This test checks the file pickers as administrator (#60). Run dotnet test from a PowerShell window that runs as administrator.";
 
+    public static bool NoUiTestRuns => SkipReason != null && AdminSkipReason != null;
+
     private static bool FindIsAdministrator()
     {
         using var identity = WindowsIdentity.GetCurrent();

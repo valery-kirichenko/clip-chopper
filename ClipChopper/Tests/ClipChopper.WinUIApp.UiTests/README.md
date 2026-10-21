@@ -25,7 +25,19 @@ The command builds the app with the runtime identifier `win-x64` first. The test
 
 ## Administrator test
 
-`AdminPickerTests` checks that the three file pickers open when the app runs as administrator (#60). It runs only when the test host runs as administrator. In a normal session, it skips. To run it, build in a normal PowerShell window, then run the test from a PowerShell window that runs as administrator:
+`AdminPickerTests` checks that the three file pickers open when the app runs as administrator (#60). It runs only when the test host runs as administrator. In a normal session, it skips. To run it, use two PowerShell windows. A PowerShell window that runs as administrator starts in `C:\Windows\System32`, so in both windows go to the repository root first:
+
+```powershell
+cd <path to the repository root>
+```
+
+Build in a normal window. The build uses the Debug configuration:
+
+```powershell
+dotnet build ClipChopper/Tests/ClipChopper.WinUIApp.UiTests -p:Platform=x64
+```
+
+Then run the test in the window that runs as administrator. The `--no-build` flag with no `-c` option uses the Debug output of that build:
 
 ```powershell
 dotnet test ClipChopper/Tests/ClipChopper.WinUIApp.UiTests -p:Platform=x64 --no-build --filter "FullyQualifiedName~AdminPickerTests"
