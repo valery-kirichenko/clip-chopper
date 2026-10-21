@@ -27,7 +27,7 @@ internal static partial class NativeMethods
     internal static partial bool SetProcessDpiAwarenessContext(IntPtr context);
 
     [LibraryImport(User32)]
-    internal static partial IntPtr GetThreadDpiAwarenessContext();
+    internal static partial IntPtr GetDpiAwarenessContextForProcess(IntPtr process);
 
     [LibraryImport(User32)]
     [return: MarshalAs(UnmanagedType.Bool)]

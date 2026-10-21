@@ -1,4 +1,3 @@
-using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using ClipChopper.WinUIApp.UiTests.Native;
@@ -19,7 +18,7 @@ internal sealed class KillOnCloseJob : IDisposable
         var handle = NativeMethods.CreateJobObject(IntPtr.Zero, null);
         if (handle == IntPtr.Zero)
         {
-            throw CreateError("CreateJobObject");
+            throw Win32Errors.CreateFromLastCall("CreateJobObject");
         }
 
         var info = new JobObjectExtendedLimitInformation();
@@ -29,12 +28,12 @@ internal sealed class KillOnCloseJob : IDisposable
         {
             if (!NativeMethods.SetInformationJobObject(handle, JobObjectInfoClass.ExtendedLimitInformation, ref info, length))
             {
-                throw CreateError("SetInformationJobObject");
+                throw Win32Errors.CreateFromLastCall("SetInformationJobObject");
             }
 
             if (!NativeMethods.AssignProcessToJobObject(handle, process.Handle))
             {
-                throw CreateError("AssignProcessToJobObject");
+                throw Win32Errors.CreateFromLastCall("AssignProcessToJobObject");
             }
         }
         catch
@@ -44,12 +43,6 @@ internal sealed class KillOnCloseJob : IDisposable
         }
 
         return new KillOnCloseJob(handle);
-    }
-
-    private static Win32Exception CreateError(string call)
-    {
-        var error = Marshal.GetLastPInvokeError();
-        return new Win32Exception(error, $"{call} failed: {Marshal.GetPInvokeErrorMessage(error)} (0x{error:X8})");
     }
 
     public void Dispose()

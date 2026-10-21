@@ -7,6 +7,7 @@ public static class RangeProbe
     private const int ColorTolerance = 6;
 
     /// <summary>
+    /// Finds the marked range on the slider in the capture.
     /// The bounds are screen rectangles in physical pixels, the same pixels as the capture.
     /// </summary>
     public static RangeMeasurement Measure(
