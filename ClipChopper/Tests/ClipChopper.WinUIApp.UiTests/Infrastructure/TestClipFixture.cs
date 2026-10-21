@@ -14,7 +14,7 @@ public sealed class TestClipFixture : IDisposable
 
     internal TestClipFixture(string ffmpegPath)
     {
-        if (UiEnvironment.SkipReason != null)
+        if (UiEnvironment.SkipReason != null && UiEnvironment.AdminSkipReason != null)
         {
             ClipPath = string.Empty;
             return;

@@ -6,6 +6,7 @@ internal static partial class NativeMethods
 {
     private const string User32 = "user32.dll";
     private const string Kernel32 = "kernel32.dll";
+    private const string Advapi32 = "advapi32.dll";
 
     [LibraryImport(User32)]
     [return: MarshalAs(UnmanagedType.Bool)]
@@ -14,6 +15,16 @@ internal static partial class NativeMethods
     [LibraryImport(User32)]
     [return: MarshalAs(UnmanagedType.Bool)]
     internal static partial bool IsWindowVisible(IntPtr hwnd);
+
+    [LibraryImport(User32, EntryPoint = "FindWindowExW", StringMarshalling = StringMarshalling.Utf16)]
+    internal static partial IntPtr FindWindowEx(IntPtr parent, IntPtr childAfter, string? className, string? windowName);
+
+    [LibraryImport(User32)]
+    internal static partial IntPtr GetWindow(IntPtr hwnd, GetWindowCommand command);
+
+    [LibraryImport(User32)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    internal static partial bool IsWindow(IntPtr hwnd);
 
     [LibraryImport(User32)]
     internal static partial IntPtr OpenInputDesktop(uint flags, [MarshalAs(UnmanagedType.Bool)] bool inherit, DesktopAccessRights desiredAccess);
@@ -50,4 +61,12 @@ internal static partial class NativeMethods
     [LibraryImport(Kernel32)]
     [return: MarshalAs(UnmanagedType.Bool)]
     internal static partial bool CloseHandle(IntPtr handle);
+
+    [LibraryImport(Advapi32, SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    internal static partial bool OpenProcessToken(IntPtr process, TokenAccessRights desiredAccess, out IntPtr token);
+
+    [LibraryImport(Advapi32, SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    internal static partial bool GetTokenInformation(IntPtr token, TokenInformationClass infoClass, out TokenElevation info, uint length, out uint returnLength);
 }
