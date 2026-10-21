@@ -1,13 +1,11 @@
 using System.Diagnostics;
-using System.Runtime.InteropServices;
 using System.Security.Principal;
+using ClipChopper.WinUIApp.UiTests.Platform;
 
 namespace ClipChopper.WinUIApp.UiTests.Infrastructure;
 
 public static class UiEnvironment
 {
-    private const uint DesktopSwitchDesktop = 0x0100;
-
     public static string? SkipReason { get; } = FindSkipReason();
 
     private static string? FindSkipReason()
@@ -28,19 +26,11 @@ public static class UiEnvironment
             return "The test host runs in session 0, which has no desktop.";
         }
 
-        var desktop = OpenInputDesktop(0, false, DesktopSwitchDesktop);
-        if (desktop == IntPtr.Zero)
+        if (!InputDesktop.IsAvailable())
         {
             return "The input desktop is not available (the screen may be locked).";
         }
 
-        CloseDesktop(desktop);
         return null;
     }
-
-    [DllImport("user32.dll", SetLastError = true)]
-    private static extern IntPtr OpenInputDesktop(uint flags, bool inherit, uint desiredAccess);
-
-    [DllImport("user32.dll")]
-    private static extern bool CloseDesktop(IntPtr desktop);
 }
