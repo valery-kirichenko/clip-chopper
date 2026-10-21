@@ -33,6 +33,9 @@ internal static partial class NativeMethods
     [return: MarshalAs(UnmanagedType.Bool)]
     internal static partial bool AreDpiAwarenessContextsEqual(IntPtr first, IntPtr second);
 
+    [LibraryImport(User32)]
+    internal static partial uint GetDpiForWindow(IntPtr hwnd);
+
     [LibraryImport(Kernel32, EntryPoint = "CreateJobObjectW", SetLastError = true, StringMarshalling = StringMarshalling.Utf16)]
     internal static partial IntPtr CreateJobObject(IntPtr attributes, string? name);
 

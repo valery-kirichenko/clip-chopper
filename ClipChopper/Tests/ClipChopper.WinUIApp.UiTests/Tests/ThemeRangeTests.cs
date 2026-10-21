@@ -35,7 +35,7 @@ public sealed class ThemeRangeTests
         var windowBounds = app.Window.BoundingRectangle;
         using var capture = app.Capture($"range-{theme}");
 
-        var titleLuminance = MeanLuminance(capture, CaptureRegions.TitleBar(windowBounds));
+        var titleLuminance = MeanLuminance(capture, CaptureRegions.TitleBar(windowBounds, app.WindowDpi));
         if (theme == "Light")
         {
             Assert.True(titleLuminance > 200, $"ThemeApplied: title bar luminance is {titleLuminance:F0}, expected over 200.");
