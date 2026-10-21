@@ -1,5 +1,6 @@
 using System.Drawing;
 using System.Globalization;
+using ClipChopper.WinUIApp.CommandLine;
 using ClipChopper.WinUIApp.UiTests.Driver;
 using ClipChopper.WinUIApp.UiTests.Infrastructure;
 using Xunit;
@@ -23,9 +24,9 @@ public sealed class ThemeRangeTests
     }
 
     [UiTheory]
-    [InlineData("Light")]
-    [InlineData("Dark")]
-    public void CapturesMarkedRangeInTheme(string theme)
+    [InlineData(LaunchTheme.Light)]
+    [InlineData(LaunchTheme.Dark)]
+    public void CapturesMarkedRangeInTheme(LaunchTheme theme)
     {
         using var app = ClipChopperApp.Launch(new AppLaunchOptions { Theme = theme, OpenFile = _clip.ClipPath });
         app.Page.WaitUntilOpened(TimeSpan.FromSeconds(20));
@@ -36,7 +37,7 @@ public sealed class ThemeRangeTests
         using var capture = app.Capture($"range-{theme}");
 
         var titleLuminance = MeanLuminance(capture, CaptureRegions.TitleBar(windowBounds, app.WindowDpi));
-        if (theme == "Light")
+        if (theme == LaunchTheme.Light)
         {
             Assert.True(titleLuminance > 200, $"ThemeApplied: title bar luminance is {titleLuminance:F0}, expected over 200.");
         }
