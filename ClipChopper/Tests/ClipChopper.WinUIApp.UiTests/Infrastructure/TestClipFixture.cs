@@ -8,6 +8,11 @@ public sealed class TestClipFixture : IDisposable
     private readonly string? _folder;
 
     public TestClipFixture()
+        : this(Path.Combine(Path.GetDirectoryName(TestPaths.AppExePath)!, "FFmpeg", "ffmpeg.exe"))
+    {
+    }
+
+    internal TestClipFixture(string ffmpegPath)
     {
         if (UiEnvironment.SkipReason != null)
         {
@@ -18,7 +23,15 @@ public sealed class TestClipFixture : IDisposable
         _folder = Path.Combine(Path.GetTempPath(), "ClipChopperUiTests-" + Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(_folder);
         ClipPath = Path.Combine(_folder, "test-clip.mp4");
-        MakeClip(ClipPath);
+        try
+        {
+            MakeClip(ffmpegPath, ClipPath);
+        }
+        catch
+        {
+            DeleteFolder();
+            throw;
+        }
     }
 
     public string ClipPath { get; }
@@ -35,16 +48,20 @@ public sealed class TestClipFixture : IDisposable
 
     public void Dispose()
     {
+        DeleteFolder();
+    }
+
+    private void DeleteFolder()
+    {
         if (_folder != null && Directory.Exists(_folder))
         {
             Directory.Delete(_folder, recursive: true);
         }
     }
 
-    private static void MakeClip(string path)
+    private static void MakeClip(string ffmpegPath, string path)
     {
-        var ffmpeg = Path.Combine(Path.GetDirectoryName(TestPaths.AppExePath)!, "FFmpeg", "ffmpeg.exe");
-        var startInfo = new ProcessStartInfo(ffmpeg)
+        var startInfo = new ProcessStartInfo(ffmpegPath)
         {
             UseShellExecute = false,
             RedirectStandardError = true,
