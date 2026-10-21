@@ -23,6 +23,16 @@ public sealed class TestClipFixture : IDisposable
 
     public string ClipPath { get; }
 
+    /// <summary>
+    /// Copies the test clip to the same folder under another file name and returns the new path.
+    /// </summary>
+    public string CopyClipAs(string fileName)
+    {
+        var path = Path.Combine(Path.GetDirectoryName(ClipPath)!, fileName);
+        File.Copy(ClipPath, path);
+        return path;
+    }
+
     public void Dispose()
     {
         if (_folder != null && Directory.Exists(_folder))

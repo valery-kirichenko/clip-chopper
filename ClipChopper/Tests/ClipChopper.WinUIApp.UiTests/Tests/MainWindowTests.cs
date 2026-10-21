@@ -10,6 +10,8 @@ public sealed class MainWindowTests
 {
     private const string AppRegistryKey = @"Software\ClipChopper";
 
+    private static readonly TimeSpan UnsupportedFileSettleTime = TimeSpan.FromSeconds(3);
+
     private readonly TestClipFixture _clip;
 
     public MainWindowTests(TestClipFixture clip)
@@ -67,6 +69,25 @@ public sealed class MainWindowTests
         Assert.InRange(afterEnd.SeekValue, 7000 - MainWindowPage.FrameToleranceMs, 7000 + MainWindowPage.FrameToleranceMs);
 
         app.Capture("marked").Dispose();
+    }
+
+    [UiFact]
+    public void IgnoresLaunchFileWithUnsupportedExtension()
+    {
+        var unsupportedPath = _clip.CopyClipAs("unsupported-clip.avi");
+        bool hasExited;
+        MainWindowState state;
+        using (var app = ClipChopperApp.Launch(new AppLaunchOptions { OpenFile = unsupportedPath }))
+        {
+            Thread.Sleep(UnsupportedFileSettleTime);
+            hasExited = app.HasExited;
+            state = app.Page.ReadState();
+        }
+
+        Assert.False(hasExited, "AppRunning: the app must keep running after --open with an unsupported file.");
+        Assert.False(state.IsOpened, "NoVideoOpened: the play button is disabled.");
+        Assert.Null(state.SelectedFileName);
+        Assert.Null(state.Fragment);
     }
 
     private static object? ReadPreviousPath()
