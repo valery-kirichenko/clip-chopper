@@ -35,6 +35,7 @@ The tests write these files to `artifacts/ui-tests` in the repository root. Git 
 - `marked.png`: the window after the test marked the start and the end.
 - `range-Light.png` and `range-Dark.png`: the window with a marked range in each theme.
 - `range-Light.txt` and `range-Dark.txt`: the colors and the contrast ratio that the test measured on the range.
+- `range-Dark-contrast.png`: the window that the dark theme contrast test checks.
 
 ## Launch options
 
@@ -70,4 +71,4 @@ dotnet test ClipChopper/Tests/ClipChopper.WinUIApp.UiTests -p:Platform=x64 --fil
 
 - The app builds with the runtime identifier `win-x64`. Without it, the app can fail to start from a deep folder path, for example a git worktree.
 - The Debug build of the app writes the Flyleaf log to `C:\Flyleaf\log.txt`.
-- The contrast ratio of the range in the dark theme is low. Issue #36 tracks this. The tests write the ratio to a file and do not assert on it.
+- In the dark theme, the tests assert a range contrast of 2.5 or more against the track (#36). The light theme has no contrast check, because #36 does not change it. Both themes check that the range starts at the marked position.
