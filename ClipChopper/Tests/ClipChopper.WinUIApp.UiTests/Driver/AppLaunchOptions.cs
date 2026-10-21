@@ -1,10 +1,11 @@
 using System.Drawing;
+using ClipChopper.WinUIApp.CommandLine;
 
 namespace ClipChopper.WinUIApp.UiTests.Driver;
 
 public sealed record AppLaunchOptions
 {
-    public string? Theme { get; init; }
+    public LaunchTheme? Theme { get; init; }
 
     public string? OpenFile { get; init; }
 
@@ -12,8 +13,6 @@ public sealed record AppLaunchOptions
     /// When true, the app shows the marked range in the ItemStatus of the seek slider.
     /// </summary>
     public bool ExposeRange { get; init; } = true;
-
-    public IReadOnlyList<string> ExtraArguments { get; init; } = [];
 
     /// <summary>
     /// The screen position of the window in physical pixels.

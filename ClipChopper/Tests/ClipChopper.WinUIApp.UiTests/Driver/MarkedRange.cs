@@ -1,10 +1,10 @@
-using System.Globalization;
+using ClipChopper.WinUIApp.CommandLine;
 
 namespace ClipChopper.WinUIApp.UiTests.Driver;
 
 /// <summary>
 /// The marked fragment that the app shows in the ItemStatus of the seek slider.
-/// The text has the form "start=&lt;ms&gt;;stop=&lt;ms&gt;".
+/// RangeStatusFormat defines the form of the text.
 /// </summary>
 public sealed record MarkedRange(int StartMs, int StopMs)
 {
@@ -17,7 +17,7 @@ public sealed record MarkedRange(int StartMs, int StopMs)
 
     /// <summary>
     /// Returns null when the app has not set the status yet.
-    /// Throws FormatException when the status has no start or no stop value.
+    /// Throws FormatException when the status is not valid.
     /// </summary>
     public static MarkedRange? Parse(string? status)
     {
@@ -26,31 +26,11 @@ public sealed record MarkedRange(int StartMs, int StopMs)
             return null;
         }
 
-        int? start = null;
-        int? stop = null;
-        foreach (var part in status.Split(';'))
+        if (!RangeStatusFormat.TryParse(status, out var startMs, out var stopMs))
         {
-            var pair = part.Split('=');
-            if (pair.Length != 2 || !int.TryParse(pair[1], NumberStyles.Integer, CultureInfo.InvariantCulture, out var value))
-            {
-                throw new FormatException($"Unexpected ItemStatus of the seek slider: '{status}'.");
-            }
-
-            if (pair[0] == "start")
-            {
-                start = value;
-            }
-            else if (pair[0] == "stop")
-            {
-                stop = value;
-            }
+            throw new FormatException($"Unexpected ItemStatus of the seek slider: '{status}'.");
         }
 
-        if (start is null || stop is null)
-        {
-            throw new FormatException($"The ItemStatus of the seek slider has no start or no stop value: '{status}'.");
-        }
-
-        return new MarkedRange(start.Value, stop.Value);
+        return new MarkedRange(startMs, stopMs);
     }
 }

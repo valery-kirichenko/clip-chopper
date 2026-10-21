@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Drawing;
+using ClipChopper.WinUIApp.CommandLine;
 using ClipChopper.WinUIApp.UiTests.Platform;
 using FlaUI.Core.AutomationElements;
 using FlaUI.Core.Tools;
@@ -83,24 +84,13 @@ public sealed class ClipChopperApp : IDisposable
             UseShellExecute = false,
             WorkingDirectory = Path.GetDirectoryName(TestPaths.AppExePath)!,
         };
-        if (options.Theme != null)
+        var launchOptions = new LaunchOptions
         {
-            startInfo.ArgumentList.Add("--theme");
-            startInfo.ArgumentList.Add(options.Theme);
-        }
-
-        if (options.OpenFile != null)
-        {
-            startInfo.ArgumentList.Add("--open");
-            startInfo.ArgumentList.Add(options.OpenFile);
-        }
-
-        if (options.ExposeRange)
-        {
-            startInfo.ArgumentList.Add("--expose-range");
-        }
-
-        foreach (var argument in options.ExtraArguments)
+            Theme = options.Theme,
+            OpenFile = options.OpenFile,
+            ExposeRange = options.ExposeRange,
+        };
+        foreach (var argument in LaunchArguments.From(launchOptions))
         {
             startInfo.ArgumentList.Add(argument);
         }
