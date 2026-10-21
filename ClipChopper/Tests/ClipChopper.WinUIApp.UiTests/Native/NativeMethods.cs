@@ -15,7 +15,7 @@ internal static partial class NativeMethods
     [return: MarshalAs(UnmanagedType.Bool)]
     internal static partial bool IsWindowVisible(IntPtr hwnd);
 
-    [LibraryImport(User32, SetLastError = true)]
+    [LibraryImport(User32)]
     internal static partial IntPtr OpenInputDesktop(uint flags, [MarshalAs(UnmanagedType.Bool)] bool inherit, DesktopAccessRights desiredAccess);
 
     [LibraryImport(User32)]
@@ -33,7 +33,7 @@ internal static partial class NativeMethods
     [return: MarshalAs(UnmanagedType.Bool)]
     internal static partial bool AssignProcessToJobObject(IntPtr job, IntPtr process);
 
-    [LibraryImport(Kernel32, SetLastError = true)]
+    [LibraryImport(Kernel32)]
     [return: MarshalAs(UnmanagedType.Bool)]
     internal static partial bool CloseHandle(IntPtr handle);
 }

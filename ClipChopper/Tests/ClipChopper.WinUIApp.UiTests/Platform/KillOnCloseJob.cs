@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using ClipChopper.WinUIApp.UiTests.Native;
@@ -18,7 +19,7 @@ internal sealed class KillOnCloseJob : IDisposable
         var handle = NativeMethods.CreateJobObject(IntPtr.Zero, null);
         if (handle == IntPtr.Zero)
         {
-            throw new InvalidOperationException("CreateJobObject failed.");
+            throw new Win32Exception(Marshal.GetLastPInvokeError(), "CreateJobObject failed.");
         }
 
         var info = new JobObjectExtendedLimitInformation();
@@ -26,10 +27,14 @@ internal sealed class KillOnCloseJob : IDisposable
         var length = (uint) Marshal.SizeOf<JobObjectExtendedLimitInformation>();
         try
         {
-            if (!NativeMethods.SetInformationJobObject(handle, JobObjectInfoClass.ExtendedLimitInformation, ref info, length)
-                || !NativeMethods.AssignProcessToJobObject(handle, process.Handle))
+            if (!NativeMethods.SetInformationJobObject(handle, JobObjectInfoClass.ExtendedLimitInformation, ref info, length))
             {
-                throw new InvalidOperationException("Cannot put the app process into a job object.");
+                throw new Win32Exception(Marshal.GetLastPInvokeError(), "SetInformationJobObject failed.");
+            }
+
+            if (!NativeMethods.AssignProcessToJobObject(handle, process.Handle))
+            {
+                throw new Win32Exception(Marshal.GetLastPInvokeError(), "AssignProcessToJobObject failed.");
             }
         }
         catch
