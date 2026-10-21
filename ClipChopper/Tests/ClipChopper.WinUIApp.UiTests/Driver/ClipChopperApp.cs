@@ -95,6 +95,11 @@ public sealed class ClipChopperApp : IDisposable
             startInfo.ArgumentList.Add(options.OpenFile);
         }
 
+        if (options.ExposeRange)
+        {
+            startInfo.ArgumentList.Add("--expose-range");
+        }
+
         foreach (var argument in options.ExtraArguments)
         {
             startInfo.ArgumentList.Add(argument);

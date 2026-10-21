@@ -365,7 +365,10 @@ namespace ClipChopper.WinUIApp
                 var margin = FragmentRange.Margin;
                 margin.Left = marginValue;
                 FragmentRange.Margin = margin;
-                AutomationProperties.SetItemStatus(SeekSlider, FormattableString.Invariant($"start={_fragment.Start / TimeSpan.TicksPerMillisecond};stop={_fragment.Stop / TimeSpan.TicksPerMillisecond}"));
+                if (App.ExposeRange)
+                {
+                    AutomationProperties.SetItemStatus(SeekSlider, FormattableString.Invariant($"start={_fragment.Start / TimeSpan.TicksPerMillisecond};stop={_fragment.Stop / TimeSpan.TicksPerMillisecond}"));
+                }
             });
         }
 

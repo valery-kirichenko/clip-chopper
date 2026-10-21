@@ -60,8 +60,13 @@ namespace ClipChopper.WinUIApp
         }
 
         /// <summary>
+        /// True when the command line has the option "--expose-range" for UI tests.
+        /// </summary>
+        public static bool ExposeRange { get; } = Environment.GetCommandLineArgs().Contains("--expose-range");
+
+        /// <summary>
         /// Returns the value after the given option in the command line, or null.
-        /// The options "--theme" and "--open" are for UI tests. Without them the app starts as before.
+        /// The options "--theme", "--open" and "--expose-range" are for UI tests. Without them the app starts as before.
         /// </summary>
         private static string? GetLaunchOption(string name)
         {

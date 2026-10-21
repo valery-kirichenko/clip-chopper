@@ -38,7 +38,7 @@ The tests write these files to `artifacts/ui-tests` in the repository root. Git 
 
 ## Launch options
 
-The app has two options for tests: `--theme Light|Dark` and `--open <path>`. They are off by default and have no effect on a normal start.
+The app has three options for tests: `--theme Light|Dark`, `--open <path>`, and `--expose-range`. The last one makes the app publish the marked range in the `ItemStatus` of the seek slider. `ClipChopperApp` sets it by default. The options are off by default and have no effect on a normal start.
 
 ## Write a new test
 

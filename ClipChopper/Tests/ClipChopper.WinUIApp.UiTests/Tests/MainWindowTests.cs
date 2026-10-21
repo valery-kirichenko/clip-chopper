@@ -10,7 +10,7 @@ public sealed class MainWindowTests
 {
     private const string AppRegistryKey = @"Software\ClipChopper";
 
-    private static readonly TimeSpan UnsupportedFileSettleTime = TimeSpan.FromSeconds(3);
+    private static readonly TimeSpan SettleTime = TimeSpan.FromSeconds(3);
 
     private readonly TestClipFixture _clip;
 
@@ -79,7 +79,7 @@ public sealed class MainWindowTests
         MainWindowState state;
         using (var app = ClipChopperApp.Launch(new AppLaunchOptions { OpenFile = unsupportedPath }))
         {
-            Thread.Sleep(UnsupportedFileSettleTime);
+            Thread.Sleep(SettleTime);
             hasExited = app.HasExited;
             state = app.Page.ReadState();
         }
@@ -88,6 +88,22 @@ public sealed class MainWindowTests
         Assert.False(state.IsOpened, "NoVideoOpened: the play button is disabled.");
         Assert.Null(state.SelectedFileName);
         Assert.Null(state.Fragment);
+    }
+
+    [UiFact]
+    public void KeepsRangeStatusOffWithoutExposeRangeOption()
+    {
+        MarkedRange? range;
+        using (var app = ClipChopperApp.Launch(new AppLaunchOptions { OpenFile = _clip.ClipPath, ExposeRange = false }))
+        {
+            app.Page.WaitUntilPlayable(TimeSpan.FromSeconds(20));
+            app.Page.SeekTo(2000);
+            app.Page.StartFragmentButton.Patterns.Invoke.Pattern.Invoke();
+            Thread.Sleep(SettleTime);
+            range = app.Page.ReadRange();
+        }
+
+        Assert.Null(range);
     }
 
     private static object? ReadPreviousPath()
