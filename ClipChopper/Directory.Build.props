@@ -6,7 +6,6 @@
     <AppConfigurations>Debug;Release</AppConfigurations>
     <DotNetTargetFramework>net10.0</DotNetTargetFramework>
     <AppTargetFramework>$(DotNetTargetFramework)</AppTargetFramework>
-    <WindowsAppTargetFramework>$(DotNetTargetFramework)-windows</WindowsAppTargetFramework>
     <WinUIAppTargetFramework>$(DotNetTargetFramework)-windows10.0.22621.0</WinUIAppTargetFramework>
     <WinUIAppTargetPlatformMinVersion>10.0.17763.0</WinUIAppTargetPlatformMinVersion>
     <LibraryTargetFramework>$(DotNetTargetFramework)</LibraryTargetFramework>
@@ -17,7 +16,6 @@
   <!-- NuGet packages -->
   <PropertyGroup>
     <AcolyteNETPackageVersion>2.2.0</AcolyteNETPackageVersion>
-    <FFMEWindowsPackageVersion>4.4.350</FFMEWindowsPackageVersion>
     <NExifToolPackageVersion>0.11.0</NExifToolPackageVersion>
     <MicrosoftExtensionsConfigurationPackageVersion>10.0.12</MicrosoftExtensionsConfigurationPackageVersion>
     <MicrosoftExtensionsConfigurationBinderPackageVersion>10.0.12</MicrosoftExtensionsConfigurationBinderPackageVersion>
@@ -27,7 +25,6 @@
     <NLogPackageVersion>4.7.15</NLogPackageVersion>
     <NLogConfigPackageVersion>4.7.15</NLogConfigPackageVersion>
     <NLogSchemaPackageVersion>4.7.15</NLogSchemaPackageVersion>
-    <OokiiDialogsWpfPackageVersion>5.0.1</OokiiDialogsWpfPackageVersion>
   </PropertyGroup>
 
 </Project>
