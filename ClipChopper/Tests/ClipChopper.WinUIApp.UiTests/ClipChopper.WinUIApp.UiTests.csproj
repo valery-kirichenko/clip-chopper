@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>$(WindowsAppTargetFramework)</TargetFramework>
+    <TargetFramework>$(UiTestTargetFramework)</TargetFramework>
     <Platforms>$(AppPlatforms)</Platforms>
     <Configurations>$(AppConfigurations)</Configurations>
     <Nullable>enable</Nullable>

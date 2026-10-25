@@ -11,6 +11,7 @@
     <LibraryTargetFramework>$(DotNetTargetFramework)</LibraryTargetFramework>
     <TestTargetFramework>$(DotNetTargetFramework)</TestTargetFramework>
     <CSharpLangVersion>10.0</CSharpLangVersion>
+    <UiTestTargetFramework>$(DotNetTargetFramework)-windows</UiTestTargetFramework>
   </PropertyGroup>
 
   <!-- NuGet packages -->
