@@ -257,7 +257,15 @@
                                     Value="{Binding Player.Audio.Volume, Mode=TwoWay}"
                                     TickFrequency="100" TickPlacement="Outside"
                                     PointerWheelChanged="VolumeSlider_PointerWheelChanged"
-                                    Width="150" Margin="8,0,0,0"/>
+                                    Width="150" Margin="8,0,0,0">
+                                <Slider.Resources>
+                                    <ResourceDictionary>
+                                        <StaticResource x:Key="SliderTrackFill" ResourceKey="FragmentRangeTrackBrush"/>
+                                        <StaticResource x:Key="SliderTrackFillPointerOver" ResourceKey="FragmentRangeTrackBrush"/>
+                                        <StaticResource x:Key="SliderTrackFillPressed" ResourceKey="FragmentRangeTrackBrush"/>
+                                    </ResourceDictionary>
+                                </Slider.Resources>
+                            </Slider>
                             <!--<Button>
                                 <FontIcon Glyph="&#xE767;" />
                             </Button>-->
