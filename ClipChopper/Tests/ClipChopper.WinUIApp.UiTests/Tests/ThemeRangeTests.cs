@@ -26,6 +26,12 @@ public sealed class ThemeRangeTests
     private const int MinDistanceFromVolumeThumb = 14;
     private const int BackgroundProbeOffset = 5;
 
+    private const string ShotDirVariable = "CLIPCHOPPER_UITEST_SHOT_DIR";
+    private const int ShotLeftMargin = 76;
+    private const int ShotTopMargin = 12;
+    private const int ShotRightMargin = 8;
+    private const int ShotBottomMargin = 6;
+
     private readonly TestClipFixture _clip;
     private readonly ITestOutputHelper _output;
 
@@ -138,6 +144,27 @@ public sealed class ThemeRangeTests
         File.WriteAllText(Path.Combine(TestPaths.ArtifactsDir, $"track-{theme}.txt"), text);
         _output.WriteLine(text);
         Assert.True(RangeProbe.AreClose(seekTrack, volumeTrack, TrackColorTolerance), $"TrackColor: the inactive track of the volume slider is {volumeTrack}, the seek slider track is {seekTrack}, expected a difference of {TrackColorTolerance} or less in each channel.");
+        SaveControlAreaShot(capture, windowBounds, seekBounds, theme);
+    }
+
+    /// <summary>
+    /// Saves the control area under the video to the folder named in the environment variable, if it is set.
+    /// The shot shows the timeline with the marked range and the volume slider, for the pull request description.
+    /// </summary>
+    private static void SaveControlAreaShot(Bitmap capture, Rectangle windowBounds, Rectangle seekBounds, string theme)
+    {
+        var directory = Environment.GetEnvironmentVariable(ShotDirVariable);
+        if (string.IsNullOrEmpty(directory))
+        {
+            return;
+        }
+
+        var left = Math.Max(0, seekBounds.Left - windowBounds.Left - ShotLeftMargin);
+        var top = Math.Max(0, seekBounds.Top - windowBounds.Top - ShotTopMargin);
+        var area = new Rectangle(left, top, capture.Width - left - ShotRightMargin, capture.Height - top - ShotBottomMargin);
+        using var shot = capture.Clone(area, capture.PixelFormat);
+        Directory.CreateDirectory(directory);
+        shot.Save(Path.Combine(directory, theme.ToLowerInvariant() + ".png"), System.Drawing.Imaging.ImageFormat.Png);
     }
 
     private static void AssertSampleIsTrack(string slider, Bitmap capture, Rectangle windowBounds, Point point, Color track)
