@@ -26,6 +26,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ClipChopper.Configuration",
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClipChopper.WinUIApp", "Applications\ClipChopper.WinUIApp\ClipChopper.WinUIApp.csproj", "{24153534-34C8-4CF9-82E7-834CA389C2FF}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ClipChopper.WinUIApp.UiTests", "Tests\ClipChopper.WinUIApp.UiTests\ClipChopper.WinUIApp.UiTests.csproj", "{5B7E1C0A-3D52-4E6B-9C41-7A2F6D8E0B13}"
+	ProjectSection(ProjectDependencies) = postProject
+		{24153534-34C8-4CF9-82E7-834CA389C2FF} = {24153534-34C8-4CF9-82E7-834CA389C2FF}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|ARM64 = Debug|ARM64
@@ -114,6 +119,18 @@ Global
 		{24153534-34C8-4CF9-82E7-834CA389C2FF}.Release|x86.ActiveCfg = Release|x86
 		{24153534-34C8-4CF9-82E7-834CA389C2FF}.Release|x86.Build.0 = Release|x86
 		{24153534-34C8-4CF9-82E7-834CA389C2FF}.Release|x86.Deploy.0 = Release|x86
+		{5B7E1C0A-3D52-4E6B-9C41-7A2F6D8E0B13}.Debug|ARM64.ActiveCfg = Debug|x64
+		{5B7E1C0A-3D52-4E6B-9C41-7A2F6D8E0B13}.Debug|ARM64.Build.0 = Debug|x64
+		{5B7E1C0A-3D52-4E6B-9C41-7A2F6D8E0B13}.Debug|x64.ActiveCfg = Debug|x64
+		{5B7E1C0A-3D52-4E6B-9C41-7A2F6D8E0B13}.Debug|x64.Build.0 = Debug|x64
+		{5B7E1C0A-3D52-4E6B-9C41-7A2F6D8E0B13}.Debug|x86.ActiveCfg = Debug|x64
+		{5B7E1C0A-3D52-4E6B-9C41-7A2F6D8E0B13}.Debug|x86.Build.0 = Debug|x64
+		{5B7E1C0A-3D52-4E6B-9C41-7A2F6D8E0B13}.Release|ARM64.ActiveCfg = Release|x64
+		{5B7E1C0A-3D52-4E6B-9C41-7A2F6D8E0B13}.Release|ARM64.Build.0 = Release|x64
+		{5B7E1C0A-3D52-4E6B-9C41-7A2F6D8E0B13}.Release|x64.ActiveCfg = Release|x64
+		{5B7E1C0A-3D52-4E6B-9C41-7A2F6D8E0B13}.Release|x64.Build.0 = Release|x64
+		{5B7E1C0A-3D52-4E6B-9C41-7A2F6D8E0B13}.Release|x86.ActiveCfg = Release|x64
+		{5B7E1C0A-3D52-4E6B-9C41-7A2F6D8E0B13}.Release|x86.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -125,6 +142,7 @@ Global
 		{336DE30D-54C0-4D55-A36B-354B52E5C9C9} = {A4D3BDEB-BB70-46BC-BB8C-B58D71922315}
 		{8FF14528-E915-4729-9C49-A87D29E42802} = {A4D3BDEB-BB70-46BC-BB8C-B58D71922315}
 		{24153534-34C8-4CF9-82E7-834CA389C2FF} = {30A9B94B-57FE-4C5D-B493-2E8F2D578AF8}
+		{5B7E1C0A-3D52-4E6B-9C41-7A2F6D8E0B13} = {C2130176-D2F0-44C6-9D32-219B4B626F05}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {D5421CE1-B974-4F27-83D9-6EACD36B29A4}

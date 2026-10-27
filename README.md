@@ -17,6 +17,8 @@ You need Windows, the .NET 10 SDK, and PowerShell. Build the app with this comma
 dotnet build ClipChopper\Applications\ClipChopper.WinUIApp\ClipChopper.WinUIApp.csproj -c Release -p:Platform=x64
 ```
 
+To run the UI tests, see `ClipChopper/Tests/ClipChopper.WinUIApp.UiTests/README.md`.
+
 ### FFmpeg
 
 The repository does not contain the FFmpeg files. The first build downloads them into `ClipChopper\Applications\ClipChopper.WinUIApp\FFmpeg`. A later build skips the download, because the file `ffmpeg-version.txt` in that folder holds the version that the build needs.
