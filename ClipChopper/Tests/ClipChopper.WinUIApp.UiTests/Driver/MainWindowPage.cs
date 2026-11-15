@@ -33,6 +33,8 @@ public sealed class MainWindowPage
 
     public AutomationElement SeekSlider => Find("SeekSlider");
 
+    public AutomationElement VolumeSlider => Find("VolumeSlider");
+
     public AutomationElement CurrentTimeText => Find("CurrentTimeText");
 
     public AutomationElement DurationText => Find("DurationText");

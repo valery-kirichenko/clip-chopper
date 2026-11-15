@@ -58,11 +58,28 @@ public static class RangeProbe
         );
     }
 
+    public static Color ColorAt(Bitmap capture, Rectangle windowBounds, Point screenPoint)
+    {
+        var x = screenPoint.X - windowBounds.Left;
+        var y = screenPoint.Y - windowBounds.Top;
+        if (x < 0 || x >= capture.Width || y < 0 || y >= capture.Height)
+        {
+            throw new ArgumentOutOfRangeException(nameof(screenPoint), screenPoint, $"The point is outside the capture. The window starts at {windowBounds.Location} and the capture is {capture.Width} x {capture.Height} pixels.");
+        }
+
+        return capture.GetPixel(x, y);
+    }
+
+    public static bool AreClose(Color first, Color second, int tolerance)
+    {
+        return Math.Abs(first.R - second.R) <= tolerance
+            && Math.Abs(first.G - second.G) <= tolerance
+            && Math.Abs(first.B - second.B) <= tolerance;
+    }
+
     private static bool IsClose(Color first, Color second)
     {
-        return Math.Abs(first.R - second.R) <= ColorTolerance
-            && Math.Abs(first.G - second.G) <= ColorTolerance
-            && Math.Abs(first.B - second.B) <= ColorTolerance;
+        return AreClose(first, second, ColorTolerance);
     }
 
     private static double ContrastRatio(Color first, Color second)
