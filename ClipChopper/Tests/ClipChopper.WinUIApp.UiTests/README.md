@@ -80,7 +80,7 @@ Use `app.Page` to find controls, to seek, to mark, and to read the state. Mark a
 
 ## Skips
 
-If the test host runs as administrator, the normal tests skip. If it does not, the administrator test skips. If no interactive desktop exists, all tests skip. A skip is not a pass. A locked screen also skips the tests, because the input desktop is not available then. The tests do not check a remote desktop session. CI does not run these tests.
+If the test host runs as administrator, the normal tests skip. If it does not, the administrator test skips. If no interactive desktop exists, the UI tests and the administrator tests skip, but the plain tests still run. A skip is not a pass. A locked screen also skips the tests, because the input desktop is not available then. The tests do not check a remote desktop session. CI does not run these tests.
 
 The tests of the launch option parser, the command line builder, and the range format are plain `[Fact]` and `[Theory]` tests. They run without a desktop. To run only them, use this command:
 

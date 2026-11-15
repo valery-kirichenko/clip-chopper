@@ -1,4 +1,3 @@
-using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using ClipChopper.WinUIApp.UiTests.Native;
@@ -11,7 +10,7 @@ internal static class ProcessElevation
     {
         if (!NativeMethods.OpenProcessToken(process.Handle, TokenAccessRights.Query, out var token))
         {
-            throw new Win32Exception(Marshal.GetLastPInvokeError(), "OpenProcessToken failed.");
+            throw Win32Errors.CreateFromLastCall("OpenProcessToken");
         }
 
         try
@@ -19,7 +18,7 @@ internal static class ProcessElevation
             var length = (uint) Marshal.SizeOf<TokenElevation>();
             if (!NativeMethods.GetTokenInformation(token, TokenInformationClass.Elevation, out var elevation, length, out _))
             {
-                throw new Win32Exception(Marshal.GetLastPInvokeError(), "GetTokenInformation failed.");
+                throw Win32Errors.CreateFromLastCall("GetTokenInformation");
             }
 
             return elevation.TokenIsElevated != 0;
