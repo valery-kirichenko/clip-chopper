@@ -10,5 +10,10 @@ namespace ClipChopper.WinUIApp.CommandLine
         public string? OpenFile { get; init; }
 
         public bool ExposeRange { get; init; }
+
+        /// <summary>
+        /// When true, the app shows its window without activation and sets the volume of its player to 0. The UI tests use it.
+        /// </summary>
+        public bool UiTest { get; init; }
     }
 }

@@ -63,6 +63,14 @@ public sealed class LaunchOptionsParserTests
     }
 
     [Fact]
+    public void ReadsUiTestFlag()
+    {
+        var options = LaunchOptionsParser.Parse([LaunchOptionNames.UiTest]);
+
+        Assert.True(options.UiTest);
+    }
+
+    [Fact]
     public void ReadsAllOptionsWhenFlagComesFirst()
     {
         AssertAllOptionsRead(

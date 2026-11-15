@@ -1,4 +1,5 @@
 using System.Globalization;
+using ClipChopper.WinUIApp.Automation;
 using FlaUI.Core.AutomationElements;
 using FlaUI.Core.Definitions;
 using FlaUI.Core.Tools;
@@ -33,6 +34,8 @@ public sealed class MainWindowPage
 
     public AutomationElement SeekSlider => Find("SeekSlider");
 
+    public AutomationElement VolumeSlider => Find("VolumeSlider");
+
     public AutomationElement CurrentTimeText => Find("CurrentTimeText");
 
     public AutomationElement DurationText => Find("DurationText");
@@ -58,6 +61,20 @@ public sealed class MainWindowPage
         if (!playable.Result)
         {
             throw new TimeoutException("The video did not open: the play button stayed disabled.", playable.LastException);
+        }
+    }
+
+    /// <summary>
+    /// Waits until the play button and the audio track selector are enabled.
+    /// Use it for a clip with an audio track and a start without "--expose-range". The wait times out for a clip without audio.
+    /// The app fills the audio track selector just before it creates the range.
+    /// </summary>
+    public void WaitUntilAudioTracksLoaded(TimeSpan timeout)
+    {
+        var loaded = Retry.WhileFalse(() => PlayButton.IsEnabled && AudioTrackSelector.IsEnabled, timeout, UiTiming.PollInterval, throwOnTimeout: false, ignoreException: true);
+        if (!loaded.Result)
+        {
+            throw new TimeoutException("The video did not open: the play button or the audio track selector stayed disabled.", loaded.LastException);
         }
     }
 
@@ -113,6 +130,17 @@ public sealed class MainWindowPage
     public MarkedRange? ReadRange()
     {
         return MarkedRange.Parse(SeekSlider.Properties.ItemStatus.ValueOrDefault);
+    }
+
+    public bool IsMuted()
+    {
+        var status = VolumeSlider.Properties.ItemStatus.ValueOrDefault;
+        return status switch
+        {
+            MuteStatusFormat.Muted => true,
+            MuteStatusFormat.NotMuted => false,
+            _ => throw new InvalidOperationException($"The volume slider shows no mute state. ItemStatus: '{status}'."),
+        };
     }
 
     private void Mark(RangeEdge edge, int expectedMs)

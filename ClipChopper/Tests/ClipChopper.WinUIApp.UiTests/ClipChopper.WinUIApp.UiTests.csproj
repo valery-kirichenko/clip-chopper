@@ -38,6 +38,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)..\..\Applications\ClipChopper.WinUIApp\CommandLine\LaunchOptionsParser.cs" Link="CommandLine\LaunchOptionsParser.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)..\..\Applications\ClipChopper.WinUIApp\CommandLine\LaunchTheme.cs" Link="CommandLine\LaunchTheme.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)..\..\Applications\ClipChopper.WinUIApp\Automation\RangeStatusFormat.cs" Link="Automation\RangeStatusFormat.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)..\..\Applications\ClipChopper.WinUIApp\Automation\MuteStatusFormat.cs" Link="Automation\MuteStatusFormat.cs" />
   </ItemGroup>
 
   <ItemGroup>
@@ -48,6 +49,10 @@
     <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
       <_Parameter1>ArtifactsDir</_Parameter1>
       <_Parameter2>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\..\..\artifacts\ui-tests'))</_Parameter2>
+    </AssemblyAttribute>
+    <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+      <_Parameter1>TestProjectDir</_Parameter1>
+      <_Parameter2>$(MSBuildThisFileDirectory)</_Parameter2>
     </AssemblyAttribute>
   </ItemGroup>
 
