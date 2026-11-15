@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Runtime.InteropServices;
-using ClipChopper.Common.Json;
-using ClipChopper.Common.Options;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Primitives;
 using Newtonsoft.Json;
@@ -16,12 +14,6 @@ namespace ClipChopper.Configuration
         public static string DefaultOptionsPath => PredefinedPaths.DefaultOptionsPath;
 
         public static string AlternativeOptionsPath => PredefinedPaths.AlternativeOptionsPath;
-
-        #region Options
-
-        public static ClipChopperCoreOptions Core => GetOptions<ClipChopperCoreOptions>();
-
-        #endregion
 
 
         public static TOptions? FindOptions<TOptions>()
