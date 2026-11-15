@@ -11,7 +11,8 @@ public sealed class LaunchArgumentsTests
         new LaunchOptions { Theme = LaunchTheme.Dark },
         new LaunchOptions { OpenFile = @"C:\some folder\клип.mp4" },
         new LaunchOptions { ExposeRange = true },
-        new LaunchOptions { Theme = LaunchTheme.Light, OpenFile = @"C:\some folder\клип.mp4", ExposeRange = true },
+        new LaunchOptions { UiTest = true },
+        new LaunchOptions { Theme = LaunchTheme.Light, OpenFile = @"C:\some folder\клип.mp4", ExposeRange = true, UiTest = true },
     };
 
     [Fact]
@@ -30,12 +31,12 @@ public sealed class LaunchArgumentsTests
     [Fact]
     public void BuildsTokensInFixedOrder()
     {
-        var options = new LaunchOptions { Theme = LaunchTheme.Dark, OpenFile = "x", ExposeRange = true };
+        var options = new LaunchOptions { Theme = LaunchTheme.Dark, OpenFile = "x", ExposeRange = true, UiTest = true };
 
         var arguments = LaunchArguments.From(options);
 
         Assert.Equal(
-            [LaunchOptionNames.Theme, nameof(LaunchTheme.Dark), LaunchOptionNames.Open, "x", LaunchOptionNames.ExposeRange],
+            [LaunchOptionNames.Theme, nameof(LaunchTheme.Dark), LaunchOptionNames.Open, "x", LaunchOptionNames.ExposeRange, LaunchOptionNames.UiTest],
             arguments
         );
     }

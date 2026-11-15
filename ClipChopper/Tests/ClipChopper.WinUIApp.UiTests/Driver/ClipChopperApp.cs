@@ -11,20 +11,22 @@ namespace ClipChopper.WinUIApp.UiTests.Driver;
 /// <summary>
 /// The only code that starts the app, attaches UI Automation, and sets the window position and size.
 /// It makes the test host per-monitor DPI aware first, so all positions and sizes are physical pixels.
-/// A hidden (windowless) mode can be added here later.
+/// By default, it starts the app on a hidden desktop. See UiTestMode for the visible mode.
 /// </summary>
 public sealed class ClipChopperApp : IDisposable
 {
     private readonly Process _process;
     private readonly UIA3Automation _automation;
     private readonly KillOnCloseJob _job;
+    private readonly HiddenDesktop? _desktop;
     private readonly IntPtr _windowHandle;
 
-    private ClipChopperApp(Process process, UIA3Automation automation, KillOnCloseJob job, IntPtr windowHandle, Window window)
+    private ClipChopperApp(Process process, UIA3Automation automation, KillOnCloseJob job, HiddenDesktop? desktop, IntPtr windowHandle, Window window)
     {
         _process = process;
         _automation = automation;
         _job = job;
+        _desktop = desktop;
         _windowHandle = windowHandle;
         Window = window;
         Page = new MainWindowPage(window, automation);
@@ -38,27 +40,35 @@ public sealed class ClipChopperApp : IDisposable
 
     public bool HasExited => _process.HasExited;
 
+    public int ProcessId => _process.Id;
+
+    public string? DesktopName => _desktop?.Name;
+
     public static ClipChopperApp Launch(AppLaunchOptions options)
     {
         DpiAwareness.EnablePerMonitorV2();
-        var process = Process.Start(CreateStartInfo(options))!;
+        HiddenDesktop? desktop = null;
+        Process? process = null;
         KillOnCloseJob? job = null;
         UIA3Automation? automation = null;
         try
         {
-            job = KillOnCloseJob.Assign(process);
+            desktop = UiTestMode.IsVisible ? null : HiddenDesktop.Create();
+            var started = AppProcessStarter.Start(TestPaths.AppExePath, BuildArguments(options), desktop?.StartupName);
+            process = started.Process;
+            job = started.Job;
             automation = new UIA3Automation();
-            var windowHandle = MainWindowFinder.WaitForHandle(process, options.StartTimeout, UiTiming.PollInterval);
+            var windowHandle = MainWindowFinder.WaitForHandle(process, desktop?.Handle ?? IntPtr.Zero, options.StartTimeout, UiTiming.PollInterval);
             var window = automation.FromHandle(windowHandle).AsWindow();
             var transform = window.Patterns.Transform.Pattern;
             transform.Move(options.WindowPosition.X, options.WindowPosition.Y);
             transform.Resize(options.WindowSize.Width, options.WindowSize.Height);
             WaitForSize(window, options.WindowSize);
-            return new ClipChopperApp(process, automation, job, windowHandle, window);
+            return new ClipChopperApp(process, automation, job, desktop, windowHandle, window);
         }
         catch
         {
-            Cleanup(process, automation, job);
+            Cleanup(process, automation, job, desktop);
             throw;
         }
     }
@@ -74,28 +84,19 @@ public sealed class ClipChopperApp : IDisposable
 
     public void Dispose()
     {
-        Cleanup(_process, _automation, _job);
+        Cleanup(_process, _automation, _job, _desktop);
     }
 
-    private static ProcessStartInfo CreateStartInfo(AppLaunchOptions options)
+    private static IReadOnlyList<string> BuildArguments(AppLaunchOptions options)
     {
-        var startInfo = new ProcessStartInfo(TestPaths.AppExePath)
-        {
-            UseShellExecute = false,
-            WorkingDirectory = Path.GetDirectoryName(TestPaths.AppExePath)!,
-        };
         var launchOptions = new LaunchOptions
         {
             Theme = options.Theme,
             OpenFile = options.OpenFile,
             ExposeRange = options.ExposeRange,
+            UiTest = true,
         };
-        foreach (var argument in LaunchArguments.From(launchOptions))
-        {
-            startInfo.ArgumentList.Add(argument);
-        }
-
-        return startInfo;
+        return LaunchArguments.From(launchOptions);
     }
 
     private static void WaitForSize(Window window, Size size)
@@ -118,9 +119,9 @@ public sealed class ClipChopperApp : IDisposable
         }
     }
 
-    private static void Cleanup(Process process, UIA3Automation? automation, KillOnCloseJob? job)
+    private static void Cleanup(Process? process, UIA3Automation? automation, KillOnCloseJob? job, HiddenDesktop? desktop)
     {
-        if (!process.HasExited)
+        if (process is { HasExited: false })
         {
             process.Kill(entireProcessTree: true);
             process.WaitForExit(TimeSpan.FromSeconds(10));
@@ -128,6 +129,7 @@ public sealed class ClipChopperApp : IDisposable
 
         automation?.Dispose();
         job?.Dispose();
-        process.Dispose();
+        process?.Dispose();
+        desktop?.Dispose();
     }
 }

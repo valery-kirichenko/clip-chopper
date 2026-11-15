@@ -13,5 +13,7 @@ namespace ClipChopper.WinUIApp.CommandLine
         public const string Open = "--open";
 
         public const string ExposeRange = "--expose-range";
+
+        public const string UiTest = "--ui-test";
     }
 }

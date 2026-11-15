@@ -8,6 +8,8 @@ public static class TestPaths
 
     public static string ArtifactsDir { get; } = ReadMetadata("ArtifactsDir");
 
+    public static string TestProjectDir { get; } = ReadMetadata("TestProjectDir");
+
     private static string ReadMetadata(string key)
     {
         return typeof(TestPaths).Assembly

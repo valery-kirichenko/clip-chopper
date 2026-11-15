@@ -96,7 +96,7 @@ public sealed class MainWindowTests
         MarkedRange? range;
         using (var app = ClipChopperApp.Launch(new AppLaunchOptions { OpenFile = _clip.ClipPath, ExposeRange = false }))
         {
-            app.Page.WaitUntilPlayable(TimeSpan.FromSeconds(20));
+            app.Page.WaitUntilAudioTracksLoaded(TimeSpan.FromSeconds(20));
             app.Page.SeekTo(2000);
             app.Page.StartFragmentButton.Patterns.Invoke.Pattern.Invoke();
             Thread.Sleep(SettleTime);

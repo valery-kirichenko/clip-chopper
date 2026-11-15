@@ -204,12 +204,19 @@ namespace ClipChopper.WinUIApp
             config.Player.AutoPlay = false;
             config.Decoder.AllowProfileMismatch = true;
             Player = new Player(config);
-            Player.Audio.Volume = 100;
+            Player.Audio.Volume = _launchOptions.UiTest ? 0 : 100;
             Player.PropertyChanged += Player_PropertyChanged;
             Player.OpenCompleted += Player_OpenCompleted;
 
 
             this.InitializeComponent();
+            if (_launchOptions.UiTest)
+            {
+                VolumeSlider.IsEnabled = false;
+                ExposeMuteState();
+                Player.Audio.PropertyChanged += Audio_PropertyChanged;
+            }
+
             this.ExtendsContentIntoTitleBar = true;
             this.SetTitleBar(DefaultTitleBar);
 
@@ -290,6 +297,11 @@ namespace ClipChopper.WinUIApp
             if (!Player.CanPlay)
             {
                 return;
+            }
+
+            if (_launchOptions.UiTest)
+            {
+                DispatcherQueue.TryEnqueue(ExposeMuteState);
             }
 
             if (Player.Audio.Streams.Count > 0)
@@ -376,6 +388,19 @@ namespace ClipChopper.WinUIApp
                     AutomationProperties.SetItemStatus(SeekSlider, RangeStatusFormat.Format(startMs, stopMs));
                 }
             });
+        }
+
+        private void Audio_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(Player.Audio.Mute) || e.PropertyName == nameof(Player.Audio.Volume))
+            {
+                DispatcherQueue.TryEnqueue(ExposeMuteState);
+            }
+        }
+
+        private void ExposeMuteState()
+        {
+            AutomationProperties.SetItemStatus(VolumeSlider, MuteStatusFormat.Format(Player.Audio.Mute || Player.Audio.Volume == 0));
         }
 
         private void Player_PropertyChanged(object? sender, PropertyChangedEventArgs e)

@@ -1,4 +1,5 @@
 ﻿using ClipChopper.WinUIApp.CommandLine;
+using ClipChopper.WinUIApp.Interop;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
@@ -49,7 +50,14 @@ namespace ClipChopper.WinUIApp
         {
             var window = new MainWindow(_launchOptions);
             m_window = window;
-            window.Activate();
+            if (_launchOptions.UiTest)
+            {
+                NoActivateWindow.Show(window);
+            }
+            else
+            {
+                window.Activate();
+            }
 
             if (_launchOptions.OpenFile is { } path && File.Exists(path))
             {

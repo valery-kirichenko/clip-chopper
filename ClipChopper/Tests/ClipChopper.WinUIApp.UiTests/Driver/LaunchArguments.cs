@@ -27,6 +27,11 @@ public static class LaunchArguments
             arguments.Add(LaunchOptionNames.ExposeRange);
         }
 
+        if (options.UiTest)
+        {
+            arguments.Add(LaunchOptionNames.UiTest);
+        }
+
         return arguments;
     }
 }

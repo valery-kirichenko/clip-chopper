@@ -33,6 +33,9 @@ namespace ClipChopper.WinUIApp.CommandLine
                     case LaunchOptionNames.ExposeRange:
                         options = options with { ExposeRange = true };
                         break;
+                    case LaunchOptionNames.UiTest:
+                        options = options with { UiTest = true };
+                        break;
                 }
             }
 
