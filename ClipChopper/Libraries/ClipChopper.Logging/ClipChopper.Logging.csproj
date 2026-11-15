@@ -27,10 +27,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="$(SolutionDir)Libraries\ClipChopper.Common\ClipChopper.Common.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
+    <PackageReference Include="Acolyte.NET" Version="$(AcolyteNETPackageVersion)" />
     <PackageReference Include="MinVer" Version="$(MinVerPackageVersion)" PrivateAssets="all" />
     <PackageReference Include="NLog" Version="$(NLogPackageVersion)" />
     <PackageReference Include="NLog.Config" Version="$(NLogConfigPackageVersion)">

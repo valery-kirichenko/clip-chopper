@@ -6,7 +6,11 @@ This file gives Claude Code the facts about this repository.
 
 Clip Chopper trims videos and keeps the original video and audio quality.
 
-The main app is the WinUI 3 app `ClipChopper.WinUIApp`. Its output assembly is `ClipChopper`. The libraries are `ClipChopper.Common`, `ClipChopper.Configuration`, `ClipChopper.Core`, `ClipChopper.Logging`, and `ClipChopper.Models`. The WinUI app has no project reference to the libraries.
+The main app is the WinUI 3 app `ClipChopper.WinUIApp`. Its output assembly is `ClipChopper`. The WinUI app has no project reference to the libraries. The libraries are:
+
+- `ClipChopper.Domain` holds the domain types. It references no other project and no package for WinUI, FFmpeg, ExifTool, or logging.
+- `ClipChopper.Configuration` loads the options of the app from a JSON configuration file.
+- `ClipChopper.Logging` holds the logger interface, its NLog adapter, the NLog configuration, and the hook for unhandled exceptions.
 
 ## Repo layout
 
@@ -15,7 +19,7 @@ The solution is `ClipChopper/ClipChopper.sln`. All paths below start at the repo
 | Path                                                           | What lives there                                                     |
 |----------------------------------------------------------------|----------------------------------------------------------------------|
 | `ClipChopper/Applications/`                                    | The WinUI 3 app `ClipChopper.WinUIApp`                               |
-| `ClipChopper/Libraries/`                                       | The five libraries                                                   |
+| `ClipChopper/Libraries/`                                       | The three libraries                                                  |
 | `ClipChopper/Tests/ClipChopper.WinUIApp.UiTests/`              | The UI tests and unit tests of the WinUI app (xUnit and FlaUI)       |
 | `ClipChopper/Applications/ClipChopper.WinUIApp/Installer/`     | The Inno Setup scripts `Setup.iss` and `CodeDependencies.iss`        |
 | `ClipChopper/Scripts/Get-FFmpeg.ps1`                           | The script that downloads FFmpeg                                     |
@@ -38,7 +42,7 @@ dotnet build ClipChopper/Applications/ClipChopper.WinUIApp/ClipChopper.WinUIApp.
 - The projects declare the `x64` platform only. The solution lists the platforms `ARM64`, `x64`, and `x86`. It maps the WinUI app to the platform of the same name, and it maps the libraries to `x64`.
 - The plain solution build takes the first solution platform, `ARM64`, and makes an ARM64 WinUI app. The `-c Release -p:Platform=x64` form builds `x64`. It matches CI and the installer.
 - There is no `global.json`. CI uses the SDK `10.0.x`.
-- Build the libraries through the solution. Their project references use `$(SolutionDir)`, which is empty in a single-project build. MSBuild then drops the references, so some libraries (Logging, Configuration, Core) fail to compile and the others build without their references.
+- No library has a project reference. Each library also builds alone, for example `dotnet build ClipChopper/Libraries/ClipChopper.Domain/ClipChopper.Domain.csproj -c Release -p:Platform=x64`.
 - The only test project is `ClipChopper/Tests/ClipChopper.WinUIApp.UiTests`. Run it with `dotnet test ClipChopper/Tests/ClipChopper.WinUIApp.UiTests -p:Platform=x64`. The UI tests open windows, play sound, and move the cursor, so run them on a desktop session that nobody uses. The test project README shows how to run only the plain tests.
 - Before you call a task done, run `dotnet build ClipChopper/ClipChopper.sln -c Release -p:Platform=x64` and the tests. CI runs only the build.
 - To build the installer, publish the app to `ClipChopper/Applications/ClipChopper.WinUIApp/Installer/publish`. Then compile `Setup.iss` with Inno Setup. The installer goes to `Installer/bin`.
@@ -61,7 +65,7 @@ dotnet build ClipChopper/Applications/ClipChopper.WinUIApp/ClipChopper.WinUIApp.
 - `Nullable` is on in all projects. `TreatWarningsAsErrors` is on in the libraries and off in the WinUI app. Fix each warning that your change adds. Do not suppress it.
 - The WinUI app is unpackaged (`WindowsPackageType` is `None`).
 - The WinUI app takes its package versions from its own project file: `Microsoft.WindowsAppSDK` 2.5.1, `FlyleafLib` 3.11.11, `FlyleafLib.Controls.WinUI` 1.4.11, `FFMpegCore` 5.5.0, `CommunityToolkit.WinUI.*` 8.2.250402, and `MediaInfo.Wrapper.Core` 21.9.3.
-- The libraries take their package versions from properties in `ClipChopper/Directory.Build.props`: `NLog` 4.7.15, `Acolyte.NET` 2.2.0, `NExifTool` 0.11.0, `Microsoft.Extensions.Configuration*` 10.0.12, `Newtonsoft.Json` 13.0.1, and `MinVer` 3.1.0. To change one of them, edit the property, not the project file.
+- The libraries take their package versions from properties in `ClipChopper/Directory.Build.props`: `NLog` 4.7.15, `Acolyte.NET` 2.2.0, `Microsoft.Extensions.Configuration*` 10.0.12, `Newtonsoft.Json` 13.0.1, and `MinVer` 3.1.0. To change one of them, edit the property, not the project file.
 
 ## Branch and PR model
 
@@ -97,3 +101,4 @@ The repository has one workflow, `.github/workflows/codeql-analysis.yml`. It run
 - Do not commit `.claude/settings.local.json`. It holds personal permissions.
 - Do not change the FFmpeg version in one place only. See the FFmpeg section.
 - Do not add a platform to the projects. They declare `x64` only.
+- Do not give `ClipChopper.Domain` a project reference or a package for WinUI, FFmpeg, ExifTool, or logging.

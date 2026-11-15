@@ -1,7 +1,7 @@
 ﻿using System;
 using Newtonsoft.Json;
 
-namespace ClipChopper.Common.Json
+namespace ClipChopper.Configuration
 {
     public static class JsonHelper
     {

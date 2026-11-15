@@ -1,7 +1,7 @@
 ﻿using System;
 using Acolyte.Assertions;
 
-namespace ClipChopper.Common
+namespace ClipChopper.Logging
 {
     public static class UnhandledExceptionEventRegistrator
     {
