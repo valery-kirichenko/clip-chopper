@@ -8,7 +8,7 @@ The tests start the built app and open a generated test clip with the `--open` o
 
 ## Requirements
 
-- A Windows desktop session. The test host must not run as administrator.
+- A Windows desktop session. The normal tests need a test host without administrator rights. The test `AdminPickerTests` needs a test host that runs as administrator.
 - The .NET 10 SDK.
 
 The first build downloads FFmpeg, as for the app. The tests use it to make the test clip.
@@ -22,6 +22,28 @@ dotnet test ClipChopper/Tests/ClipChopper.WinUIApp.UiTests -p:Platform=x64
 ```
 
 The command builds the app with the runtime identifier `win-x64` first. The test run itself takes about 10 to 20 seconds.
+
+## Administrator test
+
+`AdminPickerTests` checks that the three file pickers open when the app runs as administrator (#60). It runs only when the test host runs as administrator. In a normal session, it skips. To run it, use two PowerShell windows. A PowerShell window that runs as administrator starts in `C:\Windows\System32`, so in both windows go to the repository root first:
+
+```powershell
+cd <path to the repository root>
+```
+
+Build in a normal window. The build uses the Debug configuration:
+
+```powershell
+dotnet build ClipChopper/Tests/ClipChopper.WinUIApp.UiTests -p:Platform=x64
+```
+
+Then run the test in the window that runs as administrator. The `--no-build` flag with no `-c` option uses the Debug output of that build:
+
+```powershell
+dotnet test ClipChopper/Tests/ClipChopper.WinUIApp.UiTests -p:Platform=x64 --no-build --filter "FullyQualifiedName~AdminPickerTests"
+```
+
+The test host runs as administrator, so the app that it starts also runs as administrator. No UAC prompt shows. During the run, three file dialogs open and close. Do not click in them.
 
 ## What you see
 
@@ -54,11 +76,11 @@ app.Page.WaitUntilOpened(TimeSpan.FromSeconds(20));
 using var shot = app.Capture("my-screenshot");
 ```
 
-Use `app.Page` to find controls, to seek, to mark, and to read the state. Mark a test with `[UiFact]` or `[UiTheory]` and put it in the collection `UI`.
+Use `app.Page` to find controls, to seek, to mark, and to read the state. Mark a test with `[UiFact]` or `[UiTheory]` and put it in the collection `UI`. Mark a test that must run as administrator with `[AdminUiTheory]`.
 
 ## Skips
 
-A test skips when the test host runs as administrator or when no interactive desktop exists. A skip is not a pass. A locked screen also skips the tests, because the input desktop is not available then. The tests do not check a remote desktop session. CI does not run these tests.
+If the test host runs as administrator, the normal tests skip. If it does not, the administrator test skips. If no interactive desktop exists, the UI tests and the administrator tests skip, but the plain tests still run. A skip is not a pass. A locked screen also skips the tests, because the input desktop is not available then. The tests do not check a remote desktop session. CI does not run these tests.
 
 The tests of the launch option parser, the command line builder, and the range format are plain `[Fact]` and `[Theory]` tests. They run without a desktop. To run only them, use this command:
 

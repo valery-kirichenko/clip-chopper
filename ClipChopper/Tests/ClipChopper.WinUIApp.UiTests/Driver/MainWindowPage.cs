@@ -37,6 +37,12 @@ public sealed class MainWindowPage
 
     public AutomationElement DurationText => Find("DurationText");
 
+    public AutomationElement OpenFolderButton => FindByName("Open Folder", ControlType.Button);
+
+    public AutomationElement TakeSnapshotButton => Find("TakeSnapshotButton");
+
+    public AutomationElement SaveButton => Find("SaveButton");
+
     /// <summary>
     /// Waits until the play button is enabled and the slider shows the marked range of the new video.
     /// </summary>
@@ -110,6 +116,17 @@ public sealed class MainWindowPage
         );
     }
 
+    public AutomationElement FindPickerButton(PickerButton picker)
+    {
+        return picker switch
+        {
+            PickerButton.OpenFolder => OpenFolderButton,
+            PickerButton.TakeSnapshot => TakeSnapshotButton,
+            PickerButton.SaveClip => SaveButton,
+            _ => throw new ArgumentOutOfRangeException(nameof(picker), picker, null),
+        };
+    }
+
     public MarkedRange? ReadRange()
     {
         return MarkedRange.Parse(SeekSlider.Properties.ItemStatus.ValueOrDefault);
@@ -161,6 +178,13 @@ public sealed class MainWindowPage
     private static string FormatTime(int ms)
     {
         return TimeSpan.FromMilliseconds(ms).ToString(@"hh\:mm\:ss", CultureInfo.InvariantCulture);
+    }
+
+    private AutomationElement FindByName(string name, ControlType controlType)
+    {
+        var condition = _automation.ConditionFactory.ByName(name).And(_automation.ConditionFactory.ByControlType(controlType));
+        return _window.FindFirstDescendant(condition)
+            ?? throw new InvalidOperationException($"Control '{name}' was not found.");
     }
 
     private AutomationElement Find(string automationId)
