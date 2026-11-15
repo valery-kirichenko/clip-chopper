@@ -28,6 +28,12 @@ public sealed class ThemeRangeTests
     private const int MinDistanceFromVolumeThumb = 14;
     private const int BackgroundProbeOffset = 5;
 
+    // The track test needs a window that is wide enough for the whole button row, at any display scale.
+    private const int TrackTestWindowWidth = 1280;
+    private const int TrackTestWindowHeight = 720;
+
+    // The Width of VolumeSlider in MainWindow.xaml.
+    private const int VolumeSliderWidth = 150;
 
     private readonly TestClipFixture _clip;
     private readonly ITestOutputHelper _output;
@@ -111,7 +117,15 @@ public sealed class ThemeRangeTests
     [InlineData(LaunchTheme.Dark)]
     public void InactiveTrackColorMatchesVolumeSlider(LaunchTheme theme)
     {
-        using var app = ClipChopperApp.Launch(new AppLaunchOptions { Theme = theme, OpenFile = _clip.ClipPath });
+        using var app = ClipChopperApp.Launch(
+            new AppLaunchOptions
+            {
+                Theme = theme,
+                OpenFile = _clip.ClipPath,
+                LogicalWindowSize = new Size(TrackTestWindowWidth, TrackTestWindowHeight),
+                WindowPosition = new Point(0, 0),
+            }
+        );
         app.Page.WaitUntilOpened(TimeSpan.FromSeconds(20));
         app.Page.MarkRange(StartMs, EndMs);
         var state = app.Page.ReadState();
@@ -121,8 +135,15 @@ public sealed class ThemeRangeTests
         var volumeRatio = volume.Value.Value / volume.Maximum.Value;
         var windowBounds = app.Window.BoundingRectangle;
         using var capture = app.Capture($"track-{theme}");
+        ClipChopperApp.SaveRegion(capture, $"track-area-{theme}", CaptureRegions.ControlArea(windowBounds, seekBounds, app.WindowDpi));
 
         AssertThemeApplied(capture, windowBounds, app.WindowDpi, theme);
+
+        var expectedVolumeWidth = CaptureRegions.Scale(VolumeSliderWidth, app.WindowDpi);
+        Assert.True(
+            windowBounds.Contains(volumeBounds) && Math.Abs(volumeBounds.Width - expectedVolumeWidth) <= 1,
+            $"VolumeSliderVisible: the volume slider bounds {volumeBounds} are not fully inside the window {windowBounds}, or are not {expectedVolumeWidth} pixels wide. The window is too narrow for the button row at this display scale."
+        );
 
         var seekPoint = new Point(
             seekBounds.Left + (int) ((double) StartMs / state.SeekMaximum / 2 * seekBounds.Width),
@@ -143,7 +164,6 @@ public sealed class ThemeRangeTests
         File.WriteAllText(Path.Combine(TestPaths.ArtifactsDir, $"track-{theme}.txt"), text);
         _output.WriteLine(text);
         Assert.True(RangeProbe.AreClose(seekTrack, volumeTrack, TrackColorTolerance), $"TrackColor: the inactive track of the volume slider is {volumeTrack}, the seek slider track is {seekTrack}, expected a difference of {TrackColorTolerance} or less in each channel.");
-        ClipChopperApp.SaveRegion(capture, $"track-area-{theme}", CaptureRegions.ControlArea(windowBounds, seekBounds, app.WindowDpi));
     }
 
     private static void AssertSampleIsTrack(string slider, Bitmap capture, Rectangle windowBounds, Point point, Color track, int backgroundOffset)

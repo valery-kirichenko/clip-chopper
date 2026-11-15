@@ -25,7 +25,7 @@ The command builds the app with the runtime identifier `win-x64` first. The test
 
 ## What you see
 
-App windows open at position 100, 100 with size 1280 x 720 in physical screen pixels and take the focus. The test host is per-monitor DPI aware, so the UI Automation bounds and the screenshots use physical pixels. The sample regions come from element bounds and the window DPI, so the checks follow the display scale. The tests passed at 100% and at 150%. At a higher scale, the app content is larger, so less of it fits in the window. Do not use the mouse or the keyboard during the run. The app has keyboard shortcuts: J, K, L, Space, and the arrow keys seek or play the video. A key press or a click in the app window can make a test fail. Do not use the app window while the tests run. Each test closes its window. A failed test closes it too.
+App windows open at position 100, 100 with size 1280 x 720 in physical screen pixels and take the focus. The track color test opens its window at position 0, 0 with a size of 1280 x 720 logical pixels. This is 1280 x 720 physical pixels at 100%, 1600 x 900 at 125%, and 1920 x 1080 at 150%. Then the volume slider fits at every display scale. The screen must hold that window. If it does not, the test fails with a message about the window size or about the volume slider. The test host is per-monitor DPI aware, so the UI Automation bounds and the screenshots use physical pixels. The sample regions come from element bounds and the window DPI, so the checks follow the display scale. The tests passed at 100% and at 150%. The #36 tests ran at 100% only. A plain test checks the size conversion for 125% and 150%, and a run at 100% with the same logical window size checked the layout of the track color test. The pixel samples at a real display scale of 125% or 150% are not checked. At a higher scale, the app content is larger, so less of it fits in the window. Do not use the mouse or the keyboard during the run. The app has keyboard shortcuts: J, K, L, Space, and the arrow keys seek or play the video. A key press or a click in the app window can make a test fail. Do not use the app window while the tests run. Each test closes its window. A failed test closes it too.
 
 ## Output
 
@@ -64,10 +64,10 @@ Use `app.Page` to find controls, to seek, to mark, and to read the state. Mark a
 
 A test skips when the test host runs as administrator or when no interactive desktop exists. A skip is not a pass. A locked screen also skips the tests, because the input desktop is not available then. The tests do not check a remote desktop session. CI does not run these tests.
 
-The tests of the launch option parser, the command line builder, and the range format are plain `[Fact]` and `[Theory]` tests. They run without a desktop. To run only them, use this command:
+The tests of the launch option parser, the command line builder, the range format, and the size conversion are plain `[Fact]` and `[Theory]` tests. They run without a desktop. To run only them, use this command:
 
 ```powershell
-dotnet test ClipChopper/Tests/ClipChopper.WinUIApp.UiTests -p:Platform=x64 --filter "FullyQualifiedName~LaunchOptionsParserTests|FullyQualifiedName~LaunchArgumentsTests|FullyQualifiedName~RangeStatusFormatTests"
+dotnet test ClipChopper/Tests/ClipChopper.WinUIApp.UiTests -p:Platform=x64 --filter "FullyQualifiedName~LaunchOptionsParserTests|FullyQualifiedName~LaunchArgumentsTests|FullyQualifiedName~RangeStatusFormatTests|FullyQualifiedName~CaptureRegionsTests"
 ```
 
 ## Notes

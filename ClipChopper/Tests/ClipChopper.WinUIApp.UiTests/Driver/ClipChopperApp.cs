@@ -52,8 +52,9 @@ public sealed class ClipChopperApp : IDisposable
             var window = automation.FromHandle(windowHandle).AsWindow();
             var transform = window.Patterns.Transform.Pattern;
             transform.Move(options.WindowPosition.X, options.WindowPosition.Y);
-            transform.Resize(options.WindowSize.Width, options.WindowSize.Height);
-            WaitForSize(window, options.WindowSize);
+            var windowSize = ResolveWindowSize(options, windowHandle);
+            transform.Resize(windowSize.Width, windowSize.Height);
+            WaitForSize(window, windowSize);
             return new ClipChopperApp(process, automation, job, windowHandle, window);
         }
         catch
@@ -111,6 +112,17 @@ public sealed class ClipChopperApp : IDisposable
         }
 
         return startInfo;
+    }
+
+    private static Size ResolveWindowSize(AppLaunchOptions options, IntPtr windowHandle)
+    {
+        if (options.LogicalWindowSize is not { } logicalSize)
+        {
+            return options.WindowSize;
+        }
+
+        var dpi = WindowDpiReader.Read(windowHandle);
+        return new Size(CaptureRegions.Scale(logicalSize.Width, dpi), CaptureRegions.Scale(logicalSize.Height, dpi));
     }
 
     private static void WaitForSize(Window window, Size size)

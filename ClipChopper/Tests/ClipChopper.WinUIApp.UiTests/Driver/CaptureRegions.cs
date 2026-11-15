@@ -5,6 +5,7 @@ namespace ClipChopper.WinUIApp.UiTests.Driver;
 /// <summary>
 /// Sample rectangles in the capture, derived from element bounds so that they hold at the display scales that were checked, 100% and 150%.
 /// The bounds are screen rectangles in physical pixels, the same pixels as the capture.
+/// ControlArea was checked at 100% only.
 /// </summary>
 public static class CaptureRegions
 {
@@ -29,7 +30,7 @@ public static class CaptureRegions
     /// </summary>
     public static Rectangle TitleBar(Rectangle windowBounds, uint windowDpi)
     {
-        var titleBarHeight = (int) (TitleBarLogicalHeight * windowDpi / LogicalDpi);
+        var titleBarHeight = Scale(TitleBarLogicalHeight, windowDpi);
         var width = windowBounds.Width / 40;
         var top = titleBarHeight * 35 / 100;
         var height = Math.Max((titleBarHeight * 65 / 100) - top, 1);

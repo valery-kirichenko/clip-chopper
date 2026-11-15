@@ -60,8 +60,13 @@ public static class RangeProbe
 
     public static Color ColorAt(Bitmap capture, Rectangle windowBounds, Point screenPoint)
     {
-        var x = Math.Clamp(screenPoint.X - windowBounds.Left, 0, capture.Width - 1);
-        var y = Math.Clamp(screenPoint.Y - windowBounds.Top, 0, capture.Height - 1);
+        var x = screenPoint.X - windowBounds.Left;
+        var y = screenPoint.Y - windowBounds.Top;
+        if (x < 0 || x >= capture.Width || y < 0 || y >= capture.Height)
+        {
+            throw new ArgumentOutOfRangeException(nameof(screenPoint), screenPoint, $"The point is outside the capture. The window starts at {windowBounds.Location} and the capture is {capture.Width} x {capture.Height} pixels.");
+        }
+
         return capture.GetPixel(x, y);
     }
 
