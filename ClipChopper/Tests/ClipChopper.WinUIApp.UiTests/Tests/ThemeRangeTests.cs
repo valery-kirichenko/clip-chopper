@@ -21,16 +21,13 @@ public sealed class ThemeRangeTests
     private const double RangeStartTolerance = 0.01;
 
     private const int TrackColorTolerance = 6;
+
+    // These sizes are in logical pixels. The test scales them to the DPI of the window.
     private const int VolumeTrackEndInset = 8;
     private const int VolumeThumbHalfWidth = 10;
     private const int MinDistanceFromVolumeThumb = 14;
     private const int BackgroundProbeOffset = 5;
 
-    private const string ShotDirVariable = "CLIPCHOPPER_UITEST_SHOT_DIR";
-    private const int ShotLeftMargin = 76;
-    private const int ShotTopMargin = 12;
-    private const int ShotRightMargin = 8;
-    private const int ShotBottomMargin = 6;
 
     private readonly TestClipFixture _clip;
     private readonly ITestOutputHelper _output;
@@ -107,7 +104,7 @@ public sealed class ThemeRangeTests
     }
 
     /// <summary>
-    /// Regression test for the review of PR #78: the inactive track of the volume slider must have the color of the seek slider track.
+    /// Regression test for #36: the inactive track of the volume slider must have the color of the seek slider track.
     /// </summary>
     [UiTheory]
     [InlineData(LaunchTheme.Light)]
@@ -131,45 +128,27 @@ public sealed class ThemeRangeTests
             seekBounds.Left + (int) ((double) StartMs / state.SeekMaximum / 2 * seekBounds.Width),
             seekBounds.Top + (seekBounds.Height / 2)
         );
-        var volumePoint = new Point(volumeBounds.Right - VolumeTrackEndInset, volumeBounds.Top + (volumeBounds.Height / 2));
-        var volumeThumbCenter = volumeBounds.Left + VolumeThumbHalfWidth + (volumeRatio * (volumeBounds.Width - (2 * VolumeThumbHalfWidth)));
-        Assert.True(volumePoint.X - volumeThumbCenter >= MinDistanceFromVolumeThumb, $"VolumeSampleOnTrack: the volume ratio {volumeRatio:F2} puts the thumb too close to the sample point.");
+        var thumbHalfWidth = CaptureRegions.Scale(VolumeThumbHalfWidth, app.WindowDpi);
+        var volumePoint = new Point(volumeBounds.Right - CaptureRegions.Scale(VolumeTrackEndInset, app.WindowDpi), volumeBounds.Top + (volumeBounds.Height / 2));
+        var volumeThumbCenter = volumeBounds.Left + thumbHalfWidth + (volumeRatio * (volumeBounds.Width - (2 * thumbHalfWidth)));
+        Assert.True(volumePoint.X - volumeThumbCenter >= CaptureRegions.Scale(MinDistanceFromVolumeThumb, app.WindowDpi), $"VolumeSampleOnTrack: the volume ratio {volumeRatio:F2} puts the thumb too close to the sample point.");
 
         var seekTrack = RangeProbe.ColorAt(capture, windowBounds, seekPoint);
         var volumeTrack = RangeProbe.ColorAt(capture, windowBounds, volumePoint);
-        AssertSampleIsTrack("seek slider", capture, windowBounds, seekPoint, seekTrack);
-        AssertSampleIsTrack("volume slider", capture, windowBounds, volumePoint, volumeTrack);
+        var backgroundOffset = CaptureRegions.Scale(BackgroundProbeOffset, app.WindowDpi);
+        AssertSampleIsTrack("seek slider", capture, windowBounds, seekPoint, seekTrack, backgroundOffset);
+        AssertSampleIsTrack("volume slider", capture, windowBounds, volumePoint, volumeTrack, backgroundOffset);
 
         var text = string.Create(CultureInfo.InvariantCulture, $"theme={theme} seekTrack={seekTrack} volumeTrack={volumeTrack}");
         File.WriteAllText(Path.Combine(TestPaths.ArtifactsDir, $"track-{theme}.txt"), text);
         _output.WriteLine(text);
         Assert.True(RangeProbe.AreClose(seekTrack, volumeTrack, TrackColorTolerance), $"TrackColor: the inactive track of the volume slider is {volumeTrack}, the seek slider track is {seekTrack}, expected a difference of {TrackColorTolerance} or less in each channel.");
-        SaveControlAreaShot(capture, windowBounds, seekBounds, theme);
+        ClipChopperApp.SaveRegion(capture, $"track-area-{theme}", CaptureRegions.ControlArea(windowBounds, seekBounds, app.WindowDpi));
     }
 
-    /// <summary>
-    /// Saves the control area under the video to the folder named in the environment variable, if it is set.
-    /// The shot shows the timeline with the marked range and the volume slider, for the pull request description.
-    /// </summary>
-    private static void SaveControlAreaShot(Bitmap capture, Rectangle windowBounds, Rectangle seekBounds, string theme)
+    private static void AssertSampleIsTrack(string slider, Bitmap capture, Rectangle windowBounds, Point point, Color track, int backgroundOffset)
     {
-        var directory = Environment.GetEnvironmentVariable(ShotDirVariable);
-        if (string.IsNullOrEmpty(directory))
-        {
-            return;
-        }
-
-        var left = Math.Max(0, seekBounds.Left - windowBounds.Left - ShotLeftMargin);
-        var top = Math.Max(0, seekBounds.Top - windowBounds.Top - ShotTopMargin);
-        var area = new Rectangle(left, top, capture.Width - left - ShotRightMargin, capture.Height - top - ShotBottomMargin);
-        using var shot = capture.Clone(area, capture.PixelFormat);
-        Directory.CreateDirectory(directory);
-        shot.Save(Path.Combine(directory, theme.ToLowerInvariant() + ".png"), System.Drawing.Imaging.ImageFormat.Png);
-    }
-
-    private static void AssertSampleIsTrack(string slider, Bitmap capture, Rectangle windowBounds, Point point, Color track)
-    {
-        var background = RangeProbe.ColorAt(capture, windowBounds, new Point(point.X, point.Y - BackgroundProbeOffset));
+        var background = RangeProbe.ColorAt(capture, windowBounds, new Point(point.X, point.Y - backgroundOffset));
         Assert.False(RangeProbe.AreClose(track, background, TrackColorTolerance), $"SampleOnTrack: the {slider} sample {track} equals the background {background} above it, so the sample missed the track.");
     }
 

@@ -38,6 +38,7 @@ The tests write these files to `artifacts/ui-tests` in the repository root. Git 
 - `range-Dark-contrast.png`: the window that the dark theme contrast test checks.
 - `track-Light.png` and `track-Dark.png`: the window that the track color test checks in each theme.
 - `track-Light.txt` and `track-Dark.txt`: the track colors that the test measured on the seek slider and on the volume slider.
+- `track-area-Light.png` and `track-area-Dark.png`: the control area of the window (the timeline and the volume slider) from the track color test.
 
 ## Launch options
 
@@ -74,6 +75,5 @@ dotnet test ClipChopper/Tests/ClipChopper.WinUIApp.UiTests -p:Platform=x64 --fil
 - The app builds with the runtime identifier `win-x64`. Without it, the app can fail to start from a deep folder path, for example a git worktree.
 - The Debug build of the app writes the Flyleaf log to `C:\Flyleaf\log.txt`.
 - In the dark theme, the test `MarkedRangeIsVisibleInDarkTheme` asserts a range contrast of 2.5 or more against the track (#36). The light theme has no contrast check, because #36 does not change it. Both themes check that the range starts at the marked position.
-- The theme range checks pass only at 100% display scale. The test maps UI Automation bounds onto `PrintWindow` pixels and has no DPI awareness.
 - The dark theme contrast check depends on the Windows accent color. The threshold is 2.5, and a custom dark accent can fail it even with the fix.
-- The test `InactiveTrackColorMatchesVolumeSlider` checks that the inactive track of the volume slider has the color of the seek slider track in both themes (PR #78). It samples one pixel on each track, away from the thumb and from the marked range. The same 100% display scale limit applies.
+- The test `InactiveTrackColorMatchesVolumeSlider` checks that the inactive track of the volume slider has the color of the seek slider track in both themes (#36). It samples one pixel on each track, away from the thumb and from the marked range.

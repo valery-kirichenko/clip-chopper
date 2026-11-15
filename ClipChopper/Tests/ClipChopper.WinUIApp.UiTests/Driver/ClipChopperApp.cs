@@ -66,15 +66,30 @@ public sealed class ClipChopperApp : IDisposable
     public Bitmap Capture(string name)
     {
         var bitmap = WindowCapture.Print(_windowHandle, Window.BoundingRectangle.Size);
-        var path = Path.Combine(TestPaths.ArtifactsDir, name + ".png");
-        Directory.CreateDirectory(Path.GetDirectoryName(path)!);
-        bitmap.Save(path, System.Drawing.Imaging.ImageFormat.Png);
+        Save(bitmap, name);
         return bitmap;
+    }
+
+    /// <summary>
+    /// Saves a named region of a capture of the window to the artifacts folder.
+    /// The region is in physical pixels, the same pixels as the capture.
+    /// </summary>
+    public static void SaveRegion(Bitmap capture, string name, Rectangle region)
+    {
+        using var crop = capture.Clone(region, capture.PixelFormat);
+        Save(crop, name);
     }
 
     public void Dispose()
     {
         Cleanup(_process, _automation, _job);
+    }
+
+    private static void Save(Bitmap bitmap, string name)
+    {
+        var path = Path.Combine(TestPaths.ArtifactsDir, name + ".png");
+        Directory.CreateDirectory(Path.GetDirectoryName(path)!);
+        bitmap.Save(path, System.Drawing.Imaging.ImageFormat.Png);
     }
 
     private static ProcessStartInfo CreateStartInfo(AppLaunchOptions options)
